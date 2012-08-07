@@ -25,7 +25,7 @@ In lieu of a formal styleguide, take care to maintain the existing coding style.
 
 ## Release History
 
-0.0.1 - Initial Release (init:bootplate and debug tasks)
+0.1.0alpha1 - Initial Release (init:bootplate and debug tasks)
 
 ## License
 Copyright 2012 Blaine Bublitz
