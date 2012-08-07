@@ -1,0 +1,4 @@
+{
+  "source/App.js": "source/{%= name %}.js",
+  "source/App.css": "source/{%= name %}.css"
+}

@@ -1,0 +1,11 @@
+enyo.depends(
+	"runtime-machine.js",
+	"Walker.js",
+	"Reader.js",
+	"Iterator.js",
+	"Lexer.js",
+	"Parser.js",
+	"Documentor.js",
+	"Indexer.js",
+	"Analyzer.js"
+);

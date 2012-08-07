@@ -1,0 +1,132 @@
+#!/usr/bin/env node
+var grunt = require('grunt');
+var path = require('path');
+var nopt = require('nopt');
+
+grunt.npmTasks([
+  'enyo'
+]);
+
+var _ = grunt.utils._;
+var template = grunt.template.process;
+
+// Draw the help screen.
+function displayHelp(withFlags) {
+  var pkg = require(path.normalize(__dirname + '/../package.json'));
+  grunt.log.writeln();
+  grunt.log.writeln(template('<%= _.capitalize(name).blue.inverse %> - version: <%= version %> - <%= description %>', pkg));
+
+  var col1len = 1;
+  var widths;
+
+  var map = function(list, defs, flagify){
+    var tasks = list.map(function(name) {
+      // console.log(name, defs);
+      var defObject = defs[name];
+      var taskName = flagify ? '--' + (defObject.negate ? 'no-' : '') + name + (defObject.short ? ', -' + defObject.short : '') : name;
+      var info = defObject.info;
+      col1len = Math.max(col1len, taskName.length);
+      widths = [1, col1len, 2, 76 - col1len];
+
+      return {
+        name: taskName,
+        desc: info.blue
+      };
+    });
+    return tasks;
+  };
+
+  var enyoTasks = [
+    'init',
+    'concat',
+    'min',
+    'server',
+    'lint',
+    'watch',
+    'debug'
+  ];
+
+  var enyoInits = [
+    'init:enyo',
+    'init:bootplate',
+    'init:module'
+  ];
+
+  var enyoOptions = [
+    'help',
+    'base',
+    'color',
+    'config',
+    'debug',
+    'force',
+    'tasks',
+    'npm',
+    'write',
+    'verbose',
+    'version'
+  ];
+
+  var initDefs = {
+    'init:enyo': {
+      info: 'Basic Enyo application ' + '(Default)'.cyan
+    },
+    'init:bootplate': {
+      info: 'Enyo application based on Bootplate'
+    },
+    'init:module': {
+      info: 'Structure for Enyo modules'
+    }
+  };
+
+  var tasks = map(enyoTasks, grunt.task._tasks);
+  var inits = map(enyoInits, initDefs);
+  var opts = map(enyoOptions, grunt.cli.optlist, true);
+
+  if(enyoTasks.length){
+    displayTasks('Enyo tasks:', tasks);
+  }
+
+  if(enyoInits.length){
+    displayTasks('Init templates:', inits);
+  }
+
+  if(withFlags && enyoOptions.length){
+    displayTasks('Flags:', opts);
+  }
+
+  function displayTasks(header, tasks) {
+
+    grunt.log.header(header.cyan.bold);
+    grunt.log.writeln();
+
+    tasks.forEach(function(task) {
+      grunt.log.writetableln(widths, ['', _.pad(task.name, col1len), '', task.desc]);
+    });
+  }
+
+  grunt.log.writeln();
+}
+
+var knownOpts = {
+  help: Boolean
+};
+
+var shortHands = {
+  h: '--help'
+};
+
+// Immediately display help screen if no arguments.
+var parsed = nopt(knownOpts, shortHands, process.argv, 2);
+
+if (parsed.argv.original.length === 0 || parsed.help) {
+  // Initialize task system so that the tasks can be listed.
+  grunt.task.init([], {help: true});
+
+  // Do not proceed further.
+  if(parsed.help){
+    return displayHelp('withFlags');
+  }
+  return displayHelp();
+}
+
+grunt.cli();

@@ -1,0 +1,43 @@
+{
+  "name": "enyo",
+  "description": "CLI for EnyoJS",
+  "version": "0.1.0alpha1",
+  "homepage": "https://github.com/phated/grunt-enyo",
+  "author": {
+    "name": "Blaine Bublitz",
+    "email": "blaine@iceddev.com",
+    "url": "http://iceddev.com/"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/phated/grunt-enyo.git"
+  },
+  "bugs": {
+    "url": "https://github.com/phated/grunt-enyo/issues"
+  },
+  "licenses": [
+    {
+      "type": "Apache 2.0",
+      "url": "https://github.com/phated/grunt-enyo/blob/master/LICENSE-Apache"
+    }
+  ],
+  "main": "grunt.js",
+  "bin": "bin/grunt-enyo",
+  "engines": {
+    "node": "*"
+  },
+  "scripts": {
+    "install": "node init.js",
+    "test": "grunt test"
+  },
+  "dependencies": {
+    "nopt": "~2.0.0",
+    "grunt": "~0.3.12"
+  },
+  "devDependencies": {
+    "grunt": "~0.3.12"
+  },
+  "keywords": [
+    "gruntplugin"
+  ]
+}
