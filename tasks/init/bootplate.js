@@ -19,6 +19,8 @@
  * http://github.com/phated/grunt-enyo/blob/master/LICENSE-Apache
  */
 
+ var fs = require('fs');
+
 // Basic template description.
 exports.description = 'Scaffold an EnyoJS Bootplate project';
 
@@ -63,6 +65,10 @@ exports.template = function(grunt, init, done) {
 
     // Actually copy (and process) files.
     init.copyAndProcess(files, props, {noProcess: ['*.png', 'assets/*', 'api/', 'assets/', 'enyo/', 'lib/', 'tools/']});
+
+    // Make the shellscripts executable
+    fs.chmodSync(init.destpath('tools/minify.sh'), '755');
+    fs.chmodSync(init.destpath('enyo/tools/minify.sh'), '755');
 
     // Generate package.json file, used by npm and grunt.
     init.writePackageJSON('package.json', {
