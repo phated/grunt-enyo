@@ -4,12 +4,14 @@ module.exports = function(grunt) {
   // Project configuration.
   grunt.initConfig({
     lint: {
-      files: ['grunt.js', 'lib/**/*.js', 'test/**/*.js']
+      files: ['grunt.js', 'source/**/*.js']
     },
+    concat: {},
+    min: {},
     server: {},
     watch: {
       files: '<config:lint.files>',
-      tasks: 'lint qunit'
+      tasks: 'lint'
     },
     jshint: {
       options: {
@@ -30,9 +32,6 @@ module.exports = function(grunt) {
       }
     }
   });
-
-  // Default task.
-  grunt.registerTask('default', 'lint');
 
   // Debug
   grunt.registerTask('debug', 'server watch');
