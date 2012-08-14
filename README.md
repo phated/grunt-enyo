@@ -25,6 +25,8 @@ In lieu of a formal styleguide, take care to maintain the existing coding style.
 
 ## Release History
 
+0.1.0alpha2 - More init tasks (init:enyo and init:module tasks)
+
 0.1.0alpha1 - Initial Release (init:bootplate and debug tasks)
 
 ## License
