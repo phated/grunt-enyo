@@ -22,7 +22,7 @@
 var fs = require('fs');
 
 // Basic template description.
-exports.description = 'Scaffold an EnyoJS Bootplate project';
+exports.description = 'Scaffold an EnyoJS module project';
 
 // Template-specific notes to be displayed before question prompts.
 exports.notes = '';
@@ -48,7 +48,7 @@ exports.template = function(grunt, init, done) {
     {
       name: 'enyo_libraries',
       message: 'Enyo libraries',
-      default: 'layout onyx',
+      default: '',
       warning: 'Space separated list of enyo libraries dependencies'
     }
   ], function(err, props) {
@@ -67,12 +67,7 @@ exports.template = function(grunt, init, done) {
     init.addLicenseFiles(files, props.licenses);
 
     // Actually copy (and process) files.
-    init.copyAndProcess(files, props, {noProcess: ['*.png', 'assets/*', 'api/', 'assets/', 'enyo/', 'lib/', 'tools/']});
-
-    // Make the shellscripts executable
-    fs.chmodSync(init.destpath('tools/minify.sh'), '755');
-    fs.chmodSync(init.destpath('enyo/tools/minify.sh'), '755');
-    fs.chmodSync(init.destpath('enyo/minify/minify.sh'), '755');
+    init.copyAndProcess(files, props, {noProcess: []});
 
     // Generate package.json file, used by npm and grunt.
     init.writePackageJSON('package.json', {
@@ -82,7 +77,7 @@ exports.template = function(grunt, init, done) {
       node_version: '>= 0.6.0',
       enyo_libraries: props.enyo_libraries
     }, function(pkg, props){
-      pkg.enyo_template = 'bootplate';
+      pkg.enyo_template = 'module';
       pkg.enyo_libraries = props.enyo_libraries;
       return pkg;
     });
