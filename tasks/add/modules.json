@@ -1,0 +1,14 @@
+{
+  "layout": {
+    "zip": "https://github.com/enyojs/layout/zipball/",
+    "stable": "2.0-GA",
+    "local": true,
+    "github": true
+  },
+  "onyx": {
+    "zip": "https://github.com/enyojs/onyx/zipball/",
+    "stable": "2.0-GA",
+    "local": true,
+    "github": true
+  }
+}
