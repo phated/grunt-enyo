@@ -9,10 +9,28 @@ Install this package globally with: `npm install -g enyo`
 
 ### Init task
 
+Scaffolds an Enyo project in your current working directory
+
+(Available: enyo, bootplate, module)
+
 In terminal: (navigate to empty directory)
 `enyo init:bootplate`
 
+### Add task
+
+Installs the specified package (or packages) to a directory named lib in your current working directory
+
+(Available: layout, onyx, fu, canvas, extra)
+
+In terminal: (navigate to empty directory)
+`enyo add:layout`
+
+You can also chain packages
+`enyo add:layout:onyx`
+
 ### Debug task
+
+Starts a static file server in your current working directory
 
 In terminal: (navigate to project initialized by this tool)
 `enyo debug`
@@ -24,6 +42,8 @@ _(Coming soon)_
 In lieu of a formal styleguide, take care to maintain the existing coding style. Add unit tests for any new or changed functionality. Lint and test your code using [grunt][grunt].
 
 ## Release History
+
+0.1.0alpha3 - Add task - local only (add:layout)
 
 0.1.0alpha2 - More init tasks (init:enyo and init:module tasks)
 

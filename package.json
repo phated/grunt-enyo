@@ -1,7 +1,7 @@
 {
   "name": "enyo",
   "description": "CLI for EnyoJS",
-  "version": "0.1.0alpha2",
+  "version": "0.1.0alpha3",
   "homepage": "https://github.com/phated/grunt-enyo",
   "author": {
     "name": "Blaine Bublitz",

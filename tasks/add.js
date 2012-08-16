@@ -62,39 +62,21 @@ module.exports = function(grunt) {
       }
     };
 
-    var modulesJSONpath = grunt.task.getFile('add/modules.json');
-    var modules = grunt.file.readJSON(modulesJSONpath);
-
     packages.forEach(function(packageName){
-      var moduleInfo = modules[packageName];
+      var files = add.filesToCopy(packageName, {});
 
-      if(!moduleInfo){
-        grunt.log.error('Cannot find a reference to ' + packageName);
-        return;
-      }
-
-      if(moduleInfo && moduleInfo.local){
-        var files = add.filesToCopy(packageName, {});
-
-        Object.keys(files).forEach(function(destpath) {
-          // var o = Object.create(options);
-          var o = {};
-          var srcpath = files[destpath];
-          // If srcpath is relative, match it against options.noProcess if
-          // necessary, then make srcpath absolute.
-          var relpath;
-          if (srcpath && !grunt.file.isPathAbsolute(srcpath)) {
-            // if (o.noProcess) {
-            //   relpath = srcpath.slice(pathPrefix.length);
-            //   o.noProcess = grunt.file.isMatch(o.noProcess, relpath);
-            // }
-            srcpath = grunt.task.getFile(srcpath);
-          }
-          // Copy!
-          add.copy(srcpath, destpath, o);
-        });
-      }
-
+      Object.keys(files).forEach(function(destpath) {
+        var o = {};
+        var srcpath = files[destpath];
+        // If srcpath is relative, match it against options.noProcess if
+        // necessary, then make srcpath absolute.
+        var relpath;
+        if (srcpath && !grunt.file.isPathAbsolute(srcpath)) {
+          srcpath = grunt.task.getFile(srcpath);
+        }
+        // Copy!
+        add.copy(srcpath, destpath, o);
+      });
     });
 
   });
