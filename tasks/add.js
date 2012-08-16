@@ -2,7 +2,7 @@ module.exports = function(grunt) {
 
   var path = require('path');
 
-  grunt.registerInitTask('add', 'Manager your EnyoJS packages', function(){
+  grunt.registerInitTask('add', 'Manage your EnyoJS packages', function(){
     var packages = grunt.utils.toArray(arguments);
 
     var pathPrefix = 'add/modules/';

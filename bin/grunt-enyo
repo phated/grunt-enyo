@@ -38,6 +38,7 @@ function displayHelp(withFlags) {
 
   var enyoTasks = [
     'init',
+    'add',
     'concat',
     'min',
     'server',
@@ -50,6 +51,14 @@ function displayHelp(withFlags) {
     'init:enyo',
     'init:bootplate',
     'init:module'
+  ];
+
+  var enyoAdds = [
+    'add:layout',
+    'add:onyx',
+    'add:fu',
+    'add:canvas',
+    'add:extra',
   ];
 
   var enyoOptions = [
@@ -78,8 +87,27 @@ function displayHelp(withFlags) {
     }
   };
 
+  var addDefs = {
+    'add:layout': {
+      info: 'Add layout package to you project'
+    },
+    'add:onyx': {
+      info: 'Add onyx package to you project'
+    },
+    'add:fu': {
+      info: 'Add fu package to you project'
+    },
+    'add:canvas': {
+      info: 'Add canvas package to you project'
+    },
+    'add:extra': {
+      info: 'Add extra package to you project'
+    },
+  };
+
   var tasks = map(enyoTasks, grunt.task._tasks);
   var inits = map(enyoInits, initDefs);
+  var add = map(enyoAdds, addDefs);
   var opts = map(enyoOptions, grunt.cli.optlist, true);
 
   if(enyoTasks.length){
@@ -88,6 +116,10 @@ function displayHelp(withFlags) {
 
   if(enyoInits.length){
     displayTasks('Init templates:', inits);
+  }
+
+  if(enyoAdds.length){
+    displayTasks('Packages:', add);
   }
 
   if(withFlags && enyoOptions.length){
