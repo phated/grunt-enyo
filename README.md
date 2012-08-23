@@ -1,3 +1,4 @@
+[![build status](https://secure.travis-ci.org/phated/grunt-enyo.png)](http://travis-ci.org/phated/grunt-enyo)
 # grunt-enyo
 
 CLI for EnyoJS
