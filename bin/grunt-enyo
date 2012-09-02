@@ -44,7 +44,8 @@ function displayHelp(withFlags) {
     'server',
     'lint',
     'watch',
-    'debug'
+    'debug',
+    'build'
   ];
 
   var enyoInits = [
@@ -58,7 +59,7 @@ function displayHelp(withFlags) {
     'add:onyx',
     'add:fu',
     'add:canvas',
-    'add:extra',
+    'add:extra'
   ];
 
   var enyoOptions = [

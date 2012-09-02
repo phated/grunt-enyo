@@ -35,6 +35,15 @@ Starts a static file server in your current working directory
 In terminal: (navigate to project initialized by this tool)
 `enyo debug`
 
+### Build task
+
+Build your Bootplate project without the need for minify.sh or minify.bat (without entering the tools directory!)
+
+#### ***This is only tested against Bootplate, feel free to test it against other projects, but be careful!!!***
+
+In terminal: (navigate to a Bootplate project initialized by this tool)
+`enyo build`
+
 ## Documentation
 _(Coming soon)_
 
@@ -42,6 +51,8 @@ _(Coming soon)_
 In lieu of a formal styleguide, take care to maintain the existing coding style. Add unit tests for any new or changed functionality. Lint and test your code using [grunt][grunt].
 
 ## Release History
+
+0.1.0alpha4 - Build task - no need for minify.sh or minify.bat
 
 0.1.0alpha3 - Add task - local only (add:layout)
 
