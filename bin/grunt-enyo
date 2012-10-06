@@ -39,6 +39,7 @@ function displayHelp(withFlags) {
   var enyoTasks = [
     'init',
     'add',
+    'remove',
     'concat',
     'min',
     'server',
@@ -103,7 +104,7 @@ function displayHelp(withFlags) {
     },
     'add:extra': {
       info: 'Add extra package to you project'
-    },
+    }
   };
 
   var tasks = map(enyoTasks, grunt.task._tasks);

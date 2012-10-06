@@ -3,7 +3,7 @@ var template = require('enyo-bower/lib/util/template');
 
 module.exports = function(grunt) {
 
-  grunt.registerInitTask('remove', 'Manage your EnyoJS packages', function(){
+  grunt.registerInitTask('remove', 'Remove EnyoJS modules from your project', function(){
     var packages = grunt.utils.toArray(arguments);
 
     // Flag grunt to know we are async
