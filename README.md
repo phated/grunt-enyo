@@ -28,6 +28,18 @@ In terminal: (navigate to empty directory)
 You can also chain packages
 `enyo add:layout:onyx`
 
+### Remove task
+
+Uninstalls the specified package (or packages) to a directory named lib in your current working directory
+
+(Available: layout, onyx, fu, canvas, extra)
+
+In terminal: (navigate to empty directory)
+`enyo remove:layout`
+
+You can also chain packages
+`enyo remove:layout:onyx`
+
 ### Debug task
 
 Starts a static file server in your current working directory
@@ -51,6 +63,8 @@ _(Coming soon)_
 In lieu of a formal styleguide, take care to maintain the existing coding style. Add unit tests for any new or changed functionality. Lint and test your code using [grunt][grunt].
 
 ## Release History
+
+0.1.0alpha5 - Bower added - remove task - fixed add task
 
 0.1.0alpha4 - Build task - no need for minify.sh or minify.bat
 
