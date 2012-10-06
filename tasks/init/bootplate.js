@@ -67,7 +67,10 @@ exports.template = function(grunt, init, done) {
     init.addLicenseFiles(files, props.licenses);
 
     // Actually copy (and process) files.
-    init.copyAndProcess(files, props, {noProcess: ['*.png', 'assets/*', 'api/', 'assets/', 'enyo/', 'lib/', 'tools/']});
+    init.copyAndProcess(files, props, {noProcess: ['*.png', 'assets/*', 'api/', 'assets/', 'enyo/', 'tools/']});
+
+    // Install the specified packages
+    grunt.task.run('add:' + props.enyo_libraries.join(':'));
 
     // Make the shellscripts executable
     fs.chmodSync(init.destpath('tools/minify.sh'), '755');

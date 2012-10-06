@@ -1,15 +1,15 @@
-var install = require('enyo-bower').commands.install;
+var uninstall = require('enyo-bower').commands.uninstall;
 var template = require('enyo-bower/lib/util/template');
 
 module.exports = function(grunt) {
 
-  grunt.registerInitTask('add', 'Manage your EnyoJS packages', function(){
+  grunt.registerInitTask('remove', 'Manage your EnyoJS packages', function(){
     var packages = grunt.utils.toArray(arguments);
 
     // Flag grunt to know we are async
     var cb = this.async();
 
-    install(packages)
+    uninstall(packages)
       .on('data', function (data){
         if(data){
           console.log(data);

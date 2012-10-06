@@ -1,9 +1,0 @@
-enyo.depends(
-	"NameGenerator.js",
-	"ListBasicSample.css",
-	"ListBasicSample.js",
-	"ListContactsSample.css",
-	"ListContactsSample.js",
-	"ListPulldownSample.css",
-	"ListPulldownSample.js"
-);
