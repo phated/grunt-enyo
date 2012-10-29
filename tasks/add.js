@@ -1,18 +1,18 @@
-var install = require('enyo-bower').commands.install;
-var template = require('enyo-bower/lib/util/template');
-
 module.exports = function(grunt) {
+  'use strict';
 
   grunt.registerInitTask('add', 'Add EnyoJS modules to your project', function(){
-    var packages = grunt.utils.toArray(arguments);
+    // We have to require in bower inside of the task so it's config will read .bowerrc during an init process
+    var install = require('bower').commands.install;
+    var template = require('bower/lib/util/template');
 
     // Flag grunt to know we are async
-    var cb = this.async();
+    var done = this.async();
 
-    install(packages)
+    install(this.args, {})
       .on('data', function (data){
         if(data){
-          console.log(data);
+          grunt.log.writeln(data);
         }
       })
       .on('error', function (err){
@@ -20,18 +20,19 @@ module.exports = function(grunt) {
           message: err.message
         })
         .on('data', function (d){
-          console.log(d);
+          grunt.log.error(d);
         })
         .on('end', function (){
-          cb();
+          done(false);
         });
       })
       .on('end', function (data){
         if(data){
-          console.log(data);
+          grunt.log.writeln(data);
         }
+        grunt.log.ok();
         // Tell grunt we are done
-        cb();
+        done();
       });
   });
 

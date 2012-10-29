@@ -1,18 +1,18 @@
-var uninstall = require('enyo-bower').commands.uninstall;
-var template = require('enyo-bower/lib/util/template');
-
 module.exports = function(grunt) {
+  'use strict';
 
   grunt.registerInitTask('remove', 'Remove EnyoJS modules from your project', function(){
-    var packages = grunt.utils.toArray(arguments);
+    // We have to require in bower inside of the task so it's config will read .bowerrc during an init process
+    var uninstall = require('bower').commands.uninstall;
+    var template = require('bower/lib/util/template');
 
     // Flag grunt to know we are async
-    var cb = this.async();
+    var done = this.async();
 
-    uninstall(packages)
+    uninstall(this.args, {})
       .on('data', function (data){
         if(data){
-          console.log(data);
+          grunt.verbose.write(data);
         }
       })
       .on('error', function (err){
@@ -20,18 +20,19 @@ module.exports = function(grunt) {
           message: err.message
         })
         .on('data', function (d){
-          console.log(d);
+          grunt.verbose.error(d);
         })
         .on('end', function (){
-          cb();
+          done(false);
         });
       })
       .on('end', function (data){
         if(data){
-          console.log(data);
+          grunt.verbose.write(data);
         }
+        grunt.log.ok();
         // Tell grunt we are done
-        cb();
+        done();
       });
   });
 

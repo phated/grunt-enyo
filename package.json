@@ -32,11 +32,8 @@
   },
   "dependencies": {
     "nopt": "~2.0.0",
-    "grunt": "~0.3.12",
-    "enyo-bower": "git://github.com/MeatballIndustries/enyo-bower.git#master"
-  },
-  "devDependencies": {
-    "grunt": "~0.3.12"
+    "grunt": "~0.3.17",
+    "bower": "~0.3.0"
   },
   "keywords": [
     "gruntplugin"
