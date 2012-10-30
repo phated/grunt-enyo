@@ -94,7 +94,7 @@ exports.template = function(grunt, init, done) {
     });
 
     // Install the packages specified in component.json
-    grunt.task.run('add');
+    grunt.task.run('install');
 
     // All done!
     done();
