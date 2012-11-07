@@ -1,5 +1,5 @@
 enyo.kind({
-	name: "{%= name %}",
+	name: "App",
 	fit: true,
 	components:[
 		{name: "hello", content: "Hello World", allowHtml: true, ontap: "helloWorldTap"}

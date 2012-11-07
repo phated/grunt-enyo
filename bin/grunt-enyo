@@ -1,4 +1,6 @@
 #!/usr/bin/env node
+'use strict';
+
 var grunt = require('grunt');
 var path = require('path');
 var nopt = require('nopt');
@@ -38,13 +40,7 @@ function displayHelp(withFlags) {
 
   var enyoTasks = [
     'init',
-    'add',
-    'remove',
-    'concat',
-    'min',
-    'server',
     'lint',
-    'watch',
     'debug',
     'build'
   ];
@@ -55,12 +51,16 @@ function displayHelp(withFlags) {
     'init:module'
   ];
 
-  var enyoAdds = [
-    'add:layout',
-    'add:onyx',
-    'add:fu',
-    'add:canvas',
-    'add:extra'
+  var enyoBowers = [
+    'install',
+    'add',
+    'uninstall',
+    'remove',
+    'update',
+    'search',
+    'lookup',
+    'list',
+    'ls'
   ];
 
   var enyoOptions = [
@@ -77,56 +77,25 @@ function displayHelp(withFlags) {
     'version'
   ];
 
-  var initDefs = {
-    'init:enyo': {
-      info: 'Basic Enyo application ' + '(Default)'.cyan
-    },
-    'init:bootplate': {
-      info: 'Enyo application based on Bootplate'
-    },
-    'init:module': {
-      info: 'Structure for Enyo modules'
-    }
-  };
+  // Taken from the Grunt init task and tweaked a little
+  var templates = {};
+  grunt.task.expandFiles('../tasks/init/*.js').forEach(function(fileobj) {
+    // Add template (plus its path) to the templates object.
+    templates[path.basename(fileobj.abs, '.js')] = require(fileobj.abs);
+  });
 
-  var addDefs = {
-    'add:layout': {
-      info: 'Add layout package to you project'
-    },
-    'add:onyx': {
-      info: 'Add onyx package to you project'
-    },
-    'add:fu': {
-      info: 'Add fu package to you project'
-    },
-    'add:canvas': {
-      info: 'Add canvas package to you project'
-    },
-    'add:extra': {
-      info: 'Add extra package to you project'
-    }
-  };
+  var initDefs = {};
+  Object.keys(templates).map(function(name) {
+    var description = templates[name].description || '(no description)';
+    initDefs['init:' + name] = {
+      info: description
+    };
+  });
 
   var tasks = map(enyoTasks, grunt.task._tasks);
   var inits = map(enyoInits, initDefs);
-  var add = map(enyoAdds, addDefs);
+  var bowers = map(enyoBowers, grunt.task._tasks);
   var opts = map(enyoOptions, grunt.cli.optlist, true);
-
-  if(enyoTasks.length){
-    displayTasks('Enyo tasks:', tasks);
-  }
-
-  if(enyoInits.length){
-    displayTasks('Init templates:', inits);
-  }
-
-  if(enyoAdds.length){
-    displayTasks('Packages:', add);
-  }
-
-  if(withFlags && enyoOptions.length){
-    displayTasks('Flags:', opts);
-  }
 
   function displayTasks(header, tasks) {
 
@@ -136,6 +105,22 @@ function displayHelp(withFlags) {
     tasks.forEach(function(task) {
       grunt.log.writetableln(widths, ['', _.pad(task.name, col1len), '', task.desc]);
     });
+  }
+
+  if(enyoTasks.length){
+    displayTasks('Enyo Tasks:', tasks);
+  }
+
+  if(enyoInits.length){
+    displayTasks('Init Templates:', inits);
+  }
+
+  if(enyoBowers.length){
+    displayTasks('Package Management:', bowers);
+  }
+
+  if(withFlags && enyoOptions.length){
+    displayTasks('Flags:', opts);
   }
 
   grunt.log.writeln();

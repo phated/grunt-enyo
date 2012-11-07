@@ -21,7 +21,7 @@ enyo.kind({
 	published: {
 		/**
 			Specifies how to vertically scroll.  Acceptable values are:
-			
+
 			* "scroll": Always scroll.
 			* "auto": Scroll only if the content overflows the scroller.
 			* "hidden": Never scroll.
@@ -46,7 +46,9 @@ enyo.kind({
 			can help improve performance of complex, large scroll regions on
 			some platforms (e.g., Android).
 		*/
-		scrim: false
+		scrim: false,
+		//*	Allow drag events sent when gesture events are happening simultaneously
+		dragDuringGesture: true
 	},
 	events: {
 		onShouldDrag: ""
@@ -69,7 +71,7 @@ enyo.kind({
 	],
 	scrimTools: [{name: "scrim", classes: "enyo-fit", style: "z-index: 1;", showing: false}],
 	components: [
-		{name: "client", attributes: {"onscroll": enyo.bubbler}, classes: "enyo-touch-scroller"}
+		{name: "client", classes: "enyo-touch-scroller"}
 	],
 	create: function() {
 		this.inherited(arguments);
@@ -101,6 +103,7 @@ enyo.kind({
 	},
 	rendered: function() {
 		this.inherited(arguments);
+		enyo.makeBubble(this.$.client, "scroll");
 		this.calcBoundaries();
 		this.syncScrollMath();
 		if (this.thumb) {
@@ -247,13 +250,17 @@ enyo.kind({
 	},
 	// Special synthetic DOM events served up by the Gesture system
 	dragstart: function(inSender, inEvent) {
+		// Ignore drags sent from multi-touch events
+		if(!this.dragDuringGesture && inEvent.srcEvent.touches && inEvent.srcEvent.touches.length > 1) {
+			return true;
+		}
 		// note: allow drags to propagate to parent scrollers via data returned in the shouldDrag event.
 		this.doShouldDrag(inEvent);
 		this.dragging = (inEvent.dragger == this || (!inEvent.dragger && inEvent.boundaryDragger == this));
 		if (this.dragging) {
 			inEvent.preventDefault();
 			// note: needed because show/hide changes
-			// the position so sync'ing is required when 
+			// the position so sync'ing is required when
 			// dragging begins (needed because show/hide does not trigger onscroll)
 			this.syncScrollMath();
 			this.$.scrollMath.startDrag(inEvent);
@@ -282,9 +289,13 @@ enyo.kind({
 		}
 	},
 	mousewheel: function(inSender, e) {
-		if (!this.dragging && this.$.scrollMath.mousewheel(e)) {
-			e.preventDefault();
-			return true;
+		if (!this.dragging) {
+			this.calcBoundaries();
+			this.syncScrollMath();
+			if (this.$.scrollMath.mousewheel(e)) {
+				e.preventDefault();
+				return true;
+			}
 		}
 	},
 	scrollMathStart: function(inSender) {

@@ -1,0 +1,3 @@
+[submodule "tasks/init/module/root/enyo"]
+	path = tasks/init/module/root/enyo
+	url = git://github.com/enyojs/enyo

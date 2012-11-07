@@ -29,9 +29,11 @@ exports.notes = '';
 
 // Any existing file or directory matching this wildcard will cause a warning.
 exports.warnOn = 'enyo';
+exports.warnOn = '.bowerrc';
 
 // The actual init template.
 exports.template = function(grunt, init, done) {
+  'use strict';
 
   grunt.helper('prompt', {type: 'enyo'}, [
     // Prompt for these values.

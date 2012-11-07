@@ -1,5 +1,6 @@
 /*global module:false*/
 module.exports = function(grunt) {
+  'use strict';
 
   // Project configuration.
   grunt.initConfig({
@@ -21,15 +22,17 @@ module.exports = function(grunt) {
         sub: true,
         undef: true,
         boss: true,
-        eqnull: true
+        eqnull: true,
+        browser: true
       },
       globals: {
-        enyo: true
+        enyo: true,
+        onyx: true
       }
     }
   });
 
-  // Default task.
-  grunt.registerTask('default', 'lint');
+  // Debug
+  grunt.registerTask('debug', 'server watch');
 
 };

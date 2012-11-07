@@ -3,9 +3,12 @@
 	Can have one of the following properties:
 
 	* android
+	* androidChrome (Chrome on Android, standard starting in 4.1)
 	* ie
 	* ios
 	* webos
+	* safari (desktop version)
+	* chrome (desktop version)
 
 	If the property is defined, its value will be the major version	number
 	of the platform.
@@ -32,11 +35,16 @@ enyo.platform = {
 	var ua = navigator.userAgent;
 	var ep = enyo.platform;
 	var platforms = [
+		// Android 4+ using Chrome
+		{platform: "androidChrome", regex: /Android .* Chrome\/(\d+)[.\d]+/},
 		// Android 2 - 4
 		{platform: "android", regex: /Android (\d+)/},
 		// Kindle Fire
 		// Force version to 2, (desktop mode does not list android version)
-		{platform: "android", regex: /Silk\//, forceVersion: 2},
+		{platform: "android", regex: /Silk\/1./, forceVersion: 2},
+		// Kindle Fire HD
+		// Force version to 4
+		{platform: "android", regex: /Silk\/2./, forceVersion: 4},
 		// IE 8 - 10
 		{platform: "ie", regex: /MSIE (\d+)/},
 		// iOS 3 - 5
@@ -44,8 +52,14 @@ enyo.platform = {
 		{platform: "ios", regex: /iP(?:hone|ad;(?: U;)? CPU) OS (\d+)/},
 		// webOS 1 - 3
 		{platform: "webos", regex: /(?:web|hpw)OS\/(\d+)/},
-		// desktop safari
-		{platform: "safari", regex: /Version\/(\d+)[.\d]+\s+Safari/}
+		// desktop Safari
+		{platform: "safari", regex: /Version\/(\d+)[.\d]+\s+Safari/},
+		// desktop Chrome
+		{platform: "chrome", regex: /Chrome\/(\d+)[.\d]+/},
+		// Firefox on Android
+		{platform: "androidFirefox", regex: /Android;.*Firefox\/(\d+)/},
+		// desktop Firefox
+		{platform: "firefox", regex: /Firefox\/(\d+)/}
 	];
 	for (var i = 0, p, m, v; p = platforms[i]; i++) {
 		m = p.regex.exec(ua);

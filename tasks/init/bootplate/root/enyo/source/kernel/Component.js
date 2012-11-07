@@ -41,14 +41,34 @@ enyo.kind({
 	name: "enyo.Component",
 	kind: enyo.Object,
 	published: {
+		/**
+			A unique name for the component within its owner. This is used to
+			set the access name in the owner's _$_ hash.  If not specified, a
+			default name will be provided based on the name of the object's
+			kind, optionally with a number suffix if more than one instance
+			exists in the owner.
+		*/
 		name: "",
+		/**
+			A unique id for the component, usually automatically generated based
+			on its position within the component hierarchy, although it may also
+			be directly specified. _enyo.Control_ uses this id value for the DOM
+			id attribute.
+		*/
 		id: "",
+		/**
+			The component that owns this component. It is usually implicitly
+			defined	during creation based on the _createComponent_ call or
+			_components_ hash.
+		*/
 		owner: null
 	},
 	//* @protected
 	statics: {
 		// for memoizing kind-prefix names in nameComponent
-		_kindPrefixi: {}
+		_kindPrefixi: {},
+		// for naming the unnamed
+		_unnamedKindNumber: 0
 	},
 	defaultKind: "Component",
 	handlers: {},
@@ -103,9 +123,9 @@ enyo.kind({
 	},
 	//* @public
 	/**
-		Removes this Component from its owner (sets owner to null) and does any
-		cleanup. The Component is flagged with a _destroyed: true_ property.
-		Usually the Component will be suitable for garbage collection after 
+		Removes this component from its owner (sets _owner_ to null) and does
+		any	cleanup. The component is flagged with a _destroyed: true_ property.
+		Usually the component will be suitable for garbage collection after 
 		being destroyed, unless user code keeps a reference to it.
 	*/
 	destroy: function() {
@@ -130,9 +150,11 @@ enyo.kind({
 			}
 		});
 	},
+	//* @protected
 	makeId: function() {
 		var delim = "_", pre = this.owner && this.owner.getId();
-		return this.name ? (pre ? pre + delim : "") + this.name : "";
+		var baseName = this.name || ("@@" + (++enyo.Component._unnamedKindNumber));
+		return (pre ? pre + delim : "") + baseName;
 	},
 	ownerChanged: function(inOldOwner) {
 		if (inOldOwner) {
@@ -159,6 +181,11 @@ enyo.kind({
 		// set and return
 		return inComponent.name = n;
 	},
+	//* @public
+	/**
+		Adds _inComponent_ to the list of components owned by the current
+		component (i.e., _this.$_).
+	*/
 	addComponent: function(inComponent) {
 		var n = inComponent.getName();
 		if (!n) {
@@ -180,12 +207,14 @@ enyo.kind({
 		}
 		this.$[n] = inComponent;
 	},
+	//* Removes _inComponent_ from the list of components owned by the current
+	//* component (i.e., _this.$_).
 	removeComponent: function(inComponent) {
 		delete this.$[inComponent.getName()];
 	},
 	//* @public
 	/**
-		Returns an Array of owned components. In other words, converts the _$_
+		Returns an array of owned components; in other words, converts the _$_
 		hash into an array and returns the array.
 	*/
 	getComponents: function() {
@@ -204,6 +233,9 @@ enyo.kind({
 		inProps.owner = inProps.owner || this;
 	},
 	_createComponent: function(inInfo, inMoreInfo) {
+		if (!inInfo.kind && ("kind" in inInfo)) {
+			throw "enyo.create: Attempt to create a null kind. Check dependencies for [" + inInfo.name + "].";
+		}
 		// CAVEAT: inInfo and inMoreInfo are copied before mutation, but it's only a shallow copy
 		var props = enyo.mixin(enyo.clone(inMoreInfo), inInfo);
 		this.adjustComponentProps(props);
@@ -211,13 +243,14 @@ enyo.kind({
 	},
 	//* @public
 	/**
-		Creates and returns a Component as defined by the combination of
-		_inInfo_ and _inMoreInfo_.
-		The created Component passes through initialization machinery provided
+		Creates and returns a component as defined by the combination of
+		_inInfo_ and _inMoreInfo_. Properties in _inInfo_ override properties in
+		_inMoreInfo_.
+		
+		The created component passes through initialization machinery provided
 		by the creating component, which may supply special handling.
-		Unless the owner is explicitly specified, the new component will
-		be owned by _this_.
-		Properties in _inInfo_ override properties in _inMoreInfo_.
+		Unless the owner is explicitly specified, the new component will be
+		owned by the instance on which _createComponent_ is called.
 
 			// Create a new component named _dynamic_ owned by _this_ 
 			// (will be available as this.$.dynamic).
@@ -233,8 +266,8 @@ enyo.kind({
 		return this._createComponent(inInfo, inMoreInfo);
 	},
 	/**
-		Creates Components as defined by the array of configurations _inInfo_. 
-		Each configuration in _inInfo_ is combined with _inCommonInfo_ as 
+		Creates Components as defined by the array of configurations _inInfos_.
+		Each configuration in _inInfos_ is combined with _inCommonInfo_ as
 		described in _createComponent_.
 
 		_createComponents_ returns an array of references to the created components.
@@ -287,14 +320,6 @@ enyo.kind({
 		}
 		return this.dispatchBubble(inEventName, e, inSender);
 	},
-	dispatchBubble: function(inEventName, inEvent, inSender) {
-		// Try to dispatch from here, stop bubbling on truthy return value
-		if (this.dispatchEvent(inEventName, inEvent, inSender)) {
-			return true;
-		}
-		// Bubble to next target
-		return this.bubbleUp(inEventName, inEvent, inSender);
-	},
 	/**
 		Bubbles an event up an object chain, starting <b>above</b> _this_.
 
@@ -322,16 +347,17 @@ enyo.kind({
 	},
 	//* @protected
 	/**
-		Dispatch refers to sending an event to a named delegate.
+		Dispatching refers to sending an event to a named delegate.
 		This object may dispatch an event to itself via a handler, 
-		or to it's owner ia an event property.
-		e.g.
+		or to its owner via an event property, e.g.:
+		
 			handlers {
 				// 'tap' events dispatched to this.tapHandler
 				ontap: "tapHandler"
 			}
-			// 'tap' dispatched to 'tapHandler' delegate in this.owner
-			ontap: "tapHandler",
+			
+			// 'tap' events dispatched to 'tapHandler' delegate in this.owner
+			ontap: "tapHandler"
 	*/
 	dispatchEvent: function(inEventName, inEvent, inSender) {
 		// bottleneck event decoration
@@ -352,6 +378,15 @@ enyo.kind({
 		if (this[inEventName]) {
 			return this.bubbleDelegation(this.owner, this[inEventName], inEventName, inEvent, this);
 		}
+	},
+	// internal - try dispatching event to self, if that fails bubble it up the tree
+	dispatchBubble: function(inEventName, inEvent, inSender) {
+		// Try to dispatch from here, stop bubbling on truthy return value
+		if (this.dispatchEvent(inEventName, inEvent, inSender)) {
+			return true;
+		}
+		// Bubble to next target
+		return this.bubbleUp(inEventName, inEvent, inSender);
 	},
 	decorateEvent: function(inEventName, inEvent, inSender) {
 		// an event may float by us as part of a dispatchEvent chain or delegateEvent
@@ -374,12 +409,13 @@ enyo.kind({
 		}
 		return this.bubbleDelegation(inDelegate, inName, inEventName, inEvent, inSender);
 	},
+	//* @public
 	/**
-		Dispatch the event to named delegate inMethodName, if it exists.
-		Sub-kinds may re-route dispatches.
+		Dispatches the event to named delegate _inMethodName_, if it exists.
+		Subkinds may re-route dispatches.
 		Note that both 'handlers' events and events delegated from owned controls
 		arrive here. If you need to handle these differently, you may 
-		need to also override dispatchEvent.
+		need to also override _dispatchEvent_.
 	*/
 	dispatch: function(inMethodName, inEvent, inSender) {
 		var fn = inMethodName && this[inMethodName];
@@ -388,7 +424,10 @@ enyo.kind({
 		}
 	},
 	/**
-		Sends a message to myself and my descendants.
+		Sends a message to myself and all of my components.
+		You can stop a waterfall into components owned by a
+		receiving object by returning a truthy value from
+		the event handler.
 	*/
 	waterfall: function(inMessageName, inMessage, inSender) {
 		//this.log(inMessageName, (inSender || this).name, "=>", this.name);
@@ -398,7 +437,10 @@ enyo.kind({
 		this.waterfallDown(inMessageName, inMessage, inSender || this);
 	},
 	/**
-		Sends a message to my descendants.
+		Sends a message to all of my components, but not myself.
+		You can stop a waterfall into components owned by a
+		receiving object by returning a truthy value from
+		the event handler.
 	*/
 	waterfallDown: function(inMessageName, inMessage, inSender) {
 		for (var n in this.$) {
@@ -411,9 +453,11 @@ enyo.kind({
 
 enyo.defaultCtor = enyo.Component;
 
+// a method to create new instances from config objects.  It handles looking up the proper
+// constructor based on the provided kind attribute.
 enyo.create = enyo.Component.create = function(inConfig) {
 	if (!inConfig.kind && ("kind" in inConfig)) {
-		throw "enyo.create: Attempt to create a null kind. Check dependencies.";
+		throw "enyo.create: Attempt to create a null kind. Check dependencies for [" + (inConfig.name || "") + "].";
 	}
 	var kind = inConfig.kind || inConfig.isa || enyo.defaultCtor;
 	var ctor = enyo.constructorForKind(kind);

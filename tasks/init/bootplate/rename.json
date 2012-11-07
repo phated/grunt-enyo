@@ -1,4 +1,12 @@
 {
-  "source/App.js": "source/{%= name %}.js",
-  "source/App.css": "source/{%= name %}.css"
+  "index.html.template": "index.html",
+  "index.html": false,
+  "debug.html.template": "debug.html",
+  "debug.html": false,
+  "source/App.js.template": "source/{%= name %}.js",
+  "source/App.js": false,
+  "source/App.css.template": "source/{%= name %}.css",
+  "source/App.css": false,
+  "source/package.js.template": "source/package.js",
+  "source/package.js": false
 }

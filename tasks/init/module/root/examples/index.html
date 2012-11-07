@@ -10,7 +10,7 @@
   </head>
   <body class="enyo-unselectable">
     <script>
-      new {%= name %}().write();
+      new {%= grunt.utils._.camelize(name) %}().write();
     </script>
   </body>
 </html>

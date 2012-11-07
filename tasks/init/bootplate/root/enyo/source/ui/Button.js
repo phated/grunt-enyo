@@ -1,5 +1,10 @@
 /**
-	Implements an HTML button, with support for grouping using _enyo.Group_.
+	_enyo.Button_ implements an HTML button, with support for grouping using
+	<a href="#enyo.Group">enyo.Group</a>.
+	
+	For more information, see the documentation on
+	<a href="https://github.com/enyojs/enyo/wiki/Buttons">Buttons</a> in the
+	Enyo Developer Guide.
 */
 enyo.kind({
 	name: "enyo.Button",
@@ -8,7 +13,8 @@ enyo.kind({
 	tag: "button",
 	//* @public
 	published: {
-		//* When true, show the button as disabled and don't generate tap events.
+		//* When true, button is shown as disabled and does not generate tap
+		//* events
 		disabled: false
 	},
 	//* @protected
@@ -20,6 +26,12 @@ enyo.kind({
 		this.setAttribute("disabled", this.disabled);
 	},
 	tap: function() {
-		this.setActive(true);
+		if (this.disabled) {
+			// work around for platforms like Chrome on Android or Opera that send
+			// mouseup to disabled form controls
+			return true;
+		} else {
+			this.setActive(true);
+		}
 	}
 });

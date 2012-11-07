@@ -1,4 +1,5 @@
 module.exports = function(grunt) {
+  'use strict';
 
   // Project configuration.
   grunt.initConfig({
@@ -6,7 +7,7 @@ module.exports = function(grunt) {
       files: ['test/**/*.js']
     },
     lint: {
-      files: ['grunt.js', 'tasks/*/*.js', 'test/**/*.js']
+      files: ['grunt.js', 'init.js', 'bin/grunt-enyo', 'tasks/*.js', 'tasks/*/*.js', 'test/**/*.js']
     },
     server: {},
     watch: {

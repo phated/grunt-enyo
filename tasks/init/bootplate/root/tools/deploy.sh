@@ -15,14 +15,46 @@ SOURCE=$(cd `dirname $0`/../; pwd)
 NAME=${SOURCE##*/}
 
 # target names
-DEPLOY="$NAME$SUFFIX"
-TARGET="$SOURCE/$FOLDER/$DEPLOY"
+if [ -z "${DEPLOY}" ]; then
+    DEPLOY="$NAME$SUFFIX"
+fi
+
+if [ -z "${TARGET}" ]; then
+    TARGET="$SOURCE/$FOLDER/$DEPLOY"
+fi    
 
 if [ -d $TARGET ]; then
-	echo "$DEPLOY folder already exists, please rename or remove it and try again."
+	echo "$TARGET folder already exists, please rename or remove it and try again."
 	exit 1
 fi
 
+# use less by default
+NO_LESS=""
+
+USAGE="Usage: `basename $0` [-h] [-c] [-o output_dir] args"
+
+# Parse command line options.
+while getopts hco: OPT; do
+    case "$OPT" in
+        h)
+            echo $USAGE
+            exit 0
+            ;;
+        o)
+            TARGET=$OPTARG
+            rm -rf $TARGET
+            ;;
+        c)
+            NO_LESS="-no-less"
+            ;;
+        \?)
+            # getopts issues an error message
+            echo $USAGE >&2
+            exit 1
+            ;;
+    esac
+done
+	
 echo "This script can create a deployment in $TARGET"
 
 cat <<EOF
@@ -31,7 +63,7 @@ build step
 ==========
 EOF
 
-./minify.sh
+./minify.sh $NO_LESS
 
 cat <<EOF
 =========
@@ -48,13 +80,13 @@ cp "$SOURCE/index.html" "$SOURCE/icon.png" "$TARGET"
 # copy assets and build
 cp -r "$SOURCE/assets" "$SOURCE/build" "$TARGET"
 
-for i in $SOURCE/lib/*; do
+for i in "$SOURCE/lib/"*; do
 	o=${i##*/}
 	if [ -x $i/deploy.sh ]; then
 		echo "Deploying $o"
 		$i/deploy.sh "$TARGET/lib/$o"
 	else
 		echo "Copying $o"
-		cp -r $i "$TARGET/lib"
+		cp -r "$i" "$TARGET/lib"
 	fi
 done

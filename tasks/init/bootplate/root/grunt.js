@@ -1,14 +1,12 @@
 /*global module:false*/
 module.exports = function(grunt) {
+  'use strict';
 
   // Project configuration.
   grunt.initConfig({
     lint: {
       files: ['grunt.js', 'source/**/*.js']
     },
-    concat: {},
-    min: {},
-    server: {},
     watch: {
       files: '<config:lint.files>',
       tasks: 'lint'
@@ -28,7 +26,8 @@ module.exports = function(grunt) {
         browser: true
       },
       globals: {
-        enyo: true
+        enyo: true,
+        onyx: true
       }
     }
   });

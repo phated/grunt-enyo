@@ -53,6 +53,10 @@ exports.template = function(grunt, init, done) {
       warning: 'Space separated list of enyo libraries dependencies'
     }
   ], function(err, props) {
+    // Scrub name of hyphens and underscores
+    // A little heavy handed but don't want dashes at beginning because that is difficult to deal with in templates
+    props.name = grunt.utils._.camelize(props.name);
+
     // Make an array out of the enyo_dependencies string
     var words = grunt.utils._.words;
     var clean = grunt.utils._.clean;

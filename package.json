@@ -1,7 +1,7 @@
 {
   "name": "enyo",
   "description": "CLI for EnyoJS",
-  "version": "0.1.0alpha5",
+  "version": "0.1.0alpha6",
   "homepage": "https://github.com/phated/grunt-enyo",
   "author": {
     "name": "Blaine Bublitz",
@@ -33,7 +33,7 @@
   "dependencies": {
     "nopt": "~2.0.0",
     "grunt": "~0.3.17",
-    "bower": "~0.3.0"
+    "bower": "~0.3.x"
   },
   "keywords": [
     "gruntplugin"

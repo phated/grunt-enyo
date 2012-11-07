@@ -1,5 +1,7 @@
-{% /* This file is not formatted nicely, but it is takes the least logic to output a pretty file */ %}enyo.depends(
-  {% grunt.utils._.each(enyo_dependencies, function(library) { %}"$lib/{%= library %}",
-  {% }); %}"{%= name %}.css",
-  "{%= name %}.js"
+enyo.depends(
+	"$lib/layout",
+	"$lib/onyx",	// To theme Onyx using Theme.less, change this line to $lib/onyx/source,
+	//"Theme.less",	// uncomment this line, and follow the steps described in Theme.less
+	"App.css",
+	"App.js"
 );

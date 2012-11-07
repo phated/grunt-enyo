@@ -1,0 +1,4 @@
+{
+  "endpoint": "https://enyo-bower.herokuapp.com",
+  "directory": "lib"
+}

@@ -1,3 +1,5 @@
+'use strict';
+
 var grunt = require('grunt');
 
 /*
@@ -20,7 +22,7 @@ var grunt = require('grunt');
     test.ifError(value)
 */
 
-exports['enyo'] = {
+exports.enyo = {
   setUp: function(done) {
     // setup here
     done();
