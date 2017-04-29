@@ -2,7 +2,7 @@
 	//* @protected
 	enyo.global = this;
 
-	enyo._getProp = function(parts, create, context) {
+	enyo._getProp = (parts, create, context) => {
 		var obj = context || enyo.global;
 		for(var i=0, p; obj && (p=parts[i]); i++){
 			obj = (p in obj ? obj[p] : (create ? obj[p]={} : undefined));
@@ -23,10 +23,12 @@
 			// create foo.zot and sets foo.zot.zap to null.
 			enyo.setObject("zot.zap", null, foo);
 	*/
-	enyo.setObject = function(name, value, context) {
-		var parts=name.split("."), p=parts.pop(), obj=enyo._getProp(parts, true, context);
-		return obj && p ? (obj[p]=value) : undefined;
-	};
+	enyo.setObject = (name, value, context) => {
+        var parts=name.split(".");
+        var p=parts.pop();
+        var obj=enyo._getProp(parts, true, context);
+        return obj && p ? (obj[p]=value) : undefined;
+    };
 
 	/**
 		Gets object _name_. _name_ can use dot notation. Intermediate objects are created if _create_ argument is truthy.
@@ -43,56 +45,42 @@
 			// get the value of foo.zot.zap, or undefined if foo.zot doesn't exist
 			var value = enyo.getObject("zot.zap", false, foo);
 	*/
-	enyo.getObject = function(name, create, context) {
-		return enyo._getProp(name.split("."), create, context);
-	};
+	enyo.getObject = (name, create, context) => enyo._getProp(name.split("."), create, context);
 
 	//* Returns a random Integer between 0 and inBound (0 <= results < inBound).
 	//
 	//		var randomLetter = String.fromCharCode(enyo.irand(26) + 97);
 	//
-	enyo.irand = function(inBound) {
-		return Math.floor(Math.random() * inBound);
-	};
+	enyo.irand = inBound => Math.floor(Math.random() * inBound);
 
 	//* Returns _inString_ with the first letter capitalized.
-	enyo.cap = function(inString) {
-		return inString.slice(0, 1).toUpperCase() + inString.slice(1);
-	};
+	enyo.cap = inString => inString.slice(0, 1).toUpperCase() + inString.slice(1);
 
 	//* Returns _inString_ with the first letter un-capitalized.
-	enyo.uncap = function(inString) {
-		return inString.slice(0, 1).toLowerCase() + inString.slice(1);
-	};
+	enyo.uncap = inString => inString.slice(0, 1).toLowerCase() + inString.slice(1);
 
 	enyo.format = function(inVarArgs) {
-		var pattern = /\%./g;
-		var arg = 0, template = inVarArgs, args = arguments;
-		var replacer = function(inCode) {
-			return args[++arg];
-		};
-		return template.replace(pattern, replacer);
-	};
+        var pattern = /\%./g;
+        var arg = 0;
+        var template = inVarArgs;
+        var args = arguments;
+        var replacer = inCode => args[++arg];
+        return template.replace(pattern, replacer);
+    };
 
 	var toString = Object.prototype.toString;
 
 	//* Returns true if _it_ is a string.
-	enyo.isString = function(it) {
-		return toString.call(it) === "[object String]";
-	};
+	enyo.isString = it => toString.call(it) === "[object String]";
 
 	//* Returns true if _it_ is a function.
-	enyo.isFunction = function(it) {
-		return toString.call(it) === "[object Function]";
-	};
+	enyo.isFunction = it => toString.call(it) === "[object Function]";
 
 	//* Returns true if _it_ is an array.
-	enyo.isArray = Array.isArray || function(it) {
-		return toString.call(it) === "[object Array]";
-	};
+	enyo.isArray = Array.isArray || (it => toString.call(it) === "[object Array]");
 
 	//* Returns the index of the element in _inArray_ that is equivalent (==) to _inElement_, or -1 if no element is found.
-	enyo.indexOf = function(inElement, inArray, fromIndex) {
+	enyo.indexOf = (inElement, inArray, fromIndex) => {
 		if (inArray.indexOf) {
 			return inArray.indexOf(inElement, fromIndex);
 		}
@@ -116,7 +104,7 @@
 	};
 
 	//* Removes the first element in _inArray_ that is equivalent (==) to _inElement_.
-	enyo.remove = function(inElement, inArray) {
+	enyo.remove = (inElement, inArray) => {
 		var i = enyo.indexOf(inElement, inArray);
 		if (i >= 0) {
 			inArray.splice(i, 1);
@@ -154,7 +142,7 @@
 			return inArray.map(inFunc, c);
 		} else {
 			var results = [];
-			var add = function(e, i, a) {
+			var add = (e, i, a) => {
 				results.push(inFunc.call(c, e, i, a));
 			};
 			enyo.forEach(inArray, add, c);
@@ -172,7 +160,7 @@
 			return inArray.filter(inFunc, c);
 		} else {
 			var results = [];
-			var f = function(e, i, a) {
+			var f = (e, i, a) => {
 				var eo = e;
 				if (inFunc.call(c, e, i, a)) {
 					results.push(eo);
@@ -186,7 +174,7 @@
 	/**
 		Returns an array of all own enumerable properties found on _inObject_.
 	*/
-	enyo.keys = Object.keys || function(inObject) {
+	enyo.keys = Object.keys || (inObject => {
 		var results = [];
 		var hop = Object.prototype.hasOwnProperty;
 		for (var prop in inObject) {
@@ -212,7 +200,7 @@
 			}
 		}
 		return results;
-	};
+	});
 
 	/**
 		Clones an existing Array, or converts an array-like object into an Array.
@@ -226,7 +214,7 @@
 		
 		The special _arguments_ variable is an example of an array-like object.
 	*/
-	enyo.cloneArray = function(inArrayLike, inOffset, inStartWith) {
+	enyo.cloneArray = (inArrayLike, inOffset, inStartWith) => {
 		var arr = inStartWith || [];
 		for(var i = inOffset || 0, l = inArrayLike.length; i<l; i++){
 			arr.push(inArrayLike[i]);
@@ -238,9 +226,7 @@
 	/**
 		Shallow-clones an object or an array.
 	*/
-	enyo.clone = function(obj) {
-		return enyo.isArray(obj) ? enyo.cloneArray(obj) : enyo.mixin({}, obj);
-	};
+	enyo.clone = obj => enyo.isArray(obj) ? enyo.cloneArray(obj) : enyo.mixin({}, obj);
 
 	//* @protected
 	var empty = {};
@@ -251,11 +237,13 @@
 		If _target_ is falsey, an object is created.
 		If _source_ is falsey, the target or empty object is returned.
 	*/
-	enyo.mixin = function(target, source) {
+	enyo.mixin = (target, source) => {
 		target = target || {};
 		if (source) {
-			var name, s, i;
-			for (name in source) {
+            var name;
+            var s;
+            var i;
+            for (name in source) {
 				// the "empty" conditional avoids copying properties in "source"
 				// inherited from Object.prototype.  For example, if target has a custom
 				// toString() method, don't overwrite it with the toString() method
@@ -265,7 +253,7 @@
 					target[name] = s;
 				}
 			}
-		}
+        }
 		return target;
 	};
 
@@ -314,7 +302,7 @@
 		if (enyo.isFunction(method)) {
 			var args = enyo.cloneArray(arguments, 2);
 			if (method.bind) {
-				return method.bind.apply(method, [scope].concat(args));
+				return method.bind(...[scope].concat(args));
 			} else {
 				return function() {
 					var nargs = enyo.cloneArray(arguments);
@@ -337,7 +325,7 @@
 		it is invoked.
 	*/
 	enyo.asyncMethod = function(inScope, inMethod/*, inArgs*/) {
-		return setTimeout(enyo.bind.apply(enyo, arguments), 1);
+		return setTimeout(enyo.bind(...arguments), 1);
 	};
 
 	/**
@@ -361,29 +349,27 @@
 
 		The returned value is equivalent to _new Date().getTime()_.
 	*/
-	enyo.now = Date.now || function() {
-		return new Date().getTime();
-	};
+	enyo.now = Date.now || (() => new Date().getTime());
 
 	//* @protected
 
-	enyo.nop = function(){};
+	enyo.nop = () => {};
 	enyo.nob = {};
 	enyo.nar = [];
 
 	// this name is reported in inspectors as the type of objects created via delegate,
 	// otherwise we would just use enyo.nop
-	enyo.instance = function() {};
+	enyo.instance = () => {};
 
 	// some platforms need alternative syntax (e.g., when compiled as a v8 builtin)
 	if (!enyo.setPrototype) {
-		enyo.setPrototype = function(ctor, proto) {
+		enyo.setPrototype = (ctor, proto) => {
 			ctor.prototype = proto;
 		};
 	}
 
 	// boodman/crockford delegation w/cornford optimization
-	enyo.delegate = function(obj) {
+	enyo.delegate = obj => {
 		enyo.setPrototype(enyo.instance, obj);
 		return new enyo.instance();
 	};
@@ -402,7 +388,5 @@
 		a developer-provided resource file corresponding to the current user
 		locale.
 	*/
-	$L = function(string) {
-		return string;
-	}
+	$L = string => string
 })();

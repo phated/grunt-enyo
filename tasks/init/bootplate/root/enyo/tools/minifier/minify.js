@@ -1,12 +1,10 @@
-var
-	fs = require("fs"),
-	path = require("path"),
-	walker = require("walker"),
-	jsp = require("uglify-js").parser,
-	pro = require("uglify-js").uglify,
-	nopt = require("nopt"),
-	less = require("less")
-	;
+var fs = require("fs");
+var path = require("path");
+var walker = require("walker");
+var jsp = require("uglify-js").parser;
+var pro = require("uglify-js").uglify;
+var nopt = require("nopt");
+var less = require("less");
 
 // Shimming path.relative with 0.8.8's version if it doesn't exist
 if(!path.relative){
@@ -30,7 +28,7 @@ function pathSplit(inPath) {
 	return inPath.split(sep);
 }
 
-buildPathBlock = function(loader) {
+buildPathBlock = loader => {
 	var p$ = [];
 	for (var i=0, p; (p=loader.packages[i]); i++) {
 		if (p.name.indexOf("-") == -1) {
@@ -41,12 +39,12 @@ buildPathBlock = function(loader) {
 	return !p ? "" : "\n// minifier: path aliases\n\nenyo.path.addPaths({" + p + "});\n";
 };
 
-concatCss = function(loader, doneCB) {
+concatCss = (loader, doneCB) => {
 	w("");
 	var blob = "";
-	var addToBlob = function(sheet, code) {
+	var addToBlob = (sheet, code) => {
 		// fix url paths
-		code = code.replace(/url\([^)]*\)/g, function(inMatch) {
+		code = code.replace(/url\([^)]*\)/g, inMatch => {
 			// find the url path, ignore quotes in url string
 			var matches = /url\s*\(\s*(('([^']*)')|("([^"]*)")|([^'"]*))\s*\)/.exec(inMatch);
 			var urlPath = matches[3] || matches[5] || matches[6];
@@ -67,7 +65,7 @@ concatCss = function(loader, doneCB) {
 	}
 	// Pops one sheet off the sheets[] array, reads (and parses if less), and then
 	// recurses again from the async callback until no sheets left, then calls doneCB
-	var readAndParse = function(sheets) {
+	var readAndParse = sheets => {
 		var sheet = sheets.shift();
 		if (sheet) {
 			w(sheet);
@@ -80,7 +78,7 @@ concatCss = function(loader, doneCB) {
 			var code = fs.readFileSync(sheet, "utf8");
 			if (isLess) {
 				var parser = new(less.Parser)({filename:sheet, paths:[path.dirname(sheet)]});
-				parser.parse(code, function (err, tree) {
+				parser.parse(code, (err, tree) => {
 					if (err) {
 						console.error(err);
 					} else {
@@ -99,7 +97,7 @@ concatCss = function(loader, doneCB) {
 	readAndParse(loader.sheets);
 };
 
-concatJs = function(loader) {
+concatJs = loader => {
 	w("");
 	var blob = "";
 	for (var i=0, m; (m=loader.modules[i]); i++) {
@@ -118,19 +116,19 @@ concatJs = function(loader) {
 	return blob;
 };
 
-compress = function(inCode) {
+compress = inCode => {
 	var ast = jsp.parse(inCode); // parse code and get the initial AST
 	ast = pro.ast_mangle(ast); // get a new AST with mangled names
 	ast = pro.ast_squeeze(ast); // get an AST with compression optimizations
 	return pro.gen_code(ast, {indent_level:0, beautify: !opt.aggro, ascii_only:true}); // compressed code here
 };
 
-compressJsFile = function(inPath) {
+compressJsFile = inPath => {
 	var code = fs.readFileSync(inPath, "utf8");
 	return compress(code);
 };
 
-finish = function(loader) {
+finish = loader => {
 	//w(loader.packages);
 	//w('');
 	//
@@ -141,7 +139,7 @@ finish = function(loader) {
 		fs.mkdirSync(outfolder);
 	}
 	// Unfortunately, less parsing is asynchronous, so concatCSS is now as well
-	concatCss(loader, function(css) {
+	concatCss(loader, css => {
 		if (css.length) {
 			w("");
 			fs.writeFileSync(output + ".css", css, "utf8");

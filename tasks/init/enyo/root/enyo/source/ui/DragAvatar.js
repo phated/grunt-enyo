@@ -3,8 +3,8 @@ enyo.kind({
 	name: "enyo._DragAvatar",
 	style: "position: absolute; z-index: 10; pointer-events: none; cursor: move;",
 	showing: false,
-	showingChanged: function() {
-		this.inherited(arguments);
+	showingChanged(...args) {
+		this.inherited(args);
 		document.body.style.cursor = this.showing ? "move" : null;
 	}
 });
@@ -43,12 +43,12 @@ enyo.kind({
 		offsetY: 30
 	},
 	//* @protected
-	initComponents: function() {
+	initComponents(...args) {
 		this.avatarComponents = this.components;
 		this.components = null;
-		this.inherited(arguments);
+		this.inherited(args);
 	},
-	requireAvatar: function() {
+	requireAvatar() {
 		// FIXME: there is nobody to call teardownRender on this.avatar
 		// if document.body.innerHTML has been written over, his node is invalid
 		// we should have a trap for this condition here
@@ -56,20 +56,20 @@ enyo.kind({
 			this.avatar = this.createComponent({kind: enyo._DragAvatar, parentNode: document.body, showing: false, components: this.avatarComponents}).render();
 		}
 	},
-	showingChanged: function() {
+	showingChanged() {
 		this.avatar.setShowing(this.showing);
 		document.body.style.cursor = this.showing ? "move" : null;
 	},
 	//* @public
-	drag: function(inEvent) {
+	drag(inEvent) {
 		this.requireAvatar();
 		this.avatar.setBounds({top: inEvent.pageY - this.offsetY, left: inEvent.pageX + this.offsetX});
 		this.show();
 	},
-	show: function() {
+	show() {
 		this.setShowing(true);
 	},
-	hide: function() {
+	hide() {
 		this.setShowing(false);
 	}
 });

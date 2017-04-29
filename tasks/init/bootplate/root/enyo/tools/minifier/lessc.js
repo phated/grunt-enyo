@@ -1,12 +1,10 @@
-var
-	fs = require("fs"),
-	path = require("path"),
-	walker = require("walker"),
-	jsp = require("uglify-js").parser,
-	pro = require("uglify-js").uglify,
-	nopt = require("nopt"),
-	less = require("less")
-	;
+var fs = require("fs");
+var path = require("path");
+var walker = require("walker");
+var jsp = require("uglify-js").parser;
+var pro = require("uglify-js").uglify;
+var nopt = require("nopt");
+var less = require("less");
 
 // Shimming path.relative with 0.8.8's version if it doesn't exist
 if(!path.relative){
@@ -27,7 +25,7 @@ function finish(loader) {
 			var code = fs.readFileSync(sheet, "utf8");
 			var parser = new(less.Parser)({filename:sheet, paths:[path.dirname(sheet)]});
 			var cssFile = sheet.slice(0,sheet.length-5) + ".css";
-			parser.parse(code, function (err, tree) {
+			parser.parse(code, (err, tree) => {
 				if (err) {
 					console.error(err);
 				} else {

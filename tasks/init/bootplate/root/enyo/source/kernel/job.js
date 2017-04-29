@@ -12,9 +12,9 @@
 			enyo.job("updateThumb", enyo.bind(this, "updateThumb"), 1000);
 		}
 */
-enyo.job = function(inJobName, inJob, inWait) {
+enyo.job = (inJobName, inJob, inWait) => {
 	enyo.job.stop(inJobName);
-	enyo.job._jobs[inJobName] = setTimeout(function() {
+	enyo.job._jobs[inJobName] = setTimeout(() => {
 		enyo.job.stop(inJobName);
 		inJob();
 	}, inWait);
@@ -23,7 +23,7 @@ enyo.job = function(inJobName, inJob, inWait) {
 /**
 	Cancels the named job, if it has not already fired.
 */
-enyo.job.stop = function(inJobName) {
+enyo.job.stop = inJobName => {
 	if (enyo.job._jobs[inJobName]) {
 		clearTimeout(enyo.job._jobs[inJobName]);
 		delete enyo.job._jobs[inJobName];

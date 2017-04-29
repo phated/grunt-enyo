@@ -55,14 +55,14 @@ enyo.kind({
 	x: 0,
 	y0: 0,
 	y: 0,
-	destroy: function() {
+	destroy(...args) {
 		this.stop();
-		this.inherited(arguments);
+		this.inherited(args);
 	},
 	/**
 		Simple Verlet integrator for simulating Newtonian motion.
 	*/
-	verlet: function(p) {
+	verlet(p) {
 		var x = this.x;
 		this.x += x - this.x0;
 		this.x0 = x;
@@ -75,7 +75,7 @@ enyo.kind({
 		Boundary damping function.
 		Returns damped 'value' based on 'coeff' on one side of 'origin'.
 	*/
-	damping: function(value, origin, coeff, sign) {
+	damping(value, origin, coeff, sign) {
 		var kEpsilon = 0.5;
 		//
 		// this is basically just value *= coeff (generally, coeff < 1)
@@ -94,13 +94,13 @@ enyo.kind({
 		Dual-boundary damping function.
 		Returns damped 'value' based on 'coeff' when exceeding either boundary.
 	*/
-	boundaryDamping: function(value, aBoundary, bBoundary, coeff) {
+	boundaryDamping(value, aBoundary, bBoundary, coeff) {
 		return this.damping(this.damping(value, aBoundary, coeff, 1), bBoundary, coeff, -1);
 	},
 	/**
 		Simulation constraints (spring damping occurs here)
 	*/
-	constrain: function() {
+	constrain() {
 		var y = this.boundaryDamping(this.y, this.topBoundary, this.bottomBoundary, this.kSpringDamping);
 		if (y != this.y) {
 			// ensure snapping introduces no velocity, add additional friction
@@ -116,7 +116,7 @@ enyo.kind({
 	/**
 		The friction function
 	*/
-	friction: function(inEx, inEx0, inCoeff) {
+	friction(inEx, inEx0, inCoeff) {
 		// implicit velocity
 		var dp = this[inEx] - this[inEx0];
 		// let close-to-zero collapse to zero (i.e. smaller than epsilon is considered zero)
@@ -127,7 +127,7 @@ enyo.kind({
 	// one unit of time for simulation
 	frame: 10,
 	// piece-wise constraint simulation
-	simulate: function(t) {
+	simulate(t) {
 		while (t >= this.frame) {
 			t -= this.frame;
 			if (!this.dragging) {
@@ -139,14 +139,20 @@ enyo.kind({
 		}
 		return t;
 	},
-	animate: function() {
-		this.stop();
-		// time tracking
-		var t0 = enyo.now(), t = 0;
-		// delta tracking
-		var x0, y0;
-		// animation handler
-		var fn = enyo.bind(this, function() {
+	animate() {
+        this.stop();
+
+        // time tracking
+        var t0 = enyo.now();
+
+        var t = 0;
+
+        // delta tracking
+        var x0;
+
+        var y0;
+        // animation handler
+        var fn = enyo.bind(this, function() {
 			// wall-clock time
 			var t1 = enyo.now();
 			// schedule next frame
@@ -180,20 +186,20 @@ enyo.kind({
 			y0 = this.y;
 			x0 = this.x;
 		});
-		this.job = enyo.requestAnimationFrame(fn);
-	},
+        this.job = enyo.requestAnimationFrame(fn);
+    },
 	//* @protected
-	start: function() {
+	start() {
 		if (!this.job) {
 			this.animate();
 			this.doScrollStart();
 		}
 	},
-	stop: function(inFireEvent) {
+	stop(inFireEvent) {
 		this.job = enyo.cancelRequestAnimationFrame(this.job);
 		inFireEvent && this.doScrollStop();
 	},
-	stabilize: function() {
+	stabilize() {
 		this.start();
 		var y = Math.min(this.topBoundary, Math.max(this.bottomBoundary, this.y));
 		var x = Math.min(this.leftBoundary, Math.max(this.rightBoundary, this.x));
@@ -202,7 +208,7 @@ enyo.kind({
 		this.scroll();
 		this.stop(true);
 	},
-	startDrag: function(e) {
+	startDrag(e) {
 		this.dragging = true;
 		//
 		this.my = e.pageY;
@@ -211,7 +217,7 @@ enyo.kind({
 		this.mx = e.pageX;
 		this.px = this.ux = this.x;
 	},
-	drag: function(e) {
+	drag(e) {
 		if (this.dragging) {
 			var dy = this.vertical ? e.pageY - this.my : 0;
 			this.uy = dy + this.py;
@@ -227,7 +233,7 @@ enyo.kind({
 			return true;
 		}
 	},
-	dragDrop: function(e) {
+	dragDrop(e) {
 		if (this.dragging && !window.PalmSystem) {
 			var kSimulatedFlickScalar = 0.5;
 			this.y = this.uy;
@@ -237,10 +243,10 @@ enyo.kind({
 		}
 		this.dragFinish();
 	},
-	dragFinish: function() {
+	dragFinish() {
 		this.dragging = false;
 	},
-	flick: function(e) {
+	flick(e) {
 		var v;
 		if (this.vertical) {
 			v = e.yVelocity > 0 ? Math.min(this.kMaxFlick, e.yVelocity) : Math.max(-this.kMaxFlick, e.yVelocity);
@@ -252,7 +258,7 @@ enyo.kind({
 		}
 		this.start();
 	},
-	mousewheel: function(e) {
+	mousewheel(e) {
 		var dy = this.vertical ? e.wheelDeltaY || e.wheelDelta: 0;
 		if ((dy > 0 && this.y < this.topBoundary) || (dy < 0 && this.y > this.bottomBoundary)) {
 			this.stop(true);
@@ -261,7 +267,7 @@ enyo.kind({
 			return true;
 		}
 	},
-	scroll: function() {
+	scroll() {
 		this.doScroll();
 	},
 	// NOTE: Yip/Orvell method for determining scroller instantaneous velocity
@@ -270,7 +276,7 @@ enyo.kind({
 	/**
 		Animates a scroll to the specified position.
 	*/
-	scrollTo: function(inY, inX) {
+	scrollTo(inY, inX) {
 		if (inY !== null) {
 			this.y = this.y0 - (inY + this.y0) * (1 - this.kFrictionDamping);
 		}
@@ -279,19 +285,19 @@ enyo.kind({
 		}
 		this.start();
 	},
-	setScrollX: function(inX) {
+	setScrollX(inX) {
 		this.x = this.x0 = inX;
 	},
-	setScrollY: function(inY) {
+	setScrollY(inY) {
 		this.y = this.y0 = inY;
 	},
-	setScrollPosition: function(inPosition) {
+	setScrollPosition(inPosition) {
 		this.setScrollY(inPosition);
 	},
-	isScrolling: function() {
+	isScrolling() {
 		return Boolean(this.job);
 	},
-	isInOverScroll: function() {
+	isInOverScroll() {
 		return this.job && (this.x > this.leftBoundary || this.x < this.rightBoundary || this.y > this.topBoundary || this.y < this.bottomBoundary);
 	}
 });

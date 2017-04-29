@@ -1,24 +1,26 @@
 ﻿enyo.kind({
 	name: "JSONTest",
 	kind: enyo.TestSuite,
-	testJsonStringifyExists: function() {
+	testJsonStringifyExists() {
 		enyo.json.stringify();
 		this.finish();
 	},
-	testJsonParseExists: function() {
+	testJsonParseExists() {
 		enyo.json.parse();
 		this.finish();
 	},
-	testJsonParseSimple: function() {
-		var obj = enyo.json.parse('{"foo":"bar"}'), err;
-		if (!obj.foo || !(obj.foo === "bar")) {
+	testJsonParseSimple() {
+        var obj = enyo.json.parse('{"foo":"bar"}');
+        var err;
+        if (!obj.foo || !(obj.foo === "bar")) {
 			err = "JSON string did not parse correctly";
 		}
-		this.finish(err);
-	},
-	testJsonParseReviver: function() {
-		var dates = '{"hired":"2012-01-01T12:00:00Z","fired":"2012-01-02T12:00:00Z"}',
-		parsed = enyo.json.parse(dates, function(key, value) {
+        this.finish(err);
+    },
+	testJsonParseReviver() {
+        var dates = '{"hired":"2012-01-01T12:00:00Z","fired":"2012-01-02T12:00:00Z"}';
+
+        var parsed = enyo.json.parse(dates, (key, value) => {
 			var a = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2}(?:\.\d*)?)Z$/.exec(value);
 			if ( a ) {
 				return new Date(
@@ -26,11 +28,12 @@
 				);
 			}
 			return value;
-		}),
-		err;
-		if (!(parsed.hired instanceof Date)) {
+		});
+
+        var err;
+        if (!(parsed.hired instanceof Date)) {
 			err = "JSON string did not parse and revive correctly";
 		}
-		this.finish(err);
-	}
+        this.finish(err);
+    }
 });

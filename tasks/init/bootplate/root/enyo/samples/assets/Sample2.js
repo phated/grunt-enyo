@@ -8,7 +8,7 @@ enyo.kind({
 		{tag: "br"},
 		{name: "output", classes: "sample-output"}
 	],
-	buttonTap: function(inSender, inEvent) {
+	buttonTap(inSender, inEvent) {
 		var color = this.$.input.hasNode().value;
 		this.$.output.applyStyle("background", color);
 	}

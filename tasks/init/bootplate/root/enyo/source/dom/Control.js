@@ -67,11 +67,11 @@ enyo.kind({
 	//* @protected
 	node: null,
 	generated: false,
-	create: function() {
+	create(...args) {
 		// initialize style databases
 		this.initStyles();
 		// superkind initialization
-		this.inherited(arguments);
+		this.inherited(args);
 		// 'showing' is tertiary method for modifying display style
 		// setting 'display: none;' style at initialization time will
 		// not work if 'showing' is true.
@@ -86,17 +86,17 @@ enyo.kind({
 		this.addClass(this.classes);
 		this.initProps(["id", "content", "src"]);
 	},
-	destroy: function() {
+	destroy(...args) {
 		this.removeNodeFromDom();
 		enyo.Control.unregisterDomEvents(this.id);
-		this.inherited(arguments);
+		this.inherited(args);
 	},
-	importProps: function(inProps) {
+	importProps(inProps) {
 		this.inherited(arguments);
 		// each instance has its own attributes array, the union of the prototype attributes and user-specified attributes
 		this.attributes = enyo.mixin(enyo.clone(this.kindAttributes), this.attributes);
 	},
-	initProps: function(inPropNames) {
+	initProps(inPropNames) {
 		// for each named property, trigger the *Changed handler if the property value is truthy
 		for (var i=0, n, cf; (n=inPropNames[i]); i++) {
 			if (this[n]) {
@@ -108,7 +108,7 @@ enyo.kind({
 			}
 		}
 	},
-	classesChanged: function(inOld) {
+	classesChanged(inOld) {
 		this.removeClass(inOld);
 		this.addClass(this.classes);
 	},
@@ -121,24 +121,24 @@ enyo.kind({
 		this.inherited(arguments);
 	},
 	*/
-	addChild: function(inControl) {
+	addChild(inControl) {
 		inControl.addClass(this.controlClasses);
 		this.inherited(arguments);
 	},
-	removeChild: function(inControl) {
+	removeChild(inControl) {
 		this.inherited(arguments);
 		inControl.removeClass(this.controlClasses);
 	},
 	// event filter
 	strictlyInternalEvents: {onenter: 1, onleave: 1},
-	dispatchEvent: function(inEventName, inEvent, inSender) {
+	dispatchEvent(inEventName, inEvent, inSender) {
 		// prevent dispatch and bubble of events that are strictly internal (e.g. enter/leave)
 		if (this.strictlyInternalEvents[inEventName] && this.isInternalEvent(inEvent)) {
 			return true;
 		}
 		return this.inherited(arguments);
 	},
-	isInternalEvent: function(inEvent) {
+	isInternalEvent(inEvent) {
 		var rdt = enyo.dispatcher.findDispatchTarget(inEvent.relatedTarget);
 		return rdt && rdt.isDescendantOf(this);
 	},
@@ -160,7 +160,7 @@ enyo.kind({
 				console.log(this.node.nodeType);
 			}
 	*/
-	hasNode: function() {
+	hasNode() {
 		// 'generated' is used to gate access to expensive findNodeById call
 		return this.generated && (this.node || this.findNodeById());
 	},
@@ -168,7 +168,7 @@ enyo.kind({
 		Appends the string value of _inAddendum_ to the _content_ of this
 		control.
 	*/
-	addContent: function(inAddendum) {
+	addContent(inAddendum) {
 		this.setContent(this.content + inAddendum);
 	},
 	/**
@@ -185,7 +185,7 @@ enyo.kind({
 			// Get the value attribute for this DomNode
 			var value = this.getAttribute("tabIndex");
 	*/
-	getAttribute: function(inName) {
+	getAttribute(inName) {
 		return this.hasNode() ? this.node.getAttribute(inName) : this.attributes[inName];
 	},
 	/**
@@ -198,7 +198,7 @@ enyo.kind({
 			// remove the index attribute
 			this.setAttribute("index", null);
 	*/
-	setAttribute: function(inName, inValue) {
+	setAttribute(inName, inValue) {
 		this.attributes[inName] = inValue;
 		if (this.hasNode()) {
 			this.attributeToNode(inName, inValue);
@@ -210,7 +210,7 @@ enyo.kind({
 		A caller-specified default value, _inDefault_, is returned when the DOM
 		node has not yet been created.
 	*/
-	getNodeProperty: function(inName, inDefault) {
+	getNodeProperty(inName, inDefault) {
 		if (this.hasNode()) {
 			return this.node[inName];
 		} else {
@@ -223,7 +223,7 @@ enyo.kind({
 		does not alter any values cached in local properties of the
 		_enyo.Control_ instance.
 	*/
-	setNodeProperty: function(inName, inValue) {
+	setNodeProperty(inName, inValue) {
 		if (this.hasNode()) {
 			this.node[inName] = inValue;
 		}
@@ -235,7 +235,7 @@ enyo.kind({
 
 			this.$.control.setClassAttribute("box blue-border highlighted");
 	*/
-	setClassAttribute: function(inClass) {
+	setClassAttribute(inClass) {
 		this.setAttribute("class", inClass);
 	},
 	/**
@@ -245,7 +245,7 @@ enyo.kind({
 
 			var cssClasses = this.$.control.getClassAttribute();
 	*/
-	getClassAttribute: function() {
+	getClassAttribute() {
 		return this.attributes["class"] || "";
 	},
 	/**
@@ -259,7 +259,7 @@ enyo.kind({
 			// returns true if _class_ is "bar foo baz", but false for "barfoobaz"
 			var hasFooClass = this.$.control.hasClass("foo");
 	*/
-	hasClass: function(inClass) {
+	hasClass(inClass) {
 		return inClass && ((" " + this.getClassAttribute() + " ").indexOf(" " + inClass + " ") >= 0);
 	},
 	/**
@@ -268,7 +268,7 @@ enyo.kind({
 			// add the highlight class to this object
 			this.addClass("highlight");
 	*/
-	addClass: function(inClass) {
+	addClass(inClass) {
 		if (inClass && !this.hasClass(inClass)) {
 			var c = this.getClassAttribute();
 			this.setClassAttribute(c + (c ? " " : "") + inClass);
@@ -286,7 +286,7 @@ enyo.kind({
 			// remove the highlight class from this object
 			this.removeClass("highlight");
 	*/
-	removeClass: function(inClass) {
+	removeClass(inClass) {
 		if (inClass && this.hasClass(inClass)) {
 			var c = this.getClassAttribute();
 			c = (" " + c + " ").replace(" " + inClass + " ", " ").slice(1, -1);
@@ -303,19 +303,19 @@ enyo.kind({
 			// add or remove the highlight class, depending on the "highlighted" property
 			this.addRemoveClass("highlight", this.highlighted);
 	*/
-	addRemoveClass: function(inClass, inTrueToAdd) {
+	addRemoveClass(inClass, inTrueToAdd) {
 		this[inTrueToAdd ? "addClass" : "removeClass"](inClass);
 	},
 	//
 	// styles
 	//
 	//* @protected
-	initStyles: function() {
+	initStyles() {
 		this.domStyles = this.domStyles || {};
 		enyo.Control.cssTextToDomStyles(this.kindStyle, this.domStyles);
 		this.domCssText = enyo.Control.domStylesToCssText(this.domStyles);
 	},
-	styleChanged: function() {
+	styleChanged() {
 		// FIXME: stomping on domStyles is problematic, there may be styles on this object
 		// applied by layouts or other objects.
 		// We may need a 'runtimeStyles' concept separate from a 'userStyles' concept, although
@@ -341,7 +341,7 @@ enyo.kind({
 
 			this.$.box.applyStyle("z-index", null);
 	*/
-	applyStyle: function(inStyle, inValue) {
+	applyStyle(inStyle, inValue) {
 		this.domStyles[inStyle] = inValue;
 		this.domStylesChanged();
 	},
@@ -352,7 +352,7 @@ enyo.kind({
 
 			this.$.box.addStyles("background-color: red; padding: 4px;");
 	*/
-	addStyles: function(inCssText) {
+	addStyles(inCssText) {
 		enyo.Control.cssTextToDomStyles(inCssText, this.domStyles);
 		this.domStylesChanged();
 	},
@@ -363,22 +363,22 @@ enyo.kind({
 		property names, not CSS-style names, so use "fontFamily" instead of
 		"font-family".
 	*/
-	getComputedStyleValue: function(inStyle, inDefault) {
+	getComputedStyleValue(inStyle, inDefault) {
 		if (this.hasNode()) {
 			return enyo.dom.getComputedStyleValue(this.node, inStyle);
 		}
 		return inDefault;
 	},
 	//* @protected
-	domStylesChanged: function() {
+	domStylesChanged() {
 		this.domCssText = enyo.Control.domStylesToCssText(this.domStyles);
 		this.invalidateTags();
 		this.renderStyles();
 	},
-	stylesToNode: function() {
+	stylesToNode() {
 		this.node.style.cssText = this.style + (this.style[this.style.length-1] == ';' ? ' ' : '; ') + this.domCssText;
 	},
-	setupBodyFitting: function() {
+	setupBodyFitting() {
 		enyo.dom.applyBodyFit();
 		this.addClass("enyo-fit enyo-clip");
 	},
@@ -388,7 +388,7 @@ enyo.kind({
 		not supported in Android and leads to overflow issues
 		(ENYO-900 and ENYO-901)
 	*/
-	setupOverflowScrolling: function() {
+	setupOverflowScrolling() {
 		if(enyo.platform.android || enyo.platform.androidChrome)
 			return;
 		document.getElementsByTagName("body")[0].className += " webkitOverflowScrolling";
@@ -399,7 +399,7 @@ enyo.kind({
 	/**
 		Renders this object into DOM, generating a DOM node if needed.
 	*/
-	render: function() {
+	render() {
 		if (this.parent) {
 			// allow the parent to perform setup tasks
 			// note: ('parent.generated' may change here)
@@ -424,7 +424,7 @@ enyo.kind({
 		If rendering into the document body element, appropriate styles will
 		be used to have it expand to fill the whole window.
 	*/
-	renderInto: function(inParentNode) {
+	renderInto(inParentNode) {
 		// clean up render flags and memoizations
 		this.teardownRender();
 		// inParentNode can be a string id or a node reference
@@ -453,7 +453,7 @@ enyo.kind({
 		event handler. Also, it will not work in certain environments, such as
 		Chrome Packaged Apps or Windows 8.
 	*/
-	write: function() {
+	write() {
 		if (this.fit) {
 			this.setupBodyFitting();
 		}
@@ -473,7 +473,7 @@ enyo.kind({
 				// do some task
 			}
 	*/
-	rendered: function() {
+	rendered() {
 		// CAVEAT: Currently we use one entry point ('reflow') for
 		// post-render layout work *and* post-resize layout work.
 		this.reflow();
@@ -484,13 +484,13 @@ enyo.kind({
 	/**
 		Shows this node (alias for _setShowing(true)_).
 	*/
-	show: function() {
+	show() {
 		this.setShowing(true);
 	},
 	/**
 		Hides this node (alias for _setShowing(false)_).
 	*/
-	hide: function() {
+	hide() {
 		this.setShowing(false);
 	},
 	/**
@@ -503,7 +503,7 @@ enyo.kind({
 			var bounds = this.getBounds();
 			console.log(bounds.width);
 	*/
-	getBounds: function() {
+	getBounds() {
 		var n = this.node || this.hasNode() || 0;
 		return {left: n.offsetLeft, top: n.offsetTop, width: n.offsetWidth, height: n.offsetHeight};
 	},
@@ -518,23 +518,24 @@ enyo.kind({
 			//
 			this.setBounds({width: "10em", right: "30pt"}); // adds style properties like "width: 10em; right: 30pt;"
 	*/
-	setBounds: function(inBounds, inUnit) {
-		var s = this.domStyles, unit = inUnit || "px";
-		var extents = ["width", "height", "left", "top", "right", "bottom"];
-		for (var i=0, b, e; (e=extents[i]); i++) {
+	setBounds(inBounds, inUnit) {
+        var s = this.domStyles;
+        var unit = inUnit || "px";
+        var extents = ["width", "height", "left", "top", "right", "bottom"];
+        for (var i=0, b, e; (e=extents[i]); i++) {
 			b = inBounds[e];
 			if (b || b === 0) {
 				s[e] = b + (!enyo.isString(b) ? unit : '');
 			}
 		}
-		this.domStylesChanged();
-	},
+        this.domStylesChanged();
+    },
 	//* @protected
 	// expensive, other methods do work to avoid calling here
-	findNodeById: function() {
+	findNodeById() {
 		return this.id && (this.node = enyo.dom.byId(this.id));
 	},
-	idChanged: function(inOld) {
+	idChanged(inOld) {
 		if (inOld) {
 			enyo.Control.unregisterDomEvents(inOld);
 		}
@@ -543,25 +544,25 @@ enyo.kind({
 			enyo.Control.registerDomEvents(this.id, this);
 		}
 	},
-	contentChanged: function() {
+	contentChanged() {
 		if (this.hasNode()) {
 			this.renderContent();
 		}
 	},
-	getSrc: function() {
+	getSrc() {
 		return this.getAttribute("src");
 	},
-	srcChanged: function() {
+	srcChanged() {
 		this.setAttribute("src", enyo.path.rewrite(this.src));
 	},
-	attributesChanged: function() {
+	attributesChanged() {
 		this.invalidateTags();
 		this.renderAttributes();
 	},
 	//
 	// HTML rendering
 	//
-	generateHtml: function() {
+	generateHtml() {
 		if (this.canGenerate === false) {
 			return '';
 		}
@@ -580,7 +581,7 @@ enyo.kind({
 		this.generated = true;
 		return h;
 	},
-	generateInnerHtml: function() {
+	generateInnerHtml() {
 		// Flow can alter the way that html content is rendered inside
 		// the container regardless of whether there are children.
 		this.flow();
@@ -590,7 +591,7 @@ enyo.kind({
 			return this.allowHtml ? this.content : enyo.Control.escapeHtml(this.content);
 		}
 	},
-	generateChildHtml: function() {
+	generateChildHtml() {
 		var results = '';
 		for (var i=0, c; (c=this.children[i]); i++) {
 			var h = c.generateHtml();
@@ -598,7 +599,7 @@ enyo.kind({
 		}
 		return results;
 	},
-	generateOuterHtml: function(inContent) {
+	generateOuterHtml(inContent) {
 		if (!this.tag) {
 			return inContent;
 		}
@@ -607,10 +608,10 @@ enyo.kind({
 		}
 		return this._openTag + inContent + this._closeTag;
 	},
-	invalidateTags: function() {
+	invalidateTags() {
 		this.tagsValid = false;
 	},
-	prepareTags: function() {
+	prepareTags() {
 		var htmlStyle = this.domCssText + this.style;
 		this._openTag = '<' +
 			this.tag +
@@ -626,22 +627,22 @@ enyo.kind({
 		this.tagsValid = true;
 	},
 	// DOM, aka direct-to-node, rendering
-	attributeToNode: function(inName, inValue) {
+	attributeToNode(inName, inValue) {
 		if (inValue === null || inValue === false || inValue === "") {
 			this.node.removeAttribute(inName);
 		} else {
 			this.node.setAttribute(inName, inValue);
 		}
 	},
-	attributesToNode: function() {
+	attributesToNode() {
 		for (var n in this.attributes) {
 			this.attributeToNode(n, this.attributes[n]);
 		}
 	},
-	getParentNode: function() {
+	getParentNode() {
 		return this.parentNode || (this.parent && (this.parent.hasNode() || this.parent.getParentNode()));
 	},
-	addNodeToParent: function() {
+	addNodeToParent() {
 		if (this.node) {
 			var pn = this.getParentNode();
 			if (pn) {
@@ -653,64 +654,64 @@ enyo.kind({
 			}
 		}
 	},
-	appendNodeToParent: function(inParentNode) {
+	appendNodeToParent(inParentNode) {
 		inParentNode.appendChild(this.node);
 	},
-	insertNodeInParent: function(inParentNode, inBeforeNode) {
+	insertNodeInParent(inParentNode, inBeforeNode) {
 		inParentNode.insertBefore(this.node, inBeforeNode || inParentNode.firstChild);
 	},
-	removeNodeFromDom: function() {
+	removeNodeFromDom() {
 		if (this.hasNode() && this.node.parentNode) {
 			this.node.parentNode.removeChild(this.node);
 		}
 	},
-	teardownRender: function() {
+	teardownRender() {
 		if (this.generated) {
 			this.teardownChildren();
 		}
 		this.node = null;
 		this.generated = false;
 	},
-	teardownChildren: function() {
+	teardownChildren() {
 		for (var i=0, c; (c=this.children[i]); i++) {
 			c.teardownRender();
 		}
 	},
-	renderNode: function() {
+	renderNode() {
 		this.teardownRender();
 		this.node = document.createElement(this.tag);
 		this.addNodeToParent();
 		this.generated = true;
 	},
-	renderDom: function() {
+	renderDom() {
 		this.renderAttributes();
 		this.renderStyles();
 		this.renderContent();
 	},
-	renderContent: function() {
+	renderContent() {
 		if (this.generated) {
 			this.teardownChildren();
 		}
 		this.node.innerHTML = this.generateInnerHtml();
 	},
-	renderStyles: function() {
+	renderStyles() {
 		if (this.hasNode()) {
 			this.stylesToNode();
 		}
 	},
-	renderAttributes: function() {
+	renderAttributes() {
 		if (this.hasNode()) {
 			this.attributesToNode();
 		}
 	},
-	beforeChildRender: function() {
+	beforeChildRender() {
 		// if we are generated, we should flow before rendering a child
 		// if not, the render context isn't ready anyway
 		if (this.generated) {
 			this.flow();
 		}
 	},
-	syncDisplayToShowing: function() {
+	syncDisplayToShowing() {
 		var ds = this.domStyles;
 		if (this.showing) {
 			// note: only show a node if it's actually hidden
@@ -727,10 +728,10 @@ enyo.kind({
 			this.applyStyle("display", "none");
 		}
 	},
-	showingChanged: function() {
+	showingChanged() {
 		this.syncDisplayToShowing();
 	},
-	getShowing: function() {
+	getShowing() {
 		// 'showing' specifically means domStyles.display !== 'none'.
 		// 'showing' does not imply the node is actually visible or even rendered in DOM,
 		// it simply reflects this state of this specific property as a convenience.
@@ -738,7 +739,7 @@ enyo.kind({
 	},
 	//
 	//
-	fitChanged: function(inOld) {
+	fitChanged(inOld) {
 		this.parent.reflow();
 	},
 	//
@@ -750,19 +751,19 @@ enyo.kind({
 			'&lt;code&gt;"This &amp; That"&lt;/code&gt;' becomes
 			'&amp;lt;code&amp;gt;"This &amp;amp; That"&amp;lt;/code&amp;gt;' 
 		*/
-		escapeHtml: function(inText) {
+		escapeHtml(inText) {
 			return inText != null ? String(inText).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;') : '';
 		},
 		//* @protected
-		registerDomEvents: function(inId, inControl) {
+		registerDomEvents(inId, inControl) {
 			enyo.$[inId] = inControl;
 		},
-		unregisterDomEvents: function(inId) {
+		unregisterDomEvents(inId) {
 			enyo.$[inId] = null;
 		},
 		selfClosing: {img: 1, hr: 1, br: 1, area: 1, base: 1, basefont: 1, input: 1, link: 1, meta: 1,
 			command: 1, embed: 1, keygen: 1, wbr: 1, param: 1, source: 1, track: 1, col: 1},
-		cssTextToDomStyles: function(inText, inStyleHash) {
+		cssTextToDomStyles(inText, inStyleHash) {
 			if (inText) {
 				// remove spaces between rules, then split rules on delimiter (;)
 				var rules = inText.replace(/; /g, ";").split(";");
@@ -779,17 +780,19 @@ enyo.kind({
 				}
 			}
 		},
-		domStylesToCssText: function(inStyleHash) {
-			var n, v, text = '';
-			for (n in inStyleHash) {
+		domStylesToCssText(inStyleHash) {
+            var n;
+            var v;
+            var text = '';
+            for (n in inStyleHash) {
 				v = inStyleHash[n];
 				if ((v !== null) && (v !== undefined) && (v !== "")) {
 					text +=  n + ':' + v + ';';
 				}
 			}
-			return text;
-		},
-		stylesToHtml: function(inStyleHash) {
+            return text;
+        },
+		stylesToHtml(inStyleHash) {
 			var cssText = enyo.Control.domStylesToCssText(inStyleHash);
 			return (cssText ? ' style="' + cssText + '"' : "");
 		},
@@ -798,25 +801,27 @@ enyo.kind({
 			replaced by HTML entities, e.g., 'hello from "Me & She"' becomes
 			'hello from &amp;quot;Me &amp;amp; She&amp;quot;' 
 		*/
-		escapeAttribute: function(inText) {
+		escapeAttribute(inText) {
 			return !enyo.isString(inText) ? inText : String(inText).replace(/&/g,'&amp;').replace(/\"/g,'&quot;');
 		},
-		attributesToHtml: function(inAttributeHash) {
-			var n, v, h = '';
-			for (n in inAttributeHash) {
+		attributesToHtml(inAttributeHash) {
+            var n;
+            var v;
+            var h = '';
+            for (n in inAttributeHash) {
 				v = inAttributeHash[n];
 				if (v !== null && v !== false && v !== "") {
 					h += ' ' + n + '="' + enyo.Control.escapeAttribute(v) + '"';
 				}
 			}
-			return h;
-		}
+            return h;
+        }
 	}
 });
 
 enyo.defaultCtor = enyo.Control;
 
-enyo.Control.subclass = function(ctor, props) {
+enyo.Control.subclass = (ctor, props) => {
 	// Control classes may declare properties that are intended
 	// to stack with superclass properties.
 	//

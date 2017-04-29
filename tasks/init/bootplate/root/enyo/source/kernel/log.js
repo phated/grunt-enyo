@@ -7,7 +7,7 @@ enyo.logging = {
 	// set level to -1 to disable all logging
 	levels: {log: 20, warn: 10, error: 0},
 	// return true if logging level is lower than the current log level
-	shouldLog: function(inMethod) {
+	shouldLog(inMethod) {
 		var ll = parseInt(this.levels[inMethod], 0);
 		return (ll <= this.level);
 	},
@@ -23,7 +23,7 @@ enyo.logging = {
 		return a$;
 	},
 	*/
-	_log: function(inMethod, inArgs) {
+	_log(inMethod, inArgs) {
 		//var a$ = enyo.logging.formatArgs(inMethod, inArgs);
 		var a$ = enyo.isArray(inArgs) ? inArgs : enyo.cloneArray(inArgs);
 		if (enyo.dumbConsole) {
@@ -36,13 +36,13 @@ enyo.logging = {
 			fn.apply(console, a$);
 		} else if (console.log.apply) {
 			// some consoles support console.log.apply
-			console.log.apply(console, a$);
+			console.log(...a$);
 		} else {
 			// otherwise, do our own formatting
 			console.log(a$.join(" "));
 		}
 	},
-	log: function(inMethod, inArgs) {
+	log(inMethod, inArgs) {
 		if (window.console) {
 			if (this.shouldLog(inMethod)) {
 				this._log(inMethod, inArgs);
@@ -60,7 +60,7 @@ enyo.logging = {
 
 	Setting the log level lower will prevent logging functions with a higher level from being executed.
 */
-enyo.setLogLevel = function(inLevel) {
+enyo.setLogLevel = inLevel => {
 	var ll = parseInt(inLevel, 0);
 	if (isFinite(ll)) {
 		enyo.logging.level = ll;
@@ -74,16 +74,16 @@ enyo.setLogLevel = function(inLevel) {
 
 	Multiple arguments are coerced to String and joined with spaces.
 */
-enyo.log = function() {
-	enyo.logging.log("log", arguments);
+enyo.log = function(...args) {
+	enyo.logging.log("log", args);
 };
 
 //* Same as _log_, except uses the console's warn method (if it exists).
-enyo.warn = function() {
-	enyo.logging.log("warn", arguments);
+enyo.warn = function(...args) {
+	enyo.logging.log("warn", args);
 };
 
 //* Same as _log_, except uses the console's error method (if it exists).
-enyo.error = function() {
-	enyo.logging.log("error", arguments);
+enyo.error = function(...args) {
+	enyo.logging.log("error", args);
 };

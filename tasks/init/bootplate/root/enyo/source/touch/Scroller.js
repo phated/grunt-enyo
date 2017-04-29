@@ -105,7 +105,7 @@ enyo.kind({
 			{os: "webos", version: 1e9}
 		],
 		//* Returns true if platform should have touch events.
-		hasTouchScrolling: function() {
+		hasTouchScrolling() {
 			for (var i=0, t, m; (t=this.osInfo[i]); i++) {
 				if (enyo.platform[t.os]) {
 					return true;
@@ -116,7 +116,7 @@ enyo.kind({
 			Returns true if the platform has native div scrollers (desktop
 			browsers always have them).
 		*/
-		hasNativeScrolling: function() {
+		hasNativeScrolling() {
 			for (var i=0, t, m; (t=this.osInfo[i]); i++) {
 				if (enyo.platform[t.os] < t.version) {
 					return false;
@@ -124,37 +124,37 @@ enyo.kind({
 			}
 			return true;
 		},
-		getTouchStrategy: function() {
+		getTouchStrategy() {
 			return enyo.platform.android >= 3 ? "TranslateScrollStrategy" : "TouchScrollStrategy";
 		}
 	},
 	//* @protected
 	controlParentName: "strategy",
-	create: function() {
-		this.inherited(arguments);
+	create(...args) {
+		this.inherited(args);
 		this.horizontalChanged();
 		this.verticalChanged();
 	},
-	importProps: function(inProps) {
+	importProps(inProps) {
 		this.inherited(arguments);
 		// allow global overriding of strategy kind
 		if (inProps && inProps.strategyKind === undefined && (enyo.Scroller.touchScrolling || this.touch)) {
 			this.strategyKind = enyo.Scroller.getTouchStrategy();
 		}
 	},
-	initComponents: function() {
+	initComponents(...args) {
 		this.strategyKindChanged();
-		this.inherited(arguments);
+		this.inherited(args);
 	},
-	teardownChildren: function() {
+	teardownChildren(...args) {
 		this.cacheScrollPosition();
-		this.inherited(arguments);
+		this.inherited(args);
 	},
-	rendered: function() {
-		this.inherited(arguments);
+	rendered(...args) {
+		this.inherited(args);
 		this.restoreScrollPosition();
 	},
-	strategyKindChanged: function() {
+	strategyKindChanged() {
 		if (this.$.strategy) {
 			this.$.strategy.destroy();
 			this.controlParent = null;
@@ -165,63 +165,63 @@ enyo.kind({
 			this.render();
 		}
 	},
-	createStrategy: function() {
+	createStrategy() {
 		this.createComponents([{name: "strategy", maxHeight: this.maxHeight, kind: this.strategyKind, thumb: this.thumb, preventDragPropagation: this.preventDragPropagation, overscroll:this.touchOverscroll, isChrome: true}]);
 	},
-	getStrategy: function() {
+	getStrategy() {
 		return this.$.strategy;
 	},
-	maxHeightChanged: function() {
+	maxHeightChanged() {
 		this.$.strategy.setMaxHeight(this.maxHeight);
 	},
-	showingChanged: function() {
+	showingChanged(...args) {
 		if (!this.showing) {
 			this.cacheScrollPosition();
 			this.setScrollLeft(0);
 			this.setScrollTop(0);
 		}
-		this.inherited(arguments);
+		this.inherited(args);
 		if (this.showing) {
 			this.restoreScrollPosition();
 		}
 	},
-	thumbChanged: function() {
+	thumbChanged() {
 		this.$.strategy.setThumb(this.thumb);
 	},
-	cacheScrollPosition: function() {
+	cacheScrollPosition() {
 		this.cachedPosition = {left: this.getScrollLeft(), top: this.getScrollTop()};
 	},
-	restoreScrollPosition: function() {
+	restoreScrollPosition() {
 		if (this.cachedPosition) {
 			this.setScrollLeft(this.cachedPosition.left);
 			this.setScrollTop(this.cachedPosition.top);
 			this.cachedPosition = null;
 		}
 	},
-	horizontalChanged: function() {
+	horizontalChanged() {
 		this.$.strategy.setHorizontal(this.horizontal);
 	},
-	verticalChanged: function() {
+	verticalChanged() {
 		this.$.strategy.setVertical(this.vertical);
 	},
 	// FIXME: these properties are virtual; property changed methods are fired only if 
 	// property value changes, not if getter changes.
 	//* Sets scroll position along horizontal axis.
-	setScrollLeft: function(inLeft) {
+	setScrollLeft(inLeft) {
 		this.scrollLeft = inLeft;
 		this.$.strategy.setScrollLeft(this.scrollLeft);
 	},
 	//* Sets scroll position along vertical axis.
-	setScrollTop: function(inTop) {
+	setScrollTop(inTop) {
 		this.scrollTop = inTop;
 		this.$.strategy.setScrollTop(inTop);
 	},
 	//* Gets scroll position along horizontal axis.
-	getScrollLeft: function() {
+	getScrollLeft() {
 		return this.$.strategy.getScrollLeft();
 	},
 	//* Gets scroll position along vertical axis.
-	getScrollTop: function() {
+	getScrollTop() {
 		return this.$.strategy.getScrollTop();
 	},
 	//* @public
@@ -229,18 +229,18 @@ enyo.kind({
 		Returns an object describing the scroll boundaries with _height_ and
 		_width_ properties.
 	*/
-	getScrollBounds: function() {
+	getScrollBounds() {
 		return this.$.strategy.getScrollBounds();
 	},
 	/**
 		Scrolls the given control (_inControl_) into view. If _inAlignWithTop_
 		is true, _inControl_ is aligned with the top of the scroller.
 	*/
-	scrollIntoView: function(inControl, inAlignWithTop) {
+	scrollIntoView(inControl, inAlignWithTop) {
 		this.$.strategy.scrollIntoView(inControl, inAlignWithTop);
 	},
 	//* Scrolls to the position specified by _inX_ and _inY_ in pixel units.
-	scrollTo: function(inX, inY) {
+	scrollTo(inX, inY) {
 		this.$.strategy.scrollTo(inX, inY);
 	},
 	/**
@@ -248,15 +248,15 @@ enyo.kind({
 		Unlike _scrollIntoView_, which uses DOM's _scrollIntoView_, this only
 		affects the current scroller.
 	*/
-	scrollToControl: function(inControl, inAlignWithTop) {
+	scrollToControl(inControl, inAlignWithTop) {
 		this.scrollToNode(inControl.hasNode(), inAlignWithTop);
 	},
 	//* Ensures that the given node is visible in the scroller's viewport.
-	scrollToNode: function(inNode, inAlignWithTop) {
+	scrollToNode(inNode, inAlignWithTop) {
 		this.$.strategy.scrollToNode(inNode, inAlignWithTop);
 	},
 	//* Normalizes scroll event to _onScroll_.
-	domScroll: function(inSender, e) {
+	domScroll(inSender, e) {
 		// if a scroll event originated here, pass it to our strategy to handle
 		if (this.$.strategy.domScroll && e.originator == this) {
 			this.$.strategy.scroll(inSender, e);
@@ -268,18 +268,18 @@ enyo.kind({
 		Returns true if the current scroll event should be stopped; false if it
 		should be allowed to propagate.
 	*/
-	shouldStopScrollEvent: function(inEvent) {
+	shouldStopScrollEvent(inEvent) {
 		return (this.preventScrollPropagation && inEvent.originator.owner != this.$.strategy);
 	},
 	/**
 		Calls _shouldStopScrollEvent_ to determine whether current scroll event
 		should be stopped.
 	*/
-	scrollStart: function(inSender, inEvent) {
+	scrollStart(inSender, inEvent) {
 		return this.shouldStopScrollEvent(inEvent);
 	},
 	//* Either propagates or stops the current scroll event.
-	scroll: function(inSender, inEvent) {
+	scroll(inSender, inEvent) {
 		// note: scroll event can be native dom or generated.
 		if (inEvent.dispatchTarget) {
 			// allow a dom event if it orignated with this scroller or its strategy
@@ -292,23 +292,23 @@ enyo.kind({
 		Calls _shouldStopScrollEvent_ to determine whether current scroll event
 		should be stopped.
 	*/
-	scrollStop: function(inSender, inEvent) {
+	scrollStop(inSender, inEvent) {
 		return this.shouldStopScrollEvent(inEvent);
 	},
-	scrollToTop: function() {
+	scrollToTop() {
 		this.setScrollTop(0);
 	},
-	scrollToBottom: function() {
+	scrollToBottom() {
 		this.setScrollTop(this.getScrollBounds().maxTop);
 	},
-	scrollToRight: function() {
+	scrollToRight() {
 		this.setScrollTop(this.getScrollBounds().maxLeft);
 	},
-	scrollToLeft: function() {
+	scrollToLeft() {
 		this.setScrollLeft(0);
 	},
 	//* Ensures scroll position is in bounds.
-	stabilize: function() {
+	stabilize() {
 		var s = this.getStrategy();
 		if (s.stabilize) {
 			s.stabilize();

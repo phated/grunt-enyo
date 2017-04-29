@@ -14,21 +14,21 @@ enyo.kind({
 	//* CSS class that's added to the control using this layout kind
 	layoutClass: "",
 	//* @protected
-	constructor: function(inContainer) {
+	constructor(inContainer) {
 		this.container = inContainer;
 		if (inContainer) {
 			inContainer.addClass(this.layoutClass);
 		}
 	},
-	destroy: function() {
+	destroy() {
 		if (this.container) {
 			this.container.removeClass(this.layoutClass);
 		}
 	},
 	// static property layout
-	flow: function() {
+	flow() {
 	},
 	// dynamic measuring layout
-	reflow: function() {
+	reflow() {
 	}
 });

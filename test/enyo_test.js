@@ -23,7 +23,7 @@ var grunt = require('grunt');
 */
 
 exports.enyo = {
-  setUp: function(done) {
+  setUp(done) {
     // setup here
     done();
   }

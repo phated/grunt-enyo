@@ -73,8 +73,8 @@ enyo.kind({
 	components: [
 		{name: "client", classes: "enyo-touch-scroller"}
 	],
-	create: function() {
-		this.inherited(arguments);
+	create(...args) {
+		this.inherited(args);
 		this.transform = enyo.dom.canTransform();
 		if(!this.transform) {
 			if(this.overscroll) {
@@ -93,16 +93,16 @@ enyo.kind({
 		this.container.addClass(containerClasses);
 		this.translation = this.accel ? "translate3d" : "translate";
 	},
-	initComponents: function() {
+	initComponents(...args) {
 		this.createChrome(this.tools);
-		this.inherited(arguments);
+		this.inherited(args);
 	},
-	destroy: function() {
+	destroy(...args) {
 		this.container.removeClass("enyo-touch-strategy-container");
-		this.inherited(arguments);
+		this.inherited(args);
 	},
-	rendered: function() {
-		this.inherited(arguments);
+	rendered(...args) {
+		this.inherited(args);
 		enyo.makeBubble(this.$.client, "scroll");
 		this.calcBoundaries();
 		this.syncScrollMath();
@@ -110,7 +110,7 @@ enyo.kind({
 			this.alertThumbs();
 		}
 	},
-	scrimChanged: function() {
+	scrimChanged() {
 		if (this.scrim && !this.$.scrim) {
 			this.makeScrim();
 		}
@@ -118,7 +118,7 @@ enyo.kind({
 			this.$.scrim.destroy();
 		}
 	},
-	makeScrim: function() {
+	makeScrim() {
 		// reset control parent so scrim doesn't go into client.
 		var cp = this.controlParent;
 		this.controlParent = null;
@@ -132,14 +132,14 @@ enyo.kind({
 		}
 	},
 	//* Whether or not the scroller is actively moving
-	isScrolling: function() {
+	isScrolling() {
 		return this.$.scrollMath.isScrolling();
 	},
 	//* Whether or not the scroller is in overscrolling
-	isOverscrolling: function() {
+	isOverscrolling() {
 		return (this.overscroll) ? this.$.scrollMath.isInOverScroll() : false;
 	},
-	domScroll: function() {
+	domScroll() {
 		if (!this.isScrolling()) {
 			this.calcBoundaries();
 			this.syncScrollMath();
@@ -148,61 +148,61 @@ enyo.kind({
 			}
 		}
 	},
-	horizontalChanged: function() {
+	horizontalChanged() {
 		this.$.scrollMath.horizontal = (this.horizontal != "hidden");
 	},
-	verticalChanged: function() {
+	verticalChanged() {
 		this.$.scrollMath.vertical = (this.vertical != "hidden");
 	},
-	maxHeightChanged: function() {
+	maxHeightChanged() {
 		this.$.client.applyStyle("max-height", this.maxHeight);
 		// note: previously used enyo-fit here but IE would reset scroll position when the scroll thumb
 		// was hidden; in general IE resets scrollTop when there are 2 abs position siblings, one has
 		// scrollTop and the other is hidden.
 		this.$.client.addRemoveClass("enyo-scrollee-fit", !this.maxHeight);
 	},
-	thumbChanged: function() {
+	thumbChanged() {
 		this.hideThumbs();
 	},
-	stop: function() {
+	stop() {
 		if (this.isScrolling()) {
 			this.$.scrollMath.stop(true);
 		}
 	},
-	stabilize: function() {
+	stabilize() {
 		this.$.scrollMath.stabilize();
 	},
 	//* Scrolls to specific x/y positions within the scroll area.
-	scrollTo: function(inX, inY) {
+	scrollTo(inX, inY) {
 		this.stop();
 		this.$.scrollMath.scrollTo(inY || inY === 0 ? inY : null, inX);
 	},
-	scrollIntoView: function() {
+	scrollIntoView(...args) {
 		this.stop();
-		this.inherited(arguments);
+		this.inherited(args);
 	},
 	//* Sets the left scroll position within the scroller.
-	setScrollLeft: function() {
+	setScrollLeft(...args) {
 		this.stop();
-		this.inherited(arguments);
+		this.inherited(args);
 	},
 	//* Sets the top scroll position within the scroller.
-	setScrollTop: function() {
+	setScrollTop(...args) {
 		this.stop();
-		this.inherited(arguments);
+		this.inherited(args);
 	},
 	//* Gets the left scroll position within the scroller.
-	getScrollLeft: function() {
-		return this.isScrolling() ? this.scrollLeft : this.inherited(arguments);
+	getScrollLeft(...args) {
+		return this.isScrolling() ? this.scrollLeft : this.inherited(args);
 	},
 	//* Gets the top scroll position within the scroller.
-	getScrollTop: function() {
-		return this.isScrolling() ? this.scrollTop : this.inherited(arguments);
+	getScrollTop(...args) {
+		return this.isScrolling() ? this.scrollTop : this.inherited(args);
 	},
-	calcScrollNode: function() {
+	calcScrollNode() {
 		return this.$.client.hasNode();
 	},
-	calcAutoScrolling: function() {
+	calcAutoScrolling() {
 		var v = (this.vertical == "auto");
 		var h = (this.horizontal == "auto") || (this.horizontal == "default");
 		if ((v || h) && this.scrollNode) {
@@ -215,41 +215,42 @@ enyo.kind({
 			}
 		}
 	},
-	shouldDrag: function(inSender, e) {
-		this.calcAutoScrolling();
-		var requestV = e.vertical;
-		var canH = this.$.scrollMath.horizontal && !requestV;
-		var canV = this.$.scrollMath.vertical && requestV;
-		var down = e.dy < 0, right = e.dx < 0;
-		var oobV = (!down && this.startEdges.top || down && this.startEdges.bottom);
-		var oobH = (!right && this.startEdges.left || right && this.startEdges.right);
-		// we would scroll if not at a boundary
-		if (!e.boundaryDragger && (canH || canV)) {
+	shouldDrag(inSender, e) {
+        this.calcAutoScrolling();
+        var requestV = e.vertical;
+        var canH = this.$.scrollMath.horizontal && !requestV;
+        var canV = this.$.scrollMath.vertical && requestV;
+        var down = e.dy < 0;
+        var right = e.dx < 0;
+        var oobV = (!down && this.startEdges.top || down && this.startEdges.bottom);
+        var oobH = (!right && this.startEdges.left || right && this.startEdges.right);
+        // we would scroll if not at a boundary
+        if (!e.boundaryDragger && (canH || canV)) {
 			e.boundaryDragger = this;
 		}
-		// include boundary exclusion
-		if ((!oobV && canV) || (!oobH && canH)) {
+        // include boundary exclusion
+        if ((!oobV && canV) || (!oobH && canH)) {
 			e.dragger = this;
 			return true;
 		}
-	},
-	flick: function(inSender, e) {
+    },
+	flick(inSender, e) {
 		var onAxis = Math.abs(e.xVelocity) > Math.abs(e.yVelocity) ? this.$.scrollMath.horizontal : this.$.scrollMath.vertical;
 		if (onAxis && this.dragging) {
 			this.$.scrollMath.flick(e);
 			return this.preventDragPropagation;
 		}
 	},
-	hold: function(inSender, e) {
+	hold(inSender, e) {
 		if (this.isScrolling() && !this.isOverscrolling()) {
 			this.$.scrollMath.stop(e);
 			return true;
 		}
 	},
-	move: function(inSender, inEvent) {
+	move(inSender, inEvent) {
 	},
 	// Special synthetic DOM events served up by the Gesture system
-	dragstart: function(inSender, inEvent) {
+	dragstart(inSender, inEvent) {
 		// Ignore drags sent from multi-touch events
 		if(!this.dragDuringGesture && inEvent.srcEvent.touches && inEvent.srcEvent.touches.length > 1) {
 			return true;
@@ -269,7 +270,7 @@ enyo.kind({
 			}
 		}
 	},
-	drag: function(inSender, inEvent) {
+	drag(inSender, inEvent) {
 		if (this.dragging) {
 			inEvent.preventDefault();
 			this.$.scrollMath.drag(inEvent);
@@ -278,7 +279,7 @@ enyo.kind({
 			}
 		}
 	},
-	dragfinish: function(inSender, inEvent) {
+	dragfinish(inSender, inEvent) {
 		if (this.dragging) {
 			inEvent.preventTap();
 			this.$.scrollMath.dragFinish();
@@ -288,7 +289,7 @@ enyo.kind({
 			}
 		}
 	},
-	mousewheel: function(inSender, e) {
+	mousewheel(inSender, e) {
 		if (!this.dragging) {
 			this.calcBoundaries();
 			this.syncScrollMath();
@@ -298,7 +299,7 @@ enyo.kind({
 			}
 		}
 	},
-	scrollMathStart: function(inSender) {
+	scrollMathStart(inSender) {
 		if (this.scrollNode) {
 			this.calcBoundaries();
 			if (this.thumb) {
@@ -306,7 +307,7 @@ enyo.kind({
 			}
 		}
 	},
-	scrollMathScroll: function(inSender) {
+	scrollMathScroll(inSender) {
 		if(!this.overscroll) {
 			//don't overscroll past edges
 			this.effectScroll(-Math.min(inSender.leftBoundary, Math.max(inSender.rightBoundary, inSender.x)),
@@ -318,92 +319,95 @@ enyo.kind({
 			this.updateThumbs();
 		}
 	},
-	scrollMathStop: function(inSender) {
+	scrollMathStop(inSender) {
 		this.effectScrollStop();
 		if (this.thumb) {
 			this.delayHideThumbs(100);
 		}
 	},
-	calcBoundaries: function() {
-		var s = this.$.scrollMath, b = this._getScrollBounds();
-		s.bottomBoundary = b.clientHeight - b.height;
-		s.rightBoundary = b.clientWidth - b.width;
-	},
-	syncScrollMath: function() {
+	calcBoundaries() {
+        var s = this.$.scrollMath;
+        var b = this._getScrollBounds();
+        s.bottomBoundary = b.clientHeight - b.height;
+        s.rightBoundary = b.clientWidth - b.width;
+    },
+	syncScrollMath() {
 		var m = this.$.scrollMath;
 		m.setScrollX(-this.getScrollLeft());
 		m.setScrollY(-this.getScrollTop());
 	},
-	effectScroll: function(inX, inY) {
+	effectScroll(inX, inY) {
 		if (this.scrollNode) {
 			this.scrollLeft = this.scrollNode.scrollLeft = inX;
 			this.scrollTop = this.scrollNode.scrollTop = inY;
 			this.effectOverscroll(Math.round(inX), Math.round(inY));
 		}
 	},
-	effectScrollStop: function() {
+	effectScrollStop() {
 		this.effectOverscroll(null, null);
 	},
-	effectOverscroll: function(inX, inY) {
-		var n = this.scrollNode;
-		var x = "0", y = "0", z = this.accel ? ",0" : "";
-		if (inY !== null && Math.abs(inY - n.scrollTop) > 1) {
+	effectOverscroll(inX, inY) {
+        var n = this.scrollNode;
+        var x = "0";
+        var y = "0";
+        var z = this.accel ? ",0" : "";
+        if (inY !== null && Math.abs(inY - n.scrollTop) > 1) {
 			y = (n.scrollTop - inY);
 		}
-		if (inX !== null && Math.abs(inX - n.scrollLeft) > 1) {
+        if (inX !== null && Math.abs(inX - n.scrollLeft) > 1) {
 			x = (n.scrollLeft - inX);
 		}
-		if(!this.transform) {
+        if(!this.transform) {
 			//adjust top/left if browser can't handle translations
 			this.$.client.setBounds({left:x + "px", top:y + "px"});
 		} else {
 			enyo.dom.transformValue(this.$.client, this.translation, x + "px, " + y + "px" + z);
 		}
-	},
+    },
 	//* Returns the values of _overleft_ and _overtop_, if any.
-	getOverScrollBounds: function() {
+	getOverScrollBounds() {
 		var m = this.$.scrollMath;
 		return {
 			overleft: Math.min(m.leftBoundary - m.x, 0) || Math.max(m.rightBoundary - m.x, 0),
 			overtop: Math.min(m.topBoundary - m.y, 0) || Math.max(m.bottomBoundary - m.y, 0)
 		};
 	},
-	_getScrollBounds: function() {
-		var r = this.inherited(arguments);
+	_getScrollBounds(...args) {
+		var r = this.inherited(args);
 		enyo.mixin(r, this.getOverScrollBounds());
 		return r;
 	},
-	getScrollBounds: function() {
+	getScrollBounds(...args) {
 		this.stop();
-		return this.inherited(arguments);
+		return this.inherited(args);
 	},
 	// Thumb processing
-	alertThumbs: function() {
+	alertThumbs() {
 		this.showThumbs();
 		this.delayHideThumbs(500);
 	},
 	//* Syncs the vertical and horizontal scroll indicators.
-	syncThumbs: function() {
+	syncThumbs() {
 		this.$.vthumb.sync(this);
 		this.$.hthumb.sync(this);
 	},
-	updateThumbs: function() {
+	updateThumbs() {
 		this.$.vthumb.update(this);
 		this.$.hthumb.update(this);
 	},
 	//* Syncs and shows both the vertical and horizontal scroll indicators.
-	showThumbs: function() {
+	showThumbs() {
 		this.syncThumbs();
 		this.$.vthumb.show();
 		this.$.hthumb.show();
 	},
 	//* Hides the vertical and horizontal scroll indicators.
-	hideThumbs: function() {
+	hideThumbs() {
 		this.$.vthumb.hide();
 		this.$.hthumb.hide();
 	},
 	//* Hides the vertical and horizontal scroll indicators asynchronously.
-	delayHideThumbs: function(inDelay) {
+	delayHideThumbs(inDelay) {
 		this.$.vthumb.delayHide(inDelay);
 		this.$.hthumb.delayHide(inDelay);
 	}

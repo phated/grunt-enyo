@@ -3,14 +3,14 @@
 	target a chance (eldest first) to react via implementing "previewDomEvent."
 */
 //* @protected
-(function() {
+((() => {
 	var fn = "previewDomEvent";
 	//
 	var preview = {
-		feature: function(e) {
+		feature(e) {
 			preview.dispatch(e, e.dispatchTarget);
 		},
-		dispatch: function(e, c) {
+		dispatch(e, c) {
 			var l$ = this.buildLineage(c);
 			// handlers return true to abort preview and prevent default event processing.
 			for (var i=0, l; l=l$[i]; i++) {
@@ -22,15 +22,16 @@
 		},
 		// we ascend making a list of enyo controls
 		// NOTE: the control is considered its own ancestor
-		buildLineage: function(inControl) {
-			var l = [], c = inControl;
-			while (c) {
+		buildLineage(inControl) {
+            var l = [];
+            var c = inControl;
+            while (c) {
 				l.unshift(c);
 				c = c.parent;
 			}
-			return l;
-		}
+            return l;
+        }
 	};
 	//
 	enyo.dispatcher.features.push(preview.feature);
-})();
+}))();

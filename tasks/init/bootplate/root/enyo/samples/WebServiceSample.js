@@ -18,14 +18,14 @@ enyo.kind({
 		]},
 		{kind: "onyx.TextArea", fit:true, classes:"webservice-sample-source"}
 	],
-	fetch: function() {    
+	fetch() {    
 		// send parameters the remote service using the 'send()' method
 		this.$.yql.send({
 			q: this.$.query.getValue(),
 			jsonp: (this.$.picker.getSelected().indexInContainer()==2)
 		});
 	},
-	processResponse: function(inSender, inEvent) {
+	processResponse(inSender, inEvent) {
 		// do something with it
 		this.$.textArea.setValue(JSON.stringify(inEvent.data, null, 2));
 	}

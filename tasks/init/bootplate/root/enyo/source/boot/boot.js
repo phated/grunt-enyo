@@ -1,6 +1,6 @@
 // machine for a loader instance
 enyo.machine = {
-	sheet: function(inPath) {
+	sheet(inPath) {
 		var type = "text/css";
 		var rel = "stylesheet";
 		var isLess = (inPath.slice(-5) == ".less");
@@ -28,13 +28,13 @@ enyo.machine = {
 		if (isLess && window.less) {
 			less.sheets.push(link);
 			if (!enyo.loader.finishCallbacks.lessRefresh) {
-				enyo.loader.finishCallbacks.lessRefresh = function() {
+				enyo.loader.finishCallbacks.lessRefresh = () => {
 					less.refresh(true);
 				}
 			}
 		}
 	},
-	script: function(inSrc, onLoad, onError) {
+	script(inSrc, onLoad, onError) {
 		if (!enyo.runtimeLoading) {
 			document.write('<scri' + 'pt src="' + inSrc + '"' + (onLoad ? ' onload="' + onLoad + '"' : '') + (onError ? ' onerror="' + onError + '"' : '') + '></scri' + 'pt>');
 		} else {
@@ -45,7 +45,7 @@ enyo.machine = {
 			document.getElementsByTagName('head')[0].appendChild(script);
 		}
 	},
-	inject: function(inCode) {
+	inject(inCode) {
 		document.write('<script type="text/javascript">' + inCode + "</script>");
 	}
 };
@@ -54,7 +54,7 @@ enyo.machine = {
 enyo.loader = new enyo.loaderFactory(enyo.machine);
 
 // dependency API uses enyo loader
-enyo.depends = function() {
+enyo.depends = function(...args) {
 	var ldr = enyo.loader;
 	if (!ldr.packageFolder) {
 		var tag = enyo.locateScript("package.js");
@@ -64,7 +64,7 @@ enyo.depends = function() {
 			//console.log("detected PACKAGEFOLDER [" + ldr.packageFolder + "]");
 		}
 	}
-	ldr.load.apply(ldr, arguments);
+	ldr.load(...args);
 };
 
 // Runtime loader
@@ -72,7 +72,7 @@ enyo.depends = function() {
 //  where - depends is string or array of string paths to package.js, script, or css to load
 //        - doneCallback is fired after file or package loading has completed
 // Only one file/package is loaded at a time; additional calls are queued and loading deferred
-(function() {
+((() => {
 	var enyo = window.enyo;
 	var runtimeLoadQueue = [];
 	enyo.load = function(depends, onLoadCallback) {
@@ -91,12 +91,12 @@ enyo.depends = function() {
 			var depends = args[0];
 			var dependsArg = enyo.isArray(depends) ? depends : [depends];
 			var onLoadCallback = args[1];
-			enyo.loader.finishCallbacks.runtimeLoader = function() {
+			enyo.loader.finishCallbacks.runtimeLoader = () => {
 				// Once loader is done loading a package, we chain a call to runtimeLoad(),
 				// which will call the onLoadCallback from the original load call, passing
 				// a reference to the depends argument from the original call for tracking,
 				// followed by kicking off any additionally queued load() calls
-				runtimeLoad(function() {
+				runtimeLoad(() => {
 					onLoadCallback && onLoadCallback(depends);
 				});
 			}
@@ -108,7 +108,7 @@ enyo.depends = function() {
 			enyo.loader.packageFolder = "";
 		}
 	}
-})();
+}))();
 
 // predefined path aliases
 enyo.path.addPaths({

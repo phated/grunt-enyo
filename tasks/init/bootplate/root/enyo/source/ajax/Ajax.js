@@ -22,7 +22,7 @@ enyo.kind({
 	//* published by _enyo.Ajax_.
 	published: enyo.AjaxProperties,
 	//* @protected
-	constructor: function(inParams) {
+	constructor(inParams) {
 		enyo.mixin(this, inParams);
 		this.inherited(arguments);
 	},
@@ -30,13 +30,13 @@ enyo.kind({
 	/**
 		Sends the ajax request with parameters _inParams_.
 	*/
-	go: function(inParams) {
+	go(inParams) {
 		this.startTimer();
 		this.request(inParams);
 		return this;
 	},
 	//* @protected
-	request: function(inParams) {
+	request(inParams) {
 		var parts = this.url.split("?");
 		var uri = parts.shift() || "";
 		var args = parts.length ? (parts.join("?").split("&")) : [];
@@ -63,7 +63,7 @@ enyo.kind({
 		//
 		try {
 			this.xhr = enyo.xhr.request({
-				url: url,
+				url,
 				method: this.method,
 				callback: enyo.bind(this, "receive"),
 				body: this.postBody || body,
@@ -81,7 +81,7 @@ enyo.kind({
 			this.fail(e);
 		}
 	},
-	receive: function(inText, inXhr) {
+	receive(inText, inXhr) {
 		if (!this.failed && !this.destroyed) {
 			if (this.isFailure(inXhr)) {
 				this.fail(inXhr.status);
@@ -90,7 +90,7 @@ enyo.kind({
 			}
 		}
 	},
-	fail: function(inError) {
+	fail(inError) {
 		// on failure, explicitly cancel the XHR to 
 		// prevent further responses
 		if (this.xhr) {
@@ -99,12 +99,12 @@ enyo.kind({
 		}
 		this.inherited(arguments);
 	},
-	xhrToResponse: function(inXhr) {
+	xhrToResponse(inXhr) {
 		if (inXhr) {
 			return this[(this.handleAs || "text") + "Handler"](inXhr);
 		}
 	},
-	isFailure: function(inXhr) {
+	isFailure(inXhr) {
 		// if any exceptions are thrown while checking fields in the xhr,
 		// assume a failure.
 		try {
@@ -128,13 +128,13 @@ enyo.kind({
 			return true;
 		}
 	},
-	xmlHandler: function(inXhr) {
+	xmlHandler(inXhr) {
 		return inXhr.responseXML;
 	},
-	textHandler: function(inXhr) {
+	textHandler(inXhr) {
 		return inXhr.responseText;
 	},
-	jsonHandler: function(inXhr) {
+	jsonHandler(inXhr) {
 		var r = inXhr.responseText;
 		try {
 			return r && enyo.json.parse(r);
@@ -144,7 +144,7 @@ enyo.kind({
 		}
 	},
 	statics: {
-		objectToQuery: function(/*Object*/ map) {
+		objectToQuery(/*Object*/ map) {
 			var enc = encodeURIComponent;
 			var pairs = [];
 			var backstop = {};

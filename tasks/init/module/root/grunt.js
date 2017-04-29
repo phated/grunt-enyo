@@ -1,5 +1,5 @@
 /*global module:false*/
-module.exports = function(grunt) {
+module.exports = grunt => {
   'use strict';
 
   // Project configuration.

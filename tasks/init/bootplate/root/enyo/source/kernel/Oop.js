@@ -14,7 +14,7 @@
 	[Creating Kinds](https://github.com/enyojs/enyo/wiki/Creating-Kinds)
 	in the Enyo	Developer Guide.
 */
-enyo.kind = function(inProps) {
+enyo.kind = inProps => {
 	// kind-name to constructor map could be faulty now that a new kind exists, so we simply destroy the memoizations
 	enyo._kindCtors = {};
 	// extract 'name' property
@@ -51,7 +51,7 @@ enyo.kind = function(inProps) {
 	// reference our real constructor
 	ctor.prototype.ctor = ctor;
 	// support pluggable 'features'
-	enyo.forEach(enyo.kind.features, function(fn){ fn(ctor, inProps); });
+	enyo.forEach(enyo.kind.features, fn => { fn(ctor, inProps); });
 	// put reference into namespace
 	enyo.setObject(name, ctor);
 	return ctor;
@@ -74,7 +74,7 @@ enyo.kind = function(inProps) {
 		app.MySingleton.makeSomething();
 		app.MySingleton.setValue("bar");
 */
-enyo.singleton = function(conf, context) {
+enyo.singleton = (conf, context) => {
 	// extract 'name' property (the name of our singleton)
 	var name = conf.name;
 	delete(conf.name);
@@ -85,27 +85,25 @@ enyo.singleton = function(conf, context) {
 };
 
 //* @protected
-enyo.kind.makeCtor = function() {
-	return function() {
-		if (!(this instanceof arguments.callee)) {
-			throw "enyo.kind: constructor called directly, not using 'new'";
-		}
+enyo.kind.makeCtor = () => function(...args) {
+    if (!(this instanceof args.callee)) {
+        throw "enyo.kind: constructor called directly, not using 'new'";
+    }
 
-		// two-pass instantiation
-		var result;
-		if (this._constructor) {
-			// pure construction
-			result = this._constructor.apply(this, arguments);
-		}
-		// defer initialization until entire constructor chain has finished
-		if (this.constructed) {
-			// post-constructor initialization
-			this.constructed.apply(this, arguments);
-		}
-		if (result) {
-			return result;
-		}
-	};
+    // two-pass instantiation
+    var result;
+    if (this._constructor) {
+        // pure construction
+        result = this._constructor(...args);
+    }
+    // defer initialization until entire constructor chain has finished
+    if (this.constructed) {
+        // post-constructor initialization
+        this.constructed(...args);
+    }
+    if (result) {
+        return result;
+    }
 };
 
 // classes referenced by name can omit this namespace (e.g. "Button" instead of "enyo.Button")
@@ -119,7 +117,7 @@ enyo.kind.features = [];
 //
 // 'inherited' feature
 //
-enyo.kind.features.push(function(ctor, props) {
+enyo.kind.features.push((ctor, props) => {
 	var proto = ctor.prototype;
 	if (!proto.inherited) {
 		proto.inherited = enyo.kind.inherited;
@@ -146,7 +144,7 @@ enyo.kind.inherited = function(args, newArgs) {
 //
 // 'statics' feature
 //
-enyo.kind.features.push(function(ctor, props) {
+enyo.kind.features.push((ctor, props) => {
 	// install common statics
 	enyo.mixin(ctor, enyo.kind.statics);
 	// move props statics to constructor
@@ -163,14 +161,14 @@ enyo.kind.features.push(function(ctor, props) {
 });
 
 enyo.kind.statics = {
-	subclass: function(ctor, props) {
+	subclass(ctor, props) {
 		//console.log("subclassing [" + ctor.prototype.kind + "] from [", this.prototype.kind + "]");
 	},
-	extend: function(props) {
+	extend(props) {
 		enyo.mixin(this.prototype, props);
 		// support pluggable 'features'
 		var ctor = this;
-		enyo.forEach(enyo.kind.features, function(fn){ fn(ctor, props); });
+		enyo.forEach(enyo.kind.features, fn => { fn(ctor, props); });
 	}
 };
 
@@ -179,7 +177,7 @@ enyo.kind.statics = {
 // 
 enyo._kindCtors = {};
 
-enyo.constructorForKind = function(inKind) {
+enyo.constructorForKind = inKind => {
 	if (inKind === null || enyo.isFunction(inKind)) {
 		// in inKind is a function or explicitly null, then that's ctor, full stop.
 		return inKind;
@@ -208,6 +206,6 @@ enyo.constructorForKind = function(inKind) {
 // 
 enyo.Theme = {};
 
-enyo.registerTheme = function(inNamespace) {
+enyo.registerTheme = inNamespace => {
 	enyo.mixin(enyo.Theme, inNamespace);
 };

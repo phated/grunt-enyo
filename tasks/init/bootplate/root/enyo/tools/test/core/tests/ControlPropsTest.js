@@ -1,7 +1,7 @@
 enyo.kind({
 	name: "ControlPropsTest",
 	kind: enyo.TestSuite,
-	testUnionAttributesStylesClasses: function() {
+	testUnionAttributesStylesClasses() {
 		enyo.kind({
 			name: "TestBase",
 			kind: enyo.Control,

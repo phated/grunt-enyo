@@ -12,17 +12,17 @@ enyo.kind({
 		{tag: "br"},
 		{name: "output", classes: "sample-output"}
 	],
-	addContentTap: function(inSender, inEvent) {
+	addContentTap(inSender, inEvent) {
 		var content = this.$.input.hasNode().value;
 		this.$.output.addContent(content);
 	},
-	hideTap: function(inSender, inEvent) {
+	hideTap(inSender, inEvent) {
 		this.$.output.hide();
 	},
-	showTap: function(inSender, inEvent) {
+	showTap(inSender, inEvent) {
 		this.$.output.show();
 	},
-	toggleClassTap: function(inSender, inEvent) {
+	toggleClassTap(inSender, inEvent) {
 		var c = "sample-output";
 		var has = this.$.output.hasClass(c);
 		this.$.output.addRemoveClass(c, !has);

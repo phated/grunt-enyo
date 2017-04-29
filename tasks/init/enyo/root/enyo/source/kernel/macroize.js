@@ -27,9 +27,12 @@
 		// Returns "Each Gizmo weighs 3 pounds."
 		enyo.macroize("Each {$product_0.name} weighs {$product_0.weight} pounds.", info);
 */
-enyo.macroize = function(inText, inMap, inPattern) {
-	var v, working, result = inText, pattern = inPattern || enyo.macroize.pattern;
-	var fn = function(macro, name) {
+enyo.macroize = (inText, inMap, inPattern) => {
+    var v;
+    var working;
+    var result = inText;
+    var pattern = inPattern || enyo.macroize.pattern;
+    var fn = (macro, name) => {
 		v = enyo.getObject(name, false, inMap);
 		if (v === undefined || v === null) {
 			return "{$" + name + "}";
@@ -37,8 +40,8 @@ enyo.macroize = function(inText, inMap, inPattern) {
 		working = true;
 		return v;
 	};
-	var prevent = 0;
-	do {
+    var prevent = 0;
+    do {
 		working = false;
 		result = result.replace(pattern, fn);
 		// if iterating more than 20 times, we assume a recursion (we should probably throw)
@@ -46,7 +49,7 @@ enyo.macroize = function(inText, inMap, inPattern) {
 			throw("enyo.macroize: recursion too deep");
 		}
 	} while (working);
-	return result;
+    return result;
 };
 
 /**
@@ -54,9 +57,12 @@ enyo.macroize = function(inText, inMap, inPattern) {
 	call. This means that recursive expansion of macros isn't possible, but it
 	avoids the extra processing needed to find recursive use.
 */
-enyo.quickMacroize = function(inText, inMap, inPattern) {
-	var v, working, result = inText, pattern = inPattern || enyo.macroize.pattern;
-	var fn = function(macro, name) {
+enyo.quickMacroize = (inText, inMap, inPattern) => {
+    var v;
+    var working;
+    var result = inText;
+    var pattern = inPattern || enyo.macroize.pattern;
+    var fn = (macro, name) => {
 		if (name in inMap) {
 			v = inMap[name];
 		} else {
@@ -64,8 +70,8 @@ enyo.quickMacroize = function(inText, inMap, inPattern) {
 		}
 		return (v === undefined || v === null) ? "{$" + name + "}" : v;
 	};
-	result = result.replace(pattern, fn);
-	return result;
+    result = result.replace(pattern, fn);
+    return result;
 };
 
 //* @protected

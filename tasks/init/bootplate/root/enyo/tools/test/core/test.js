@@ -10,11 +10,11 @@ enyo.kind({
 	name: "enyo.TestRunner",
 	kind: enyo.Control,
 	index: 0,
-	rendered: function() {
-		this.inherited(arguments);
+	rendered(...args) {
+		this.inherited(args);
 		this.next();
 	},
-	next: function() {
+	next() {
 		var test = enyo.TestSuite.tests[this.index++];
 		if (test) {
 			this.createComponent({name: test.prototype.kindName, kind: enyo.TestReporter, onFinishAll: "next"}).render().runTests();
@@ -67,7 +67,7 @@ enyo.kind({
 		Mostly good for unusually long-running tests, but can be used for shortening the timeout duration, or 
 		even for setting different timeouts for successive stages of a test.
 	*/
-	resetTimeout: function(timeout) {
+	resetTimeout(timeout) {
 		this.clearTimer();
 		this.timer = window.setTimeout(enyo.bind(this, "timedout"), timeout || this.timeout);
 	},
@@ -76,7 +76,7 @@ enyo.kind({
 		The logs are accumulated, and only displayed when the test fails.
 		Logged objects will be automatically converted to JSON.
 	*/
-	log: function(msg) {
+	log(msg) {
 		this.logMessages = this.logMessages || [];
 		if (typeof msg !== "string") {
 			msg = JSON.stringify(msg);
@@ -86,19 +86,19 @@ enyo.kind({
 	// Subclasses can override this method.
 	// It will be called before each test executes.
 	// It can be used to run common setup code.
-	beforeEach: function() {
+	beforeEach() {
 	},
 	// Subclasses can override this method.
 	// It will be called exactly once as each test finishes, even in failure cases.
 	// It can be used to reliably execute cleanup code.
-	afterEach: function() {
+	afterEach() {
 	},
 	// Runs all the tests in the suite.
 	// This component can operate in a couple of modes... one where it runs all tests, and one where it runs only a single test.
 	// When running all tests, it allocates a fresh child component for each test, and then uses that to do actually run the test,
 	// passing along any relevant events to our owner.  The reason for this is to eliminate unintentional state sharing between tests,
 	// and to make sure that lingering test code that calls finish() at a later time does not affect the state of a different test.
-	runAllTests: function() {
+	runAllTests() {
 		if (this.autoRunNextTest) {
 			console.error("TestSuite.runAllTests: Already running.");
 			return; // already running.
@@ -108,7 +108,7 @@ enyo.kind({
 		this.autoRunNextTest = true;
 		this.next();
 	},
-	getTestNames: function() {
+	getTestNames() {
 		// NOTE: name no function or property test* before this point unless it's really a test
 		var names = [];
 		for (var key in this) {
@@ -118,7 +118,7 @@ enyo.kind({
 		}
 		return names;
 	},
-	next: function() {
+	next() {
 		var testName;
 		if (!this.autoRunNextTest) {
 			return;
@@ -138,7 +138,7 @@ enyo.kind({
 		}
 	},
 	// Called on a component running in the "run a single test" mode to run the actual test.
-	runTest: function(inTestName) {
+	runTest(inTestName) {
 		this.resetTimeout();
 		this.doBegin({testName: inTestName});
 		try {
@@ -149,17 +149,17 @@ enyo.kind({
 			this.finish(x);
 		}
 	},
-	timedout: function() {
+	timedout() {
 		this.finish(this.timeoutMessage);
 	},
-	clearTimer: function() {
+	clearTimer() {
 		window.clearTimeout(this.timer);
 	},
 	// Call finish() to indicate success, or finish("<reason-message>") to indicate failure.
-	finish: function(inMessage) {
+	finish(inMessage) {
 		enyo.asyncMethod(this, "reallyFinish", inMessage);
 	},
-	reallyFinish: function(inMessage) {
+	reallyFinish(inMessage) {
 		// If finish has been called before, then we ignore it 
 		// unless we passed previously and now we're failing.
 		// We will send multiple finish events if we get a success and then a failure -- that counts as a failure.
@@ -207,12 +207,12 @@ enyo.kind({
 		}
 		this.doFinish({results: this.results}); // bubble results
 	},
-	childTestBegun: function(inSender) {
+	childTestBegun(inSender) {
 		// Pass child test begin event up, with the test name.
 		// This can be used to trigger UI.
 		this.triggeredNextTest = false;
 	},
-	childTestFinished: function(inSender, inResults) {
+	childTestFinished(inSender, inResults) {
 		// We do not destroy the child component yet, in case it calls finish() again later with a failure... in that case, we still fail it.
 		if (!this.triggeredNextTest) {
 			this.triggeredNextTest = true;
@@ -224,7 +224,7 @@ enyo.kind({
 
 enyo.TestSuite.tests = [];
 
-enyo.TestSuite.subclass = function(ctor, props) {
+enyo.TestSuite.subclass = (ctor, props) => {
 	// make a list of TestSuite subclasses so we can run them automatically
 	// if one needs to make a TestSuite subclass that isn't actually a TestSuite itself,
 	// they should assign a truthy 'testBase' property
@@ -251,21 +251,21 @@ enyo.kind({
 	],
 	classes: "enyo-testcase",
 	timeout: 3000,
-	create: function() {
-		this.inherited(arguments);
+	create(...args) {
+		this.inherited(args);
 		this.$.title.setContent(this.name);
 	},
-	initComponents: function() {
-		this.inherited(arguments);
+	initComponents(...args) {
+		this.inherited(args);
 		this.createComponent({name: "testSuite", kind: this.name, onBegin: "testBegun", onFinish: "updateTestDisplay"});
 	},
-	runTests: function() {
+	runTests() {
 		this.$.testSuite.runAllTests();
 	},
-	testBegun: function(inSender, inEvent) {
+	testBegun(inSender, inEvent) {
 		this.$.group.createComponent({name: inEvent.testName, classes: "enyo-testcase-running", content: inEvent.testName + ": running", allowHtml: true}).render();
 	},
-	formatStackTrace: function(inStack) {
+	formatStackTrace(inStack) {
 		var stack = inStack.split("\n");
 		var out = [''];
 		for (var i=0, s; s=stack[i]; i++) {
@@ -276,7 +276,7 @@ enyo.kind({
 		}
 		return out.join("<br/>");
 	},
-	updateTestDisplay: function(inSender, inEvent) {
+	updateTestDisplay(inSender, inEvent) {
 		var results = inEvent.results;
 		var e = results.exception;
 		var info = this.$.group.$[results.name];

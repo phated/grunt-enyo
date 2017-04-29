@@ -32,13 +32,13 @@ exports.warnOn = 'enyo';
 exports.warnOn = '.bowerrc';
 
 // The actual init template.
-exports.template = function(grunt, init, done) {
+exports.template = (grunt, init, done) => {
   'use strict';
 
   grunt.helper('prompt', {type: 'enyo'}, [
     // Prompt for these values.
 
-  ], function(err, props) {
+  ], (err, props) => {
     // Files to copy (and process).
     var files = init.filesToCopy(props);
 

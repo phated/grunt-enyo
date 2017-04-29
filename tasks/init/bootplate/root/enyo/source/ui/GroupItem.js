@@ -18,11 +18,11 @@ enyo.kind({
 		active: false
 	},
 	//* @protected
-	rendered: function() {
-		this.inherited(arguments);
+	rendered(...args) {
+		this.inherited(args);
 		this.activeChanged();
 	},
-	activeChanged: function() {
+	activeChanged() {
 		this.bubble("onActivate");
 	}
 });

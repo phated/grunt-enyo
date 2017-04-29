@@ -1,15 +1,11 @@
-(function() {
+((() => {
 	var ms = Math.round(1000/60);
 	var prefix = ["webkit", "moz", "ms", "o", ""];
 	var r = "requestAnimationFrame";
 	var c = "cancel" + enyo.cap(r);
 	// fallback on setTimeout and clearTimeout
-	var _requestFrame = function(inCallback) {
-		return window.setTimeout(inCallback, ms);
-	};
-	var _cancelFrame = function(inId) {
-		return window.clearTimeout(inId);
-	};
+	var _requestFrame = inCallback => window.setTimeout(inCallback, ms);
+	var _cancelFrame = inId => window.clearTimeout(inId);
 	for (var i = 0, pl = prefix.length, p, wc, wr; (p = prefix[i]) || i < pl; i++) {
 		// if prefixed, becomes Request and Cancel
 		wc = p ? (p + enyo.cap(c)) : c;
@@ -37,16 +33,12 @@
 
 		Returns a request id to be used with [enyo.cancelRequestAnimationFrame](#enyo.cancelRequestAnimationFrame).
 	*/
-	enyo.requestAnimationFrame = function(inCallback, inNode) {
-		return _requestFrame(inCallback, inNode);
-	};
+	enyo.requestAnimationFrame = (inCallback, inNode) => _requestFrame(inCallback, inNode);
 	/**
 		Cancels a requested animation callback with the specified id.
 	*/
-	enyo.cancelRequestAnimationFrame = function(inId) {
-		return _cancelFrame(inId);
-	};
-})();
+	enyo.cancelRequestAnimationFrame = inId => _cancelFrame(inId);
+}))();
 
 /**
 	An assortment of interpolation functions for animations.
@@ -56,23 +48,23 @@
 	Intended for use with [enyo.easedLerp](#enyo.easedLerp)
 */
 enyo.easing = {
-	cubicIn: function(n) {
-		return Math.pow(n, 3);
+	cubicIn(n) {
+		return n ** 3;
 	},
-	cubicOut: function(n) {
-		return Math.pow(n - 1, 3) + 1;
+	cubicOut(n) {
+		return (n - 1) ** 3 + 1;
 	},
-	expoOut: function(n) {
-		return (n == 1) ? 1 : (-1 * Math.pow(2, -10 * n) + 1);
+	expoOut(n) {
+		return (n == 1) ? 1 : (-1 * (2 ** (-10 * n)) + 1);
 	},
-	quadInOut: function(n){
+	quadInOut(n) {
 		n = n * 2;
 		if (n < 1) {
-			return Math.pow(n, 2) / 2;
+			return n ** 2 / 2;
 		}
 		return -1 * ((--n) * (n - 2) - 1) / 2;
 	},
-	linear: function(n) {
+	linear(n) {
 		return n;
 	}
 };
@@ -84,7 +76,7 @@ enyo.easing = {
 	the _inEasing_ function to the percentage of time elapsed / duration, capped
 	at 100%.
 */
-enyo.easedLerp = function(inT0, inDuration, inEasing, reverse) {
+enyo.easedLerp = (inT0, inDuration, inEasing, reverse) => {
 	var lerp = (enyo.now() - inT0) / inDuration;
 	if (reverse) {
 		return lerp >= 1 ? 0 : (1 - inEasing(1 - lerp));

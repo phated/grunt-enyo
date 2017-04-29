@@ -42,18 +42,18 @@ enyo.kind({
 		onStop: ""
 	},
 	//* @protected
-	constructed: function() {
-		this.inherited(arguments);
+	constructed(...args) {
+		this.inherited(args);
 		this._next = enyo.bind(this, "next");
 	},
-	destroy: function() {
+	destroy(...args) {
 		this.stop();
-		this.inherited(arguments);
+		this.inherited(args);
 	},
 	//* @public
 	//* Plays the animation.
 	//* For convenience, _inProps_ will be mixed directly into this object.
-	play: function(inProps) {
+	play(inProps) {
 		this.stop();
 		this.reversed = false;
 		if (inProps) {
@@ -66,7 +66,7 @@ enyo.kind({
 		return this;
 	},
 	//* Stops the animation and fires the _onStop_ event.
-	stop: function() {
+	stop() {
 		if (this.isAnimating()) {
 			this.cancel();
 			this.fire("onStop");
@@ -74,7 +74,7 @@ enyo.kind({
 		}
 	},
 	//* Reverses the direction of a running animation; returns self if animating.
-	reverse: function() {
+	reverse() {
 		if (this.isAnimating()) {
 			this.reversed = !this.reversed;
 			var now = this.t1 = enyo.now();
@@ -89,22 +89,22 @@ enyo.kind({
 		}
 	},
 	//* Returns true if animation is in progress.
-	isAnimating: function() {
+	isAnimating() {
 		return Boolean(this.job);
 	},
 	//* @protected
-	requestNext: function() {
+	requestNext() {
 		this.job = enyo.requestAnimationFrame(this._next, this.node);
 	},
-	cancel: function() {
+	cancel() {
 		enyo.cancelRequestAnimationFrame(this.job);
 		this.node = null;
 		this.job = null;
 	},
-	shouldEnd: function() {
+	shouldEnd() {
 		return (this.dt >= this.duration);
 	},
-	next: function() {
+	next() {
 		this.t1 = enyo.now();
 		this.dt = this.t1 - this.t0;
 		// time independent
@@ -121,7 +121,7 @@ enyo.kind({
 			this.requestNext();
 		}
 	},
-	fire: function(inEventName) {
+	fire(inEventName) {
 		var fn = this[inEventName];
 		if (enyo.isString(fn)) {
 			this.bubble(inEventName);

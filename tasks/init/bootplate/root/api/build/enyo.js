@@ -1,9 +1,9 @@
 
 // enyo.js
 
-(function() {
+((() => {
 var e = "enyo.js";
-enyo = window.enyo || {}, enyo.locateScript = function(e) {
+enyo = window.enyo || {}, enyo.locateScript = e => {
 var t = document.getElementsByTagName("script");
 for (var n = t.length - 1, r, i, s = e.length; n >= 0 && (r = t[n]); n--) if (!r.located) {
 i = r.getAttribute("src") || "";
@@ -18,29 +18,31 @@ if (t) {
 enyo.args.root = (enyo.args.root || t.path).replace("/source", "");
 for (var n = 0, r; r = t.node.attributes.item(n); n++) enyo.args[r.nodeName] = r.value;
 }
-})();
+}))();
 
 // ../../loader.js
 
-(function() {
+((() => {
 enyo = window.enyo || {}, enyo.path = {
 paths: {},
-addPath: function(e, t) {
+addPath(e, t) {
 return this.paths[e] = t;
 },
-addPaths: function(e) {
+addPaths(e) {
 if (e) for (var t in e) this.addPath(t, e[t]);
 },
-includeTrailingSlash: function(e) {
+includeTrailingSlash(e) {
 return e && e.slice(-1) !== "/" ? e + "/" : e;
 },
 rewritePattern: /\$([^\/\\]*)(\/)?/g,
-rewrite: function(e) {
-var t, n = this.includeTrailingSlash, r = this.paths, i = function(e, i) {
-return t = !0, n(r[i]) || "";
-}, s = e;
-do t = !1, s = s.replace(this.rewritePattern, i); while (t);
-return s;
+rewrite(e) {
+  var t;
+  var n = this.includeTrailingSlash;
+  var r = this.paths;
+  var i = (e, i) => (t = !0, n(r[i]) || "");
+  var s = e;
+  do t = !1, s = s.replace(this.rewritePattern, i); while (t);
+  return s;
 }
 }, enyo.loaderFactory = function(e) {
 this.machine = e, this.packages = [], this.modules = [], this.sheets = [], this.stack = [];
@@ -49,32 +51,32 @@ packageName: "",
 packageFolder: "",
 verbose: !1,
 finishCallbacks: {},
-loadScript: function(e) {
+loadScript(e) {
 this.machine.script(e);
 },
-loadSheet: function(e) {
+loadSheet(e) {
 this.machine.sheet(e);
 },
-loadPackage: function(e) {
+loadPackage(e) {
 this.machine.script(e);
 },
-report: function() {},
-load: function() {
+report() {},
+load(...args) {
 this.more({
 index: 0,
-depends: arguments || []
+depends: args || []
 });
 },
-more: function(e) {
+more(e) {
 if (e && this.continueBlock(e)) return;
 var t = this.stack.pop();
 t ? (this.verbose && console.groupEnd("* finish package (" + (t.packageName || "anon") + ")"), this.packageFolder = t.folder, this.packageName = "", this.more(t)) : this.finish();
 },
-finish: function() {
+finish() {
 this.packageFolder = "", this.verbose && console.log("-------------- fini");
 for (var e in this.finishCallbacks) this.finishCallbacks[e] && (this.finishCallbacks[e](), this.finishCallbacks[e] = null);
 },
-continueBlock: function(e) {
+continueBlock(e) {
 while (e.index < e.depends.length) {
 var t = e.depends[e.index++];
 if (t) if (typeof t == "string") {
@@ -82,109 +84,120 @@ if (this.require(t, e)) return !0;
 } else enyo.path.addPaths(t);
 }
 },
-require: function(e, t) {
-var n = enyo.path.rewrite(e), r = this.getPathPrefix(e);
-n = r + n;
-if (n.slice(-4) == ".css" || n.slice(-5) == ".less") this.verbose && console.log("+ stylesheet: [" + r + "][" + e + "]"), this.requireStylesheet(n); else {
-if (n.slice(-3) != ".js" || n.slice(-10) == "package.js") return this.requirePackage(n, t), !0;
-this.verbose && console.log("+ module: [" + r + "][" + e + "]"), this.requireScript(e, n);
-}
+require(e, t) {
+  var n = enyo.path.rewrite(e);
+  var r = this.getPathPrefix(e);
+  n = r + n;
+  if (n.slice(-4) == ".css" || n.slice(-5) == ".less") this.verbose && console.log("+ stylesheet: [" + r + "][" + e + "]"), this.requireStylesheet(n); else {
+  if (n.slice(-3) != ".js" || n.slice(-10) == "package.js") return this.requirePackage(n, t), !0;
+  this.verbose && console.log("+ module: [" + r + "][" + e + "]"), this.requireScript(e, n);
+  }
 },
-getPathPrefix: function(e) {
+getPathPrefix(e) {
 var t = e.slice(0, 1);
 return t != "/" && t != "\\" && t != "$" && e.slice(0, 5) != "http:" ? this.packageFolder : "";
 },
-requireStylesheet: function(e) {
+requireStylesheet(e) {
 this.sheets.push(e), this.loadSheet(e);
 },
-requireScript: function(e, t) {
+requireScript(e, t) {
 this.modules.push({
 packageName: this.packageName,
 rawPath: e,
 path: t
 }), this.loadScript(t);
 },
-decodePackagePath: function(e) {
-var t = "", n = "", r = "", i = "package.js", s = e.replace(/\\/g, "/").replace(/\/\//g, "/").replace(/:\//, "://").split("/");
-if (s.length) {
-var o = s.pop() || s.pop() || "";
-o.slice(-i.length) !== i ? s.push(o) : i = o, r = s.join("/"), r = r ? r + "/" : "", i = r + i;
-for (var u = s.length - 1; u >= 0; u--) if (s[u] == "source") {
-s.splice(u, 1);
-break;
-}
-n = s.join("/");
-for (var u = s.length - 1, a; a = s[u]; u--) if (a == "lib" || a == "enyo") {
-s = s.slice(u + 1);
-break;
-}
-for (var u = s.length - 1, a; a = s[u]; u--) (a == ".." || a == ".") && s.splice(u, 1);
-t = s.join("-");
-}
-return {
-alias: t,
-target: n,
-folder: r,
-manifest: i
-};
+decodePackagePath(e) {
+  var t = "";
+  var n = "";
+  var r = "";
+  var i = "package.js";
+  var s = e.replace(/\\/g, "/").replace(/\/\//g, "/").replace(/:\//, "://").split("/");
+  if (s.length) {
+  var o = s.pop() || s.pop() || "";
+  o.slice(-i.length) !== i ? s.push(o) : i = o, r = s.join("/"), r = r ? r + "/" : "", i = r + i;
+  for (var u = s.length - 1; u >= 0; u--) if (s[u] == "source") {
+  s.splice(u, 1);
+  break;
+  }
+  n = s.join("/");
+  for (var u = s.length - 1, a; a = s[u]; u--) if (a == "lib" || a == "enyo") {
+  s = s.slice(u + 1);
+  break;
+  }
+  for (var u = s.length - 1, a; a = s[u]; u--) (a == ".." || a == ".") && s.splice(u, 1);
+  t = s.join("-");
+  }
+  return {
+  alias: t,
+  target: n,
+  folder: r,
+  manifest: i
+  };
 },
-aliasPackage: function(e) {
+aliasPackage(e) {
 var t = this.decodePackagePath(e);
 this.manifest = t.manifest, t.alias && (enyo.path.addPath(t.alias, t.target), this.packageName = t.alias, this.packages.push({
 name: t.alias,
 folder: t.folder
 })), this.packageFolder = t.folder;
 },
-requirePackage: function(e, t) {
+requirePackage(e, t) {
 t.folder = this.packageFolder, this.aliasPackage(e), t.packageName = this.packageName, this.stack.push(t), this.report("loading package", this.packageName), this.verbose && console.group("* start package [" + this.packageName + "]"), this.loadPackage(this.manifest);
 }
 };
-})();
+}))();
 
 // boot.js
 
 enyo.machine = {
-sheet: function(e) {
-var t = "text/css", n = "stylesheet", r = e.slice(-5) == ".less";
-r && (window.less ? (t = "text/less", n = "stylesheet/less") : e = e.slice(0, e.length - 4) + "css");
-var i;
-enyo.runtimeLoading || r ? (i = document.createElement("link"), i.href = e, i.media = "screen", i.rel = n, i.type = t, document.getElementsByTagName("head")[0].appendChild(i)) : document.write('<link href="' + e + '" media="screen" rel="' + n + '" type="' + t + '" />'), r && window.less && (less.sheets.push(i), enyo.loader.finishCallbacks.lessRefresh || (enyo.loader.finishCallbacks.lessRefresh = function() {
-less.refresh(!0);
-}));
+sheet(e) {
+  var t = "text/css";
+  var n = "stylesheet";
+  var r = e.slice(-5) == ".less";
+  r && (window.less ? (t = "text/less", n = "stylesheet/less") : e = e.slice(0, e.length - 4) + "css");
+  var i;
+  enyo.runtimeLoading || r ? (i = document.createElement("link"), i.href = e, i.media = "screen", i.rel = n, i.type = t, document.getElementsByTagName("head")[0].appendChild(i)) : document.write('<link href="' + e + '" media="screen" rel="' + n + '" type="' + t + '" />'), r && window.less && (less.sheets.push(i), enyo.loader.finishCallbacks.lessRefresh || (enyo.loader.finishCallbacks.lessRefresh = () => {
+  less.refresh(!0);
+  }));
 },
-script: function(e, t, n) {
+script(e, t, n) {
 if (!enyo.runtimeLoading) document.write('<script src="' + e + '"' + (t ? ' onload="' + t + '"' : "") + (n ? ' onerror="' + n + '"' : "") + "></scri" + "pt>"); else {
 var r = document.createElement("script");
 r.src = e, r.onLoad = t, r.onError = n, document.getElementsByTagName("head")[0].appendChild(r);
 }
 },
-inject: function(e) {
+inject(e) {
 document.write('<script type="text/javascript">' + e + "</script>");
 }
-}, enyo.loader = new enyo.loaderFactory(enyo.machine), enyo.depends = function() {
+}, enyo.loader = new enyo.loaderFactory(enyo.machine), enyo.depends = function(...args) {
 var e = enyo.loader;
 if (!e.packageFolder) {
 var t = enyo.locateScript("package.js");
 t && t.path && (e.aliasPackage(t.path), e.packageFolder = t.path + "/");
 }
-e.load.apply(e, arguments);
-}, function() {
-function n(r) {
-r && r();
-if (t.length) {
-var i = t.shift(), s = i[0], o = e.isArray(s) ? s : [ s ], u = i[1];
-e.loader.finishCallbacks.runtimeLoader = function() {
-n(function() {
-u && u(s);
-});
-}, e.loader.packageFolder = "./", e.depends.apply(this, o);
-} else e.runtimeLoading = !1, e.loader.packageFolder = "";
-}
-var e = window.enyo, t = [];
-e.load = function(r, i) {
-t.push(arguments), e.runtimeLoading || (e.runtimeLoading = !0, n());
-};
-}(), enyo.path.addPaths({
+e.load(...args);
+}, (() => {
+  function n(r) {
+  r && r();
+  if (t.length) {
+    var i = t.shift();
+    var s = i[0];
+    var o = e.isArray(s) ? s : [ s ];
+    var u = i[1];
+    e.loader.finishCallbacks.runtimeLoader = () => {
+    n(() => {
+    u && u(s);
+    });
+    }, e.loader.packageFolder = "./", e.depends.apply(this, o);
+  } else e.runtimeLoading = !1, e.loader.packageFolder = "";
+  }
+  var e = window.enyo;
+  var t = [];
+  e.load = function(r, i) {
+  t.push(arguments), e.runtimeLoading || (e.runtimeLoading = !0, n());
+  };
+})(), enyo.path.addPaths({
 enyo: enyo.args.root,
 lib: "$enyo/../lib"
 });
@@ -198,62 +211,52 @@ log: 20,
 warn: 10,
 error: 0
 },
-shouldLog: function(e) {
+shouldLog(e) {
 var t = parseInt(this.levels[e], 0);
 return t <= this.level;
 },
-_log: function(e, t) {
+_log(e, t) {
 var n = enyo.isArray(t) ? t : enyo.cloneArray(t);
 enyo.dumbConsole && (n = [ n.join(" ") ]);
 var r = console[e];
-r && r.apply ? r.apply(console, n) : console.log.apply ? console.log.apply(console, n) : console.log(n.join(" "));
+r && r.apply ? r.apply(console, n) : console.log.apply ? console.log(...n) : console.log(n.join(" "));
 },
-log: function(e, t) {
+log(e, t) {
 window.console && this.shouldLog(e) && this._log(e, t);
 }
-}, enyo.setLogLevel = function(e) {
+}, enyo.setLogLevel = e => {
 var t = parseInt(e, 0);
 isFinite(t) && (enyo.logging.level = t);
-}, enyo.log = function() {
-enyo.logging.log("log", arguments);
-}, enyo.warn = function() {
-enyo.logging.log("warn", arguments);
-}, enyo.error = function() {
-enyo.logging.log("error", arguments);
+}, enyo.log = function(...args) {
+enyo.logging.log("log", args);
+}, enyo.warn = function(...args) {
+enyo.logging.log("warn", args);
+}, enyo.error = function(...args) {
+enyo.logging.log("error", args);
 };
 
 // lang.js
 
 (function() {
-enyo.global = this, enyo._getProp = function(e, t, n) {
+enyo.global = this, enyo._getProp = (e, t, n) => {
 var r = n || enyo.global;
 for (var i = 0, s; r && (s = e[i]); i++) r = s in r ? r[s] : t ? r[s] = {} : undefined;
 return r;
-}, enyo.setObject = function(e, t, n) {
-var r = e.split("."), i = r.pop(), s = enyo._getProp(r, !0, n);
-return s && i ? s[i] = t : undefined;
-}, enyo.getObject = function(e, t, n) {
-return enyo._getProp(e.split("."), t, n);
-}, enyo.irand = function(e) {
-return Math.floor(Math.random() * e);
-}, enyo.cap = function(e) {
-return e.slice(0, 1).toUpperCase() + e.slice(1);
-}, enyo.uncap = function(e) {
-return e.slice(0, 1).toLowerCase() + e.slice(1);
-}, enyo.format = function(e) {
-var t = /\%./g, n = 0, r = e, i = arguments, s = function(e) {
-return i[++n];
-};
-return r.replace(t, s);
+}, enyo.setObject = (e, t, n) => {
+  var r = e.split(".");
+  var i = r.pop();
+  var s = enyo._getProp(r, !0, n);
+  return s && i ? s[i] = t : undefined;
+}, enyo.getObject = (e, t, n) => enyo._getProp(e.split("."), t, n), enyo.irand = e => Math.floor(Math.random() * e), enyo.cap = e => e.slice(0, 1).toUpperCase() + e.slice(1), enyo.uncap = e => e.slice(0, 1).toLowerCase() + e.slice(1), enyo.format = function(e) {
+  var t = /\%./g;
+  var n = 0;
+  var r = e;
+  var i = arguments;
+  var s = e => i[++n];
+  return r.replace(t, s);
 };
 var e = Object.prototype.toString;
-enyo.isString = function(t) {
-return e.call(t) === "[object String]";
-}, enyo.isFunction = function(t) {
-return e.call(t) === "[object Function]";
-}, enyo.isArray = Array.isArray || function(t) {
-return e.call(t) === "[object Array]";
-}, enyo.indexOf = function(e, t, n) {
+enyo.isString = t => e.call(t) === "[object String]", enyo.isFunction = t => e.call(t) === "[object Function]", enyo.isArray = Array.isArray || (t => e.call(t) === "[object Array]"), enyo.indexOf = (e, t, n) => {
 if (t.indexOf) return t.indexOf(e, n);
 if (n) {
 n < 0 && (n = 0);
@@ -261,55 +264,63 @@ if (n > t.length) return -1;
 }
 for (var r = n || 0, i = t.length, s; (s = t[r]) || r < i; r++) if (s == e) return r;
 return -1;
-}, enyo.remove = function(e, t) {
+}, enyo.remove = (e, t) => {
 var n = enyo.indexOf(e, t);
 n >= 0 && t.splice(n, 1);
 }, enyo.forEach = function(e, t, n) {
 if (e) {
 var r = n || this;
 if (enyo.isArray(e) && e.forEach) e.forEach(t, r); else {
-var i = Object(e), s = i.length >>> 0;
-for (var o = 0; o < s; o++) o in i && t.call(r, i[o], o, i);
+  var i = Object(e);
+  var s = i.length >>> 0;
+  for (var o = 0; o < s; o++) o in i && t.call(r, i[o], o, i);
 }
 }
 }, enyo.map = function(e, t, n) {
-var r = n || this;
-if (enyo.isArray(e) && e.map) return e.map(t, r);
-var i = [], s = function(e, n, s) {
-i.push(t.call(r, e, n, s));
-};
-return enyo.forEach(e, s, r), i;
+  var r = n || this;
+  if (enyo.isArray(e) && e.map) return e.map(t, r);
+  var i = [];
+
+  var s = (e, n, s) => {
+  i.push(t.call(r, e, n, s));
+  };
+
+  return enyo.forEach(e, s, r), i;
 }, enyo.filter = function(e, t, n) {
-var r = n || this;
-if (enyo.isArray(e) && e.filter) return e.filter(t, r);
-var i = [], s = function(e, n, s) {
-var o = e;
-t.call(r, e, n, s) && i.push(o);
-};
-return enyo.forEach(e, s, r), i;
-}, enyo.keys = Object.keys || function(e) {
-var t = [], n = Object.prototype.hasOwnProperty;
-for (var r in e) n.call(e, r) && t.push(r);
-if (!{
-toString: null
-}.propertyIsEnumerable("toString")) {
-var i = [ "toString", "toLocaleString", "valueOf", "hasOwnProperty", "isPrototypeOf", "propertyIsEnumerable", "constructor" ];
-for (var s = 0, o; o = i[s]; s++) n.call(e, o) && t.push(o);
-}
-return t;
-}, enyo.cloneArray = function(e, t, n) {
+  var r = n || this;
+  if (enyo.isArray(e) && e.filter) return e.filter(t, r);
+  var i = [];
+
+  var s = (e, n, s) => {
+  var o = e;
+  t.call(r, e, n, s) && i.push(o);
+  };
+
+  return enyo.forEach(e, s, r), i;
+}, enyo.keys = Object.keys || (e => {
+  var t = [];
+  var n = Object.prototype.hasOwnProperty;
+  for (var r in e) n.call(e, r) && t.push(r);
+  if (!{
+  toString: null
+  }.propertyIsEnumerable("toString")) {
+  var i = [ "toString", "toLocaleString", "valueOf", "hasOwnProperty", "isPrototypeOf", "propertyIsEnumerable", "constructor" ];
+  for (var s = 0, o; o = i[s]; s++) n.call(e, o) && t.push(o);
+  }
+  return t;
+}), enyo.cloneArray = (e, t, n) => {
 var r = n || [];
 for (var i = t || 0, s = e.length; i < s; i++) r.push(e[i]);
 return r;
-}, enyo.toArray = enyo.cloneArray, enyo.clone = function(e) {
-return enyo.isArray(e) ? enyo.cloneArray(e) : enyo.mixin({}, e);
-};
+}, enyo.toArray = enyo.cloneArray, enyo.clone = e => enyo.isArray(e) ? enyo.cloneArray(e) : enyo.mixin({}, e);
 var t = {};
-enyo.mixin = function(e, n) {
+enyo.mixin = (e, n) => {
 e = e || {};
 if (n) {
-var r, i, s;
-for (r in n) i = n[r], t[r] !== i && (e[r] = i);
+  var r;
+  var i;
+  var s;
+  for (r in n) i = n[r], t[r] !== i && (e[r] = i);
 }
 return e;
 }, enyo.bind = function(e, t) {
@@ -320,86 +331,85 @@ t = e[t];
 }
 if (enyo.isFunction(t)) {
 var n = enyo.cloneArray(arguments, 2);
-return t.bind ? t.bind.apply(t, [ e ].concat(n)) : function() {
-var r = enyo.cloneArray(arguments);
+return t.bind ? t.bind(...[ e ].concat(n)) : function(...args) {
+var r = enyo.cloneArray(args);
 return t.apply(e, n.concat(r));
 };
 }
 throw [ 'enyo.bind: scope["', t, '"] is not a function (scope="', e, '")' ].join("");
 }, enyo.asyncMethod = function(e, t) {
-return setTimeout(enyo.bind.apply(enyo, arguments), 1);
+return setTimeout(enyo.bind(...arguments), 1);
 }, enyo.call = function(e, t, n) {
 var r = e || this;
 if (t) {
 var i = r[t] || t;
 if (i && i.apply) return i.apply(r, n || []);
 }
-}, enyo.now = Date.now || function() {
-return (new Date).getTime();
-}, enyo.nop = function() {}, enyo.nob = {}, enyo.nar = [], enyo.instance = function() {}, enyo.setPrototype || (enyo.setPrototype = function(e, t) {
+}, enyo.now = Date.now || (() => (new Date).getTime()), enyo.nop = () => {}, enyo.nob = {}, enyo.nar = [], enyo.instance = () => {}, enyo.setPrototype || (enyo.setPrototype = (e, t) => {
 e.prototype = t;
-}), enyo.delegate = function(e) {
-return enyo.setPrototype(enyo.instance, e), new enyo.instance;
-}, $L = function(e) {
-return e;
-};
+}), enyo.delegate = e => (enyo.setPrototype(enyo.instance, e), new enyo.instance), $L = e => e;
 })();
 
 // job.js
 
-enyo.job = function(e, t, n) {
-enyo.job.stop(e), enyo.job._jobs[e] = setTimeout(function() {
+enyo.job = (e, t, n) => {
+enyo.job.stop(e), enyo.job._jobs[e] = setTimeout(() => {
 enyo.job.stop(e), t();
 }, n);
-}, enyo.job.stop = function(e) {
+}, enyo.job.stop = e => {
 enyo.job._jobs[e] && (clearTimeout(enyo.job._jobs[e]), delete enyo.job._jobs[e]);
 }, enyo.job._jobs = {};
 
 // macroize.js
 
-enyo.macroize = function(e, t, n) {
-var r, i, s = e, o = n || enyo.macroize.pattern, u = function(e, n) {
-return r = enyo.getObject(n, !1, t), r === undefined || r === null ? "{$" + n + "}" : (i = !0, r);
-}, a = 0;
-do {
-i = !1, s = s.replace(o, u);
-if (++a >= 20) throw "enyo.macroize: recursion too deep";
-} while (i);
-return s;
-}, enyo.quickMacroize = function(e, t, n) {
-var r, i, s = e, o = n || enyo.macroize.pattern, u = function(e, n) {
-return n in t ? r = t[n] : r = enyo.getObject(n, !1, t), r === undefined || r === null ? "{$" + n + "}" : r;
-};
-return s = s.replace(o, u), s;
+enyo.macroize = (e, t, n) => {
+  var r;
+  var i;
+  var s = e;
+  var o = n || enyo.macroize.pattern;
+  var u = (e, n) => (r = enyo.getObject(n, !1, t), r === undefined || r === null ? "{$" + n + "}" : (i = !0, r));
+  var a = 0;
+  do {
+  i = !1, s = s.replace(o, u);
+  if (++a >= 20) throw "enyo.macroize: recursion too deep";
+  } while (i);
+  return s;
+}, enyo.quickMacroize = (e, t, n) => {
+  var r;
+  var i;
+  var s = e;
+  var o = n || enyo.macroize.pattern;
+  var u = (e, n) => (n in t ? r = t[n] : r = enyo.getObject(n, !1, t), r === undefined || r === null ? "{$" + n + "}" : r);
+  return s = s.replace(o, u), s;
 }, enyo.macroize.pattern = /\{\$([^{}]*)\}/g;
 
 // Oop.js
 
-enyo.kind = function(e) {
-enyo._kindCtors = {};
-var t = e.name || "";
-delete e.name;
-var n = "kind" in e, r = e.kind;
-delete e.kind;
-var i = enyo.constructorForKind(r), s = i && i.prototype || null;
-if (n && r === undefined || i === undefined) throw "enyo.kind: Attempt to subclass an undefined kind. Check dependencies for [" + (t || "<unnamed>") + "].";
-var o = enyo.kind.makeCtor();
-return e.hasOwnProperty("constructor") && (e._constructor = e.constructor, delete e.constructor), enyo.setPrototype(o, s ? enyo.delegate(s) : {}), enyo.mixin(o.prototype, e), o.prototype.kindName = t, o.prototype.base = i, o.prototype.ctor = o, enyo.forEach(enyo.kind.features, function(t) {
-t(o, e);
-}), enyo.setObject(t, o), o;
-}, enyo.singleton = function(e, t) {
+enyo.kind = e => {
+  enyo._kindCtors = {};
+  var t = e.name || "";
+  delete e.name;
+  var n = "kind" in e;
+  var r = e.kind;
+  delete e.kind;
+  var i = enyo.constructorForKind(r);
+  var s = i && i.prototype || null;
+  if (n && r === undefined || i === undefined) throw "enyo.kind: Attempt to subclass an undefined kind. Check dependencies for [" + (t || "<unnamed>") + "].";
+  var o = enyo.kind.makeCtor();
+  return e.hasOwnProperty("constructor") && (e._constructor = e.constructor, delete e.constructor), enyo.setPrototype(o, s ? enyo.delegate(s) : {}), enyo.mixin(o.prototype, e), o.prototype.kindName = t, o.prototype.base = i, o.prototype.ctor = o, enyo.forEach(enyo.kind.features, t => {
+  t(o, e);
+  }), enyo.setObject(t, o), o;
+}, enyo.singleton = (e, t) => {
 var n = e.name;
 delete e.name;
 var r = enyo.kind(e);
 enyo.setObject(n, new r, t);
-}, enyo.kind.makeCtor = function() {
-return function() {
-if (!(this instanceof arguments.callee)) throw "enyo.kind: constructor called directly, not using 'new'";
+}, enyo.kind.makeCtor = () => function(...args) {
+if (!(this instanceof args.callee)) throw "enyo.kind: constructor called directly, not using 'new'";
 var e;
-this._constructor && (e = this._constructor.apply(this, arguments)), this.constructed && this.constructed.apply(this, arguments);
+this._constructor && (e = this._constructor(...args)), this.constructed && this.constructed(...args);
 if (e) return e;
-};
-}, enyo.kind.defaultNamespace = "enyo", enyo.kind.features = [], enyo.kind.features.push(function(e, t) {
+}, enyo.kind.defaultNamespace = "enyo", enyo.kind.features = [], enyo.kind.features.push((e, t) => {
 var n = e.prototype;
 n.inherited || (n.inherited = enyo.kind.inherited);
 if (n.base) for (var r in t) {
@@ -408,27 +418,27 @@ enyo.isFunction(i) && (i._inherited = n.base.prototype[r] || enyo.nop, i.nom = n
 }
 }), enyo.kind.inherited = function(e, t) {
 return e.callee._inherited.apply(this, t || e);
-}, enyo.kind.features.push(function(e, t) {
+}, enyo.kind.features.push((e, t) => {
 enyo.mixin(e, enyo.kind.statics), t.statics && (enyo.mixin(e, t.statics), delete e.prototype.statics);
 var n = e.prototype.base;
 while (n) n.subclass(e, t), n = n.prototype.base;
 }), enyo.kind.statics = {
-subclass: function(e, t) {},
-extend: function(e) {
+subclass(e, t) {},
+extend(e) {
 enyo.mixin(this.prototype, e);
 var t = this;
-enyo.forEach(enyo.kind.features, function(n) {
+enyo.forEach(enyo.kind.features, n => {
 n(t, e);
 });
 }
-}, enyo._kindCtors = {}, enyo.constructorForKind = function(e) {
+}, enyo._kindCtors = {}, enyo.constructorForKind = e => {
 if (e === null || enyo.isFunction(e)) return e;
 if (e) {
 var t = enyo._kindCtors[e];
 return t ? t : enyo._kindCtors[e] = enyo.Theme[e] || enyo[e] || enyo.getObject(e, !1, enyo) || window[e] || enyo.getObject(e);
 }
 return enyo.defaultCtor;
-}, enyo.Theme = {}, enyo.registerTheme = function(e) {
+}, enyo.Theme = {}, enyo.registerTheme = e => {
 enyo.mixin(enyo.Theme, e);
 };
 
@@ -437,40 +447,41 @@ enyo.mixin(enyo.Theme, e);
 enyo.kind({
 name: "enyo.Object",
 kind: null,
-constructor: function() {
+constructor() {
 enyo._objectCount++;
 },
-setPropertyValue: function(e, t, n) {
+setPropertyValue(e, t, n) {
 if (this[n]) {
 var r = this[e];
 this[e] = t, this[n](r);
 } else this[e] = t;
 },
-_setProperty: function(e, t, n) {
+_setProperty(e, t, n) {
 this.setPropertyValue(e, t, this.getProperty(e) !== t && n);
 },
-destroyObject: function(e) {
+destroyObject(e) {
 this[e] && this[e].destroy && this[e].destroy(), this[e] = null;
 },
-getProperty: function(e) {
+getProperty(e) {
 var t = "get" + enyo.cap(e);
 return this[t] ? this[t]() : this[e];
 },
-setProperty: function(e, t) {
+setProperty(e, t) {
 var n = "set" + enyo.cap(e);
 this[n] ? this[n](t) : this._setProperty(e, t, e + "Changed");
 },
-log: function() {
-var e = arguments.callee.caller, t = ((e ? e.nom : "") || "(instance method)") + ":";
-enyo.logging.log("log", [ t ].concat(enyo.cloneArray(arguments)));
+log(...args) {
+  var e = args.callee.caller;
+  var t = ((e ? e.nom : "") || "(instance method)") + ":";
+  enyo.logging.log("log", [ t ].concat(enyo.cloneArray(args)));
 },
-warn: function() {
-this._log("warn", arguments);
+warn(...args) {
+this._log("warn", args);
 },
-error: function() {
-this._log("error", arguments);
+error(...args) {
+this._log("error", args);
 },
-_log: function(e, t) {
+_log(e, t) {
 if (enyo.logging.shouldLog(e)) try {
 throw new Error;
 } catch (n) {
@@ -479,23 +490,25 @@ enyo.logging._log(e, [ t.callee.caller.nom + ": " ].concat(enyo.cloneArray(t))),
 }
 }), enyo._objectCount = 0, enyo.Object.subclass = function(e, t) {
 this.publish(e, t);
-}, enyo.Object.publish = function(e, t) {
+}, enyo.Object.publish = (e, t) => {
 var n = t.published;
 if (n) {
 var r = e.prototype;
 for (var i in n) enyo.Object.addGetterSetter(i, n[i], r);
 }
-}, enyo.Object.addGetterSetter = function(e, t, n) {
-var r = e;
-n[r] = t;
-var i = enyo.cap(r), s = "get" + i;
-n[s] || (n[s] = function() {
-return this[r];
-});
-var o = "set" + i, u = r + "Changed";
-n[o] || (n[o] = function(e) {
-this._setProperty(r, e, u);
-});
+}, enyo.Object.addGetterSetter = (e, t, n) => {
+  var r = e;
+  n[r] = t;
+  var i = enyo.cap(r);
+  var s = "get" + i;
+  n[s] || (n[s] = function() {
+  return this[r];
+  });
+  var o = "set" + i;
+  var u = r + "Changed";
+  n[o] || (n[o] = function(e) {
+  this._setProperty(r, e, u);
+  });
 };
 
 // Component.js
@@ -514,130 +527,135 @@ _unnamedKindNumber: 0
 },
 defaultKind: "Component",
 handlers: {},
-toString: function() {
+toString() {
 return this.kindName;
 },
-constructor: function() {
-this._componentNameMap = {}, this.$ = {}, this.inherited(arguments);
+constructor(...args) {
+this._componentNameMap = {}, this.$ = {}, this.inherited(args);
 },
-constructed: function(e) {
+constructed(e) {
 this.importProps(e), this.create();
 },
-importProps: function(e) {
+importProps(e) {
 if (e) for (var t in e) this[t] = e[t];
 this.handlers = enyo.mixin(enyo.clone(this.kindHandlers), this.handlers);
 },
-create: function() {
+create() {
 this.ownerChanged(), this.initComponents();
 },
-initComponents: function() {
+initComponents() {
 this.createChrome(this.kindComponents), this.createClientComponents(this.components);
 },
-createChrome: function(e) {
+createChrome(e) {
 this.createComponents(e, {
 isChrome: !0
 });
 },
-createClientComponents: function(e) {
+createClientComponents(e) {
 this.createComponents(e, {
 owner: this.getInstanceOwner()
 });
 },
-getInstanceOwner: function() {
+getInstanceOwner() {
 return !this.owner || this.owner.notInstanceOwner ? this : this.owner;
 },
-destroy: function() {
+destroy() {
 this.destroyComponents(), this.setOwner(null), this.destroyed = !0;
 },
-destroyComponents: function() {
-enyo.forEach(this.getComponents(), function(e) {
+destroyComponents() {
+enyo.forEach(this.getComponents(), e => {
 e.destroyed || e.destroy();
 });
 },
-makeId: function() {
-var e = "_", t = this.owner && this.owner.getId(), n = this.name || "@@" + ++enyo.Component._unnamedKindNumber;
-return (t ? t + e : "") + n;
+makeId() {
+  var e = "_";
+  var t = this.owner && this.owner.getId();
+  var n = this.name || "@@" + ++enyo.Component._unnamedKindNumber;
+  return (t ? t + e : "") + n;
 },
-ownerChanged: function(e) {
+ownerChanged(e) {
 e && e.removeComponent(this), this.owner && this.owner.addComponent(this), this.id || (this.id = this.makeId());
 },
-nameComponent: function(e) {
-var t = enyo.Component.prefixFromKindName(e.kindName), n, r = this._componentNameMap[t] || 0;
-do n = t + (++r > 1 ? String(r) : ""); while (this.$[n]);
-return this._componentNameMap[t] = Number(r), e.name = n;
+nameComponent(e) {
+  var t = enyo.Component.prefixFromKindName(e.kindName);
+  var n;
+  var r = this._componentNameMap[t] || 0;
+  do n = t + (++r > 1 ? String(r) : ""); while (this.$[n]);
+  return this._componentNameMap[t] = Number(r), e.name = n;
 },
-addComponent: function(e) {
+addComponent(e) {
 var t = e.getName();
 t || (t = this.nameComponent(e)), this.$[t] && this.warn('Duplicate component name "' + t + '" in owner "' + this.id + '" violates unique-name-under-owner rule, replacing existing component in the hash and continuing, but this is an error condition and should be fixed.'), this.$[t] = e;
 },
-removeComponent: function(e) {
+removeComponent(e) {
 delete this.$[e.getName()];
 },
-getComponents: function() {
+getComponents() {
 var e = [];
 for (var t in this.$) e.push(this.$[t]);
 return e;
 },
-adjustComponentProps: function(e) {
+adjustComponentProps(e) {
 this.defaultProps && enyo.mixin(e, this.defaultProps), e.kind = e.kind || e.isa || this.defaultKind, e.owner = e.owner || this;
 },
-_createComponent: function(e, t) {
+_createComponent(e, t) {
 if (!e.kind && "kind" in e) throw "enyo.create: Attempt to create a null kind. Check dependencies for [" + e.name + "].";
 var n = enyo.mixin(enyo.clone(t), e);
 return this.adjustComponentProps(n), enyo.Component.create(n);
 },
-createComponent: function(e, t) {
+createComponent(e, t) {
 return this._createComponent(e, t);
 },
-createComponents: function(e, t) {
+createComponents(e, t) {
 if (e) {
 var n = [];
 for (var r = 0, i; i = e[r]; r++) n.push(this._createComponent(i, t));
 return n;
 }
 },
-getBubbleTarget: function() {
+getBubbleTarget() {
 return this.owner;
 },
-bubble: function(e, t, n) {
+bubble(e, t, n) {
 var r = t || {};
 return "originator" in r || (r.originator = n || this), this.dispatchBubble(e, r, n);
 },
-bubbleUp: function(e, t, n) {
+bubbleUp(e, t, n) {
 var r = this.getBubbleTarget();
 return r ? r.dispatchBubble(e, t, this) : !1;
 },
-dispatchEvent: function(e, t, n) {
+dispatchEvent(e, t, n) {
 this.decorateEvent(e, t, n);
 if (this.handlers[e] && this.dispatch(this.handlers[e], t, n)) return !0;
 if (this[e]) return this.bubbleDelegation(this.owner, this[e], e, t, this);
 },
-dispatchBubble: function(e, t, n) {
+dispatchBubble(e, t, n) {
 return this.dispatchEvent(e, t, n) ? !0 : this.bubbleUp(e, t, n);
 },
-decorateEvent: function(e, t, n) {},
-bubbleDelegation: function(e, t, n, r, i) {
+decorateEvent(e, t, n) {},
+bubbleDelegation(e, t, n, r, i) {
 var s = this.getBubbleTarget();
 if (s) return s.delegateEvent(e, t, n, r, i);
 },
-delegateEvent: function(e, t, n, r, i) {
+delegateEvent(e, t, n, r, i) {
 return this.decorateEvent(n, r, i), e == this ? this.dispatch(t, r, i) : this.bubbleDelegation(e, t, n, r, i);
 },
-dispatch: function(e, t, n) {
+dispatch(e, t, n) {
 var r = e && this[e];
 if (r) return r.call(this, n || this, t);
 },
-waterfall: function(e, t, n) {
+waterfall(e, t, n) {
 if (this.dispatchEvent(e, t, n)) return !0;
 this.waterfallDown(e, t, n || this);
 },
-waterfallDown: function(e, t, n) {
+waterfallDown(e, t, n) {
 for (var r in this.$) this.$[r].waterfall(e, t, n);
 }
-}), enyo.defaultCtor = enyo.Component, enyo.create = enyo.Component.create = function(e) {
-if (!e.kind && "kind" in e) throw "enyo.create: Attempt to create a null kind. Check dependencies for [" + (e.name || "") + "].";
-var t = e.kind || e.isa || enyo.defaultCtor, n = enyo.constructorForKind(t);
-return n || (console.error('no constructor found for kind "' + t + '"'), n = enyo.Component), new n(e);
+}), enyo.defaultCtor = enyo.Component, enyo.create = enyo.Component.create = e => {
+  if (!e.kind && "kind" in e) throw "enyo.create: Attempt to create a null kind. Check dependencies for [" + (e.name || "") + "].";
+  var t = e.kind || e.isa || enyo.defaultCtor;
+  var n = enyo.constructorForKind(t);
+  return n || (console.error('no constructor found for kind "' + t + '"'), n = enyo.Component), new n(e);
 }, enyo.Component.subclass = function(e, t) {
 var n = e.prototype;
 t.components && (n.kindComponents = t.components, delete n.components);
@@ -652,12 +670,13 @@ if (n) {
 var r = e.prototype;
 for (var i in n) this.addEvent(i, n[i], r);
 }
-}, enyo.Component.addEvent = function(e, t, n) {
-var r, i;
-enyo.isString(t) ? (e.slice(0, 2) != "on" && (console.warn("enyo.Component.addEvent: event names must start with 'on'. " + n.kindName + " event '" + e + "' was auto-corrected to 'on" + e + "'."), e = "on" + e), r = t, i = "do" + enyo.cap(e.slice(2))) : (r = t.value, i = t.caller), n[e] = r, n[i] || (n[i] = function(t) {
-return this.bubble(e, t);
-});
-}, enyo.Component.prefixFromKindName = function(e) {
+}, enyo.Component.addEvent = (e, t, n) => {
+  var r;
+  var i;
+  enyo.isString(t) ? (e.slice(0, 2) != "on" && (console.warn("enyo.Component.addEvent: event names must start with 'on'. " + n.kindName + " event '" + e + "' was auto-corrected to 'on" + e + "'."), e = "on" + e), r = t, i = "do" + enyo.cap(e.slice(2))) : (r = t.value, i = t.caller), n[e] = r, n[i] || (n[i] = function(t) {
+  return this.bubble(e, t);
+  });
+}, enyo.Component.prefixFromKindName = e => {
 var t = enyo.Component._kindPrefixi[e];
 if (!t) {
 var n = e.lastIndexOf(".");
@@ -686,70 +705,70 @@ _resizeFlags: {
 showingOnly: !0
 }
 },
-create: function() {
-this.controls = [], this.children = [], this.containerChanged(), this.inherited(arguments), this.layoutKindChanged();
+create(...args) {
+this.controls = [], this.children = [], this.containerChanged(), this.inherited(args), this.layoutKindChanged();
 },
-destroy: function() {
-this.destroyClientControls(), this.setContainer(null), this.inherited(arguments);
+destroy(...args) {
+this.destroyClientControls(), this.setContainer(null), this.inherited(args);
 },
-importProps: function(e) {
+importProps(e) {
 this.inherited(arguments), this.owner || (this.owner = enyo.master);
 },
-createComponents: function() {
-var e = this.inherited(arguments);
+createComponents(...args) {
+var e = this.inherited(args);
 return this.discoverControlParent(), e;
 },
-discoverControlParent: function() {
+discoverControlParent() {
 this.controlParent = this.$[this.controlParentName] || this.controlParent;
 },
-adjustComponentProps: function(e) {
+adjustComponentProps(e) {
 e.container = e.container || this, this.inherited(arguments);
 },
-containerChanged: function(e) {
+containerChanged(e) {
 e && e.removeControl(this), this.container && this.container.addControl(this, this.addBefore);
 },
-parentChanged: function(e) {
+parentChanged(e) {
 e && e != this.parent && e.removeChild(this);
 },
-isDescendantOf: function(e) {
+isDescendantOf(e) {
 var t = this;
 while (t && t != e) t = t.parent;
 return e && t == e;
 },
-getControls: function() {
+getControls() {
 return this.controls;
 },
-getClientControls: function() {
+getClientControls() {
 var e = [];
 for (var t = 0, n = this.controls, r; r = n[t]; t++) r.isChrome || e.push(r);
 return e;
 },
-destroyClientControls: function() {
+destroyClientControls() {
 var e = this.getClientControls();
 for (var t = 0, n; n = e[t]; t++) n.destroy();
 },
-addControl: function(e, t) {
+addControl(e, t) {
 this.controls.push(e), this.addChild(e, t);
 },
-removeControl: function(e) {
+removeControl(e) {
 return e.setParent(null), enyo.remove(e, this.controls);
 },
-indexOfControl: function(e) {
+indexOfControl(e) {
 return enyo.indexOf(e, this.controls);
 },
-indexOfClientControl: function(e) {
+indexOfClientControl(e) {
 return enyo.indexOf(e, this.getClientControls());
 },
-indexInContainer: function() {
+indexInContainer() {
 return this.container.indexOfControl(this);
 },
-clientIndexInContainer: function() {
+clientIndexInContainer() {
 return this.container.indexOfClientControl(this);
 },
-controlAtIndex: function(e) {
+controlAtIndex(e) {
 return this.controls[e];
 },
-addChild: function(e, t) {
+addChild(e, t) {
 if (this.controlParent) this.controlParent.addChild(e); else {
 e.setParent(this);
 if (t !== undefined) {
@@ -758,35 +777,35 @@ this.children.splice(n, 0, e);
 } else this.children.push(e);
 }
 },
-removeChild: function(e) {
+removeChild(e) {
 return enyo.remove(e, this.children);
 },
-indexOfChild: function(e) {
+indexOfChild(e) {
 return enyo.indexOf(e, this.children);
 },
-layoutKindChanged: function() {
+layoutKindChanged() {
 this.layout && this.layout.destroy(), this.layout = enyo.createFromKind(this.layoutKind, this), this.generated && this.render();
 },
-flow: function() {
+flow() {
 this.layout && this.layout.flow();
 },
-reflow: function() {
+reflow() {
 this.layout && this.layout.reflow();
 },
-resized: function() {
+resized() {
 this.waterfall("onresize", enyo.UiComponent._resizeFlags), this.waterfall("onpostresize", enyo.UiComponent._resizeFlags);
 },
-resizeHandler: function() {
+resizeHandler() {
 this.reflow();
 },
-waterfallDown: function(e, t, n) {
+waterfallDown(e, t, n) {
 for (var r in this.$) this.$[r] instanceof enyo.UiComponent || this.$[r].waterfall(e, t, n);
 for (var i = 0, s = this.children, o; o = s[i]; i++) (o.showing || !t || !t.showingOnly) && o.waterfall(e, t, n);
 },
-getBubbleTarget: function() {
+getBubbleTarget() {
 return this.parent;
 }
-}), enyo.createFromKind = function(e, t) {
+}), enyo.createFromKind = (e, t) => {
 var n = e && enyo.constructorForKind(e);
 if (n) return new n(t);
 }, enyo.master = new enyo.Component({
@@ -795,11 +814,11 @@ notInstanceOwner: !0,
 eventFlags: {
 showingOnly: !0
 },
-getId: function() {
+getId() {
 return "";
 },
 isDescendantOf: enyo.nop,
-bubble: function(e, t, n) {
+bubble(e, t, n) {
 e == "onresize" ? (enyo.master.waterfallDown("onresize", this.eventFlags), enyo.master.waterfallDown("onpostresize", this.eventFlags)) : enyo.Signals.send(e, t);
 }
 });
@@ -810,14 +829,14 @@ enyo.kind({
 name: "enyo.Layout",
 kind: null,
 layoutClass: "",
-constructor: function(e) {
+constructor(e) {
 this.container = e, e && e.addClass(this.layoutClass);
 },
-destroy: function() {
+destroy() {
 this.container && this.container.removeClass(this.layoutClass);
 },
-flow: function() {},
-reflow: function() {}
+flow() {},
+reflow() {}
 });
 
 // Signals.js
@@ -825,25 +844,25 @@ reflow: function() {}
 enyo.kind({
 name: "enyo.Signals",
 kind: enyo.Component,
-create: function() {
-this.inherited(arguments), enyo.Signals.addListener(this);
+create(...args) {
+this.inherited(args), enyo.Signals.addListener(this);
 },
-destroy: function() {
-enyo.Signals.removeListener(this), this.inherited(arguments);
+destroy(...args) {
+enyo.Signals.removeListener(this), this.inherited(args);
 },
-notify: function(e, t) {
+notify(e, t) {
 this.dispatchEvent(e, t);
 },
 statics: {
 listeners: [],
-addListener: function(e) {
+addListener(e) {
 this.listeners.push(e);
 },
-removeListener: function(e) {
+removeListener(e) {
 enyo.remove(e, this.listeners);
 },
-send: function(e, t) {
-enyo.forEach(this.listeners, function(n) {
+send(e, t) {
+enyo.forEach(this.listeners, n => {
 n.notify(e, t);
 });
 }
@@ -860,55 +879,55 @@ timeout: 0
 },
 failed: !1,
 context: null,
-constructor: function() {
+constructor() {
 this.responders = [], this.errorHandlers = [];
 },
-accumulate: function(e, t) {
+accumulate(e, t) {
 var n = t.length < 2 ? t[0] : enyo.bind(t[0], t[1]);
 e.push(n);
 },
-response: function() {
-return this.accumulate(this.responders, arguments), this;
+response(...args) {
+return this.accumulate(this.responders, args), this;
 },
-error: function() {
-return this.accumulate(this.errorHandlers, arguments), this;
+error(...args) {
+return this.accumulate(this.errorHandlers, args), this;
 },
-route: function(e, t) {
+route(e, t) {
 var n = enyo.bind(this, "respond");
-e.response(function(e, t) {
+e.response((e, t) => {
 n(t);
 });
 var r = enyo.bind(this, "fail");
-e.error(function(e, t) {
+e.error((e, t) => {
 r(t);
 }), e.go(t);
 },
-handle: function(e, t) {
+handle(e, t) {
 var n = t.shift();
 if (n) if (n instanceof enyo.Async) this.route(n, e); else {
 var r = enyo.call(this.context || this, n, [ this, e ]);
 r = r !== undefined ? r : e, (this.failed ? this.fail : this.respond).call(this, r);
 }
 },
-startTimer: function() {
+startTimer() {
 this.startTime = enyo.now(), this.timeout && (this.timeoutJob = setTimeout(enyo.bind(this, "timeoutComplete"), this.timeout));
 },
-endTimer: function() {
+endTimer() {
 this.timeoutJob && (this.endTime = enyo.now(), clearTimeout(this.timeoutJob), this.timeoutJob = null, this.latency = this.endTime - this.startTime);
 },
-timeoutComplete: function() {
+timeoutComplete() {
 this.timedout = !0, this.fail("timeout");
 },
-respond: function(e) {
+respond(e) {
 this.failed = !1, this.endTimer(), this.handle(e, this.responders);
 },
-fail: function(e) {
+fail(e) {
 this.failed = !0, this.endTimer(), this.handle(e, this.errorHandlers);
 },
-recover: function() {
+recover() {
 this.failed = !1;
 },
-go: function(e) {
+go(e) {
 return enyo.asyncMethod(this, function() {
 this.respond(e);
 }), this;
@@ -918,57 +937,63 @@ this.respond(e);
 // json.js
 
 enyo.json = {
-stringify: function(e, t, n) {
+stringify(e, t, n) {
 return JSON.stringify(e, t, n);
 },
-parse: function(e, t) {
+parse(e, t) {
 return e ? JSON.parse(e, t) : null;
 }
 };
 
 // cookie.js
 
-enyo.getCookie = function(e) {
+enyo.getCookie = e => {
 var t = document.cookie.match(new RegExp("(?:^|; )" + e + "=([^;]*)"));
 return t ? decodeURIComponent(t[1]) : undefined;
-}, enyo.setCookie = function(e, t, n) {
-var r = e + "=" + encodeURIComponent(t), i = n || {}, s = i.expires;
-if (typeof s == "number") {
-var o = new Date;
-o.setTime(o.getTime() + s * 24 * 60 * 60 * 1e3), s = o;
-}
-s && s.toUTCString && (i.expires = s.toUTCString());
-var u, a;
-for (u in i) r += "; " + u, a = i[u], a !== !0 && (r += "=" + a);
-document.cookie = r;
+}, enyo.setCookie = (e, t, n) => {
+  var r = e + "=" + encodeURIComponent(t);
+  var i = n || {};
+  var s = i.expires;
+  if (typeof s == "number") {
+  var o = new Date;
+  o.setTime(o.getTime() + s * 24 * 60 * 60 * 1e3), s = o;
+  }
+  s && s.toUTCString && (i.expires = s.toUTCString());
+  var u;
+  var a;
+  for (u in i) r += "; " + u, a = i[u], a !== !0 && (r += "=" + a);
+  document.cookie = r;
 };
 
 // xhr.js
 
 enyo.xhr = {
-request: function(e) {
-var t = this.getXMLHttpRequest(e.url), n = e.method || "GET", r = !e.sync;
-e.username ? t.open(n, enyo.path.rewrite(e.url), r, e.username, e.password) : t.open(n, enyo.path.rewrite(e.url), r), enyo.mixin(t, e.xhrFields), e.callback && this.makeReadyStateHandler(t, e.callback);
-if (e.headers) for (var i in e.headers) t.setRequestHeader(i, e.headers[i]);
-return typeof t.overrideMimeType == "function" && e.mimeType && t.overrideMimeType(e.mimeType), t.send(e.body || null), !r && e.callback && t.onreadystatechange(t), t;
+request(e) {
+  var t = this.getXMLHttpRequest(e.url);
+  var n = e.method || "GET";
+  var r = !e.sync;
+  e.username ? t.open(n, enyo.path.rewrite(e.url), r, e.username, e.password) : t.open(n, enyo.path.rewrite(e.url), r), enyo.mixin(t, e.xhrFields), e.callback && this.makeReadyStateHandler(t, e.callback);
+  if (e.headers) for (var i in e.headers) t.setRequestHeader(i, e.headers[i]);
+  return typeof t.overrideMimeType == "function" && e.mimeType && t.overrideMimeType(e.mimeType), t.send(e.body || null), !r && e.callback && t.onreadystatechange(t), t;
 },
-cancel: function(e) {
+cancel(e) {
 e.onload && (e.onload = null), e.onreadystatechange && (e.onreadystatechange = null), e.abort && e.abort();
 },
-makeReadyStateHandler: function(e, t) {
-window.XDomainRequest && e instanceof XDomainRequest && (e.onload = function() {
-t.apply(null, [ e.responseText, e ]);
-}), e.onreadystatechange = function() {
-e.readyState == 4 && t.apply(null, [ e.responseText, e ]);
+makeReadyStateHandler(e, t) {
+window.XDomainRequest && e instanceof XDomainRequest && (e.onload = () => {
+t(...[ e.responseText, e ]);
+}), e.onreadystatechange = () => {
+e.readyState == 4 && t(...[ e.responseText, e ]);
 };
 },
-inOrigin: function(e) {
-var t = document.createElement("a"), n = !1;
-t.href = e;
-if (t.protocol === ":" || t.protocol === window.location.protocol && t.hostname === window.location.hostname && t.port === (window.location.port || (window.location.protocol === "https:" ? "443" : "80"))) n = !0;
-return n;
+inOrigin(e) {
+  var t = document.createElement("a");
+  var n = !1;
+  t.href = e;
+  if (t.protocol === ":" || t.protocol === window.location.protocol && t.hostname === window.location.hostname && t.port === (window.location.port || (window.location.protocol === "https:" ? "443" : "80"))) n = !0;
+  return n;
 },
-getXMLHttpRequest: function(e) {
+getXMLHttpRequest(e) {
 try {
 if (window.XDomainRequest && !this.inOrigin(e) && !/^file:\/\//.test(window.location.href)) return new XDomainRequest;
 } catch (t) {}
@@ -1002,44 +1027,48 @@ enyo.kind({
 name: "enyo.Ajax",
 kind: enyo.Async,
 published: enyo.AjaxProperties,
-constructor: function(e) {
+constructor(e) {
 enyo.mixin(this, e), this.inherited(arguments);
 },
-go: function(e) {
+go(e) {
 return this.startTimer(), this.request(e), this;
 },
-request: function(e) {
-var t = this.url.split("?"), n = t.shift() || "", r = t.length ? t.join("?").split("&") : [], i = enyo.isString(e) ? e : enyo.Ajax.objectToQuery(e);
-this.method == "GET" && (i && (r.push(i), i = null), this.cacheBust && !/^file:/i.test(n) && r.push(Math.random()));
-var s = r.length ? [ n, r.join("&") ].join("?") : n, o = {};
-this.method != "GET" && (o["Content-Type"] = this.contentType), enyo.mixin(o, this.headers);
-try {
-this.xhr = enyo.xhr.request({
-url: s,
-method: this.method,
-callback: enyo.bind(this, "receive"),
-body: this.postBody || i,
-headers: o,
-sync: window.PalmSystem ? !1 : this.sync,
-username: this.username,
-password: this.password,
-xhrFields: this.xhrFields,
-mimeType: this.mimeType
-});
-} catch (u) {
-this.fail(u);
-}
+request(e) {
+  var t = this.url.split("?");
+  var n = t.shift() || "";
+  var r = t.length ? t.join("?").split("&") : [];
+  var i = enyo.isString(e) ? e : enyo.Ajax.objectToQuery(e);
+  this.method == "GET" && (i && (r.push(i), i = null), this.cacheBust && !/^file:/i.test(n) && r.push(Math.random()));
+  var s = r.length ? [ n, r.join("&") ].join("?") : n;
+  var o = {};
+  this.method != "GET" && (o["Content-Type"] = this.contentType), enyo.mixin(o, this.headers);
+  try {
+  this.xhr = enyo.xhr.request({
+  url: s,
+  method: this.method,
+  callback: enyo.bind(this, "receive"),
+  body: this.postBody || i,
+  headers: o,
+  sync: window.PalmSystem ? !1 : this.sync,
+  username: this.username,
+  password: this.password,
+  xhrFields: this.xhrFields,
+  mimeType: this.mimeType
+  });
+  } catch (u) {
+  this.fail(u);
+  }
 },
-receive: function(e, t) {
+receive(e, t) {
 !this.failed && !this.destroyed && (this.isFailure(t) ? this.fail(t.status) : this.respond(this.xhrToResponse(t)));
 },
-fail: function(e) {
+fail(e) {
 this.xhr && (enyo.xhr.cancel(this.xhr), this.xhr = null), this.inherited(arguments);
 },
-xhrToResponse: function(e) {
+xhrToResponse(e) {
 if (e) return this[(this.handleAs || "text") + "Handler"](e);
 },
-isFailure: function(e) {
+isFailure(e) {
 try {
 var t = "";
 return typeof e.responseText == "string" && (t = e.responseText), e.status === 0 && t === "" ? !0 : e.status !== 0 && (e.status < 200 || e.status >= 300);
@@ -1047,13 +1076,13 @@ return typeof e.responseText == "string" && (t = e.responseText), e.status === 0
 return !0;
 }
 },
-xmlHandler: function(e) {
+xmlHandler(e) {
 return e.responseXML;
 },
-textHandler: function(e) {
+textHandler(e) {
 return e.responseText;
 },
-jsonHandler: function(e) {
+jsonHandler(e) {
 var t = e.responseText;
 try {
 return t && enyo.json.parse(t);
@@ -1062,16 +1091,18 @@ return enyo.warn("Ajax request set to handleAs JSON but data was not in JSON for
 }
 },
 statics: {
-objectToQuery: function(e) {
-var t = encodeURIComponent, n = [], r = {};
-for (var i in e) {
-var s = e[i];
-if (s != r[i]) {
-var o = t(i) + "=";
-if (enyo.isArray(s)) for (var u = 0; u < s.length; u++) n.push(o + t(s[u])); else n.push(o + t(s));
-}
-}
-return n.join("&");
+objectToQuery(e) {
+  var t = encodeURIComponent;
+  var n = [];
+  var r = {};
+  for (var i in e) {
+  var s = e[i];
+  if (s != r[i]) {
+  var o = t(i) + "=";
+  if (enyo.isArray(s)) for (var u = 0; u < s.length; u++) n.push(o + t(s[u])); else n.push(o + t(s));
+  }
+  }
+  return n.join("&");
 }
 }
 });
@@ -1090,7 +1121,7 @@ cacheBust: !0
 statics: {
 nextCallbackID: 0
 },
-addScriptElement: function() {
+addScriptElement() {
 var e = document.createElement("script");
 e.src = this.src, e.async = "async", this.charset && (e.charset = this.charset), e.onerror = enyo.bind(this, function() {
 this.fail(400);
@@ -1098,17 +1129,17 @@ this.fail(400);
 var t = document.getElementsByTagName("script")[0];
 t.parentNode.insertBefore(e, t), this.scriptTag = e;
 },
-removeScriptElement: function() {
+removeScriptElement() {
 var e = this.scriptTag;
 this.scriptTag = null, e.onerror = null, e.parentNode && e.parentNode.removeChild(e);
 },
-constructor: function(e) {
+constructor(e) {
 enyo.mixin(this, e), this.inherited(arguments);
 },
-go: function(e) {
+go(e) {
 return this.startTimer(), this.jsonp(e), this;
 },
-jsonp: function(e) {
+jsonp(e) {
 var t = "enyo_jsonp_callback_" + enyo.JsonpRequest.nextCallbackID++;
 this.src = this.buildUrl(e, t), this.addScriptElement(), window[t] = enyo.bind(this, this.respond);
 var n = enyo.bind(this, function() {
@@ -1116,11 +1147,14 @@ this.removeScriptElement(), window[t] = null;
 });
 this.response(n), this.error(n);
 },
-buildUrl: function(e, t) {
-var n = this.url.split("?"), r = n.shift() || "", i = n.join("?").split("&"), s = this.bodyArgsFromParams(e, t);
-return i.push(s), this.cacheBust && i.push(Math.random()), [ r, i.join("&") ].join("?");
+buildUrl(e, t) {
+  var n = this.url.split("?");
+  var r = n.shift() || "";
+  var i = n.join("?").split("&");
+  var s = this.bodyArgsFromParams(e, t);
+  return i.push(s), this.cacheBust && i.push(Math.random()), [ r, i.join("&") ].join("?");
 },
-bodyArgsFromParams: function(e, t) {
+bodyArgsFromParams(e, t) {
 if (enyo.isString(e)) return e.replace("=?", "=" + t);
 var n = enyo.mixin({}, e);
 return n[this.callbackName] = t, enyo.Ajax.objectToQuery(n);
@@ -1145,13 +1179,13 @@ events: {
 onResponse: "",
 onError: ""
 },
-constructor: function(e) {
+constructor(e) {
 this.inherited(arguments);
 },
-send: function(e) {
+send(e) {
 return this.jsonp ? this.sendJsonp(e) : this.sendAjax(e);
 },
-sendJsonp: function(e) {
+sendJsonp(e) {
 var t = new enyo.JsonpRequest;
 for (var n in {
 url: 1,
@@ -1160,21 +1194,21 @@ charset: 1
 }) t[n] = this[n];
 return this.sendAsync(t, e);
 },
-sendAjax: function(e) {
+sendAjax(e) {
 var t = new enyo.Ajax;
 for (var n in enyo.AjaxProperties) t[n] = this[n];
 return this.sendAsync(t, e);
 },
-sendAsync: function(e, t) {
+sendAsync(e, t) {
 return e.go(t).response(this, "response").error(this, "error");
 },
-response: function(e, t) {
+response(e, t) {
 this.doResponse({
 ajax: e,
 data: t
 });
 },
-error: function(e, t) {
+error(e, t) {
 this.doError({
 ajax: e,
 data: t
@@ -1184,41 +1218,44 @@ data: t
 
 // dom.js
 
-enyo.requiresWindow = function(e) {
+enyo.requiresWindow = e => {
 e();
 }, enyo.dom = {
-byId: function(e, t) {
+byId(e, t) {
 return typeof e == "string" ? (t || document).getElementById(e) : e;
 },
-escape: function(e) {
+escape(e) {
 return e !== null ? String(e).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;") : "";
 },
-getComputedStyle: function(e) {
+getComputedStyle(e) {
 return window.getComputedStyle && e && window.getComputedStyle(e, null);
 },
-getComputedStyleValue: function(e, t, n) {
+getComputedStyleValue(e, t, n) {
 var r = n || this.getComputedStyle(e);
 return r ? r.getPropertyValue(t) : null;
 },
-getFirstElementByTagName: function(e) {
+getFirstElementByTagName(e) {
 var t = document.getElementsByTagName(e);
 return t && t[0];
 },
-applyBodyFit: function() {
+applyBodyFit() {
 var e = this.getFirstElementByTagName("html");
 e && (e.className += " enyo-document-fit");
 var t = this.getFirstElementByTagName("body");
 t && (t.className += " enyo-body-fit"), enyo.bodyIsFitting = !0;
 },
-getWindowWidth: function() {
+getWindowWidth() {
 return window.innerWidth ? window.innerWidth : document.body && document.body.offsetWidth ? document.body.offsetWidth : document.compatMode == "CSS1Compat" && document.documentElement && document.documentElement.offsetWidth ? document.documentElement.offsetWidth : 320;
 },
-_ieCssToPixelValue: function(e, t) {
-var n = t, r = e.style, i = r.left, s = e.runtimeStyle && e.runtimeStyle.left;
-return s && (e.runtimeStyle.left = e.currentStyle.left), r.left = n, n = r.pixelLeft, r.left = i, s && (r.runtimeStyle.left = s), n;
+_ieCssToPixelValue(e, t) {
+  var n = t;
+  var r = e.style;
+  var i = r.left;
+  var s = e.runtimeStyle && e.runtimeStyle.left;
+  return s && (e.runtimeStyle.left = e.currentStyle.left), r.left = n, n = r.pixelLeft, r.left = i, s && (r.runtimeStyle.left = s), n;
 },
 _pxMatch: /px/i,
-getComputedBoxValue: function(e, t, n, r) {
+getComputedBoxValue(e, t, n, r) {
 var i = r || this.getComputedStyle(e);
 if (i) return parseInt(i.getPropertyValue(t + "-" + n), 0);
 if (e && e.currentStyle) {
@@ -1227,7 +1264,7 @@ return s.match(this._pxMatch) || (s = this._ieCssToPixelValue(e, s)), parseInt(s
 }
 return 0;
 },
-calcBoxExtents: function(e, t) {
+calcBoxExtents(e, t) {
 var n = this.getComputedStyle(e);
 return {
 top: this.getComputedBoxValue(e, t, "top", n),
@@ -1236,53 +1273,60 @@ bottom: this.getComputedBoxValue(e, t, "bottom", n),
 left: this.getComputedBoxValue(e, t, "left", n)
 };
 },
-calcPaddingExtents: function(e) {
+calcPaddingExtents(e) {
 return this.calcBoxExtents(e, "padding");
 },
-calcMarginExtents: function(e) {
+calcMarginExtents(e) {
 return this.calcBoxExtents(e, "margin");
 }
 };
 
 // transform.js
 
-(function() {
-enyo.dom.calcCanAccelerate = function() {
-if (enyo.platform.android <= 2) return !1;
-var e = [ "perspective", "WebkitPerspective", "MozPerspective", "msPerspective", "OPerspective" ];
-for (var t = 0, n; n = e[t]; t++) if (typeof document.body.style[n] != "undefined") return !0;
-return !1;
-};
-var e = [ "transform", "-webkit-transform", "-moz-transform", "-ms-transform", "-o-transform" ], t = [ "transform", "webkitTransform", "MozTransform", "msTransform", "OTransform" ];
-enyo.dom.getCssTransformProp = function() {
-if (this._cssTransformProp) return this._cssTransformProp;
-var n = enyo.indexOf(this.getStyleTransformProp(), t);
-return this._cssTransformProp = e[n];
-}, enyo.dom.getStyleTransformProp = function() {
-if (this._styleTransformProp || !document.body) return this._styleTransformProp;
-for (var e = 0, n; n = t[e]; e++) if (typeof document.body.style[n] != "undefined") return this._styleTransformProp = n;
-}, enyo.dom.domTransformsToCss = function(e) {
-var t, n, r = "";
-for (t in e) n = e[t], n !== null && n !== undefined && n !== "" && (r += t + "(" + n + ") ");
-return r;
-}, enyo.dom.transformsToDom = function(e) {
-var t = this.domTransformsToCss(e.domTransforms), n = e.hasNode() ? e.node.style : null, r = e.domStyles, i = this.getStyleTransformProp(), s = this.getCssTransformProp();
-i && s && (r[s] = t, n ? n[i] = t : e.domStylesChanged());
-}, enyo.dom.canTransform = function() {
-return Boolean(this.getStyleTransformProp());
-}, enyo.dom.canAccelerate = function() {
-return this.accelerando !== undefined ? this.accelerando : document.body && (this.accelerando = this.calcCanAccelerate());
-}, enyo.dom.transform = function(e, t) {
-var n = e.domTransforms = e.domTransforms || {};
-enyo.mixin(n, t), this.transformsToDom(e);
-}, enyo.dom.transformValue = function(e, t, n) {
-var r = e.domTransforms = e.domTransforms || {};
-r[t] = n, this.transformsToDom(e);
-}, enyo.dom.accelerate = function(e, t) {
-var n = t == "auto" ? this.canAccelerate() : t;
-this.transformValue(e, "translateZ", n ? 0 : null);
-};
-})();
+((() => {
+  enyo.dom.calcCanAccelerate = () => {
+  if (enyo.platform.android <= 2) return !1;
+  var e = [ "perspective", "WebkitPerspective", "MozPerspective", "msPerspective", "OPerspective" ];
+  for (var t = 0, n; n = e[t]; t++) if (typeof document.body.style[n] != "undefined") return !0;
+  return !1;
+  };
+  var e = [ "transform", "-webkit-transform", "-moz-transform", "-ms-transform", "-o-transform" ];
+  var t = [ "transform", "webkitTransform", "MozTransform", "msTransform", "OTransform" ];
+  enyo.dom.getCssTransformProp = function() {
+  if (this._cssTransformProp) return this._cssTransformProp;
+  var n = enyo.indexOf(this.getStyleTransformProp(), t);
+  return this._cssTransformProp = e[n];
+  }, enyo.dom.getStyleTransformProp = function() {
+  if (this._styleTransformProp || !document.body) return this._styleTransformProp;
+  for (var e = 0, n; n = t[e]; e++) if (typeof document.body.style[n] != "undefined") return this._styleTransformProp = n;
+  }, enyo.dom.domTransformsToCss = e => {
+    var t;
+    var n;
+    var r = "";
+    for (t in e) n = e[t], n !== null && n !== undefined && n !== "" && (r += t + "(" + n + ") ");
+    return r;
+  }, enyo.dom.transformsToDom = function(e) {
+    var t = this.domTransformsToCss(e.domTransforms);
+    var n = e.hasNode() ? e.node.style : null;
+    var r = e.domStyles;
+    var i = this.getStyleTransformProp();
+    var s = this.getCssTransformProp();
+    i && s && (r[s] = t, n ? n[i] = t : e.domStylesChanged());
+  }, enyo.dom.canTransform = function() {
+  return Boolean(this.getStyleTransformProp());
+  }, enyo.dom.canAccelerate = function() {
+  return this.accelerando !== undefined ? this.accelerando : document.body && (this.accelerando = this.calcCanAccelerate());
+  }, enyo.dom.transform = function(e, t) {
+  var n = e.domTransforms = e.domTransforms || {};
+  enyo.mixin(n, t), this.transformsToDom(e);
+  }, enyo.dom.transformValue = function(e, t, n) {
+  var r = e.domTransforms = e.domTransforms || {};
+  r[t] = n, this.transformsToDom(e);
+  }, enyo.dom.accelerate = function(e, t) {
+  var n = t == "auto" ? this.canAccelerate() : t;
+  this.transformValue(e, "translateZ", n ? 0 : null);
+  };
+}))();
 
 // Control.js
 
@@ -1309,134 +1353,134 @@ defaultKind: "Control",
 controlClasses: "",
 node: null,
 generated: !1,
-create: function() {
-this.initStyles(), this.inherited(arguments), this.showingChanged(), this.addClass(this.kindClasses), this.addClass(this.classes), this.initProps([ "id", "content", "src" ]);
+create(...args) {
+this.initStyles(), this.inherited(args), this.showingChanged(), this.addClass(this.kindClasses), this.addClass(this.classes), this.initProps([ "id", "content", "src" ]);
 },
-destroy: function() {
-this.removeNodeFromDom(), enyo.Control.unregisterDomEvents(this.id), this.inherited(arguments);
+destroy(...args) {
+this.removeNodeFromDom(), enyo.Control.unregisterDomEvents(this.id), this.inherited(args);
 },
-importProps: function(e) {
+importProps(e) {
 this.inherited(arguments), this.attributes = enyo.mixin(enyo.clone(this.kindAttributes), this.attributes);
 },
-initProps: function(e) {
+initProps(e) {
 for (var t = 0, n, r; n = e[t]; t++) this[n] && (r = n + "Changed", this[r] && this[r]());
 },
-classesChanged: function(e) {
+classesChanged(e) {
 this.removeClass(e), this.addClass(this.classes);
 },
-addChild: function(e) {
+addChild(e) {
 e.addClass(this.controlClasses), this.inherited(arguments);
 },
-removeChild: function(e) {
+removeChild(e) {
 this.inherited(arguments), e.removeClass(this.controlClasses);
 },
 strictlyInternalEvents: {
 onenter: 1,
 onleave: 1
 },
-dispatchEvent: function(e, t, n) {
+dispatchEvent(e, t, n) {
 return this.strictlyInternalEvents[e] && this.isInternalEvent(t) ? !0 : this.inherited(arguments);
 },
-isInternalEvent: function(e) {
+isInternalEvent(e) {
 var t = enyo.dispatcher.findDispatchTarget(e.relatedTarget);
 return t && t.isDescendantOf(this);
 },
-hasNode: function() {
+hasNode() {
 return this.generated && (this.node || this.findNodeById());
 },
-addContent: function(e) {
+addContent(e) {
 this.setContent(this.content + e);
 },
-getAttribute: function(e) {
+getAttribute(e) {
 return this.hasNode() ? this.node.getAttribute(e) : this.attributes[e];
 },
-setAttribute: function(e, t) {
+setAttribute(e, t) {
 this.attributes[e] = t, this.hasNode() && this.attributeToNode(e, t), this.invalidateTags();
 },
-getNodeProperty: function(e, t) {
+getNodeProperty(e, t) {
 return this.hasNode() ? this.node[e] : t;
 },
-setNodeProperty: function(e, t) {
+setNodeProperty(e, t) {
 this.hasNode() && (this.node[e] = t);
 },
-setClassAttribute: function(e) {
+setClassAttribute(e) {
 this.setAttribute("class", e);
 },
-getClassAttribute: function() {
+getClassAttribute() {
 return this.attributes["class"] || "";
 },
-hasClass: function(e) {
+hasClass(e) {
 return e && (" " + this.getClassAttribute() + " ").indexOf(" " + e + " ") >= 0;
 },
-addClass: function(e) {
+addClass(e) {
 if (e && !this.hasClass(e)) {
 var t = this.getClassAttribute();
 this.setClassAttribute(t + (t ? " " : "") + e);
 }
 },
-removeClass: function(e) {
+removeClass(e) {
 if (e && this.hasClass(e)) {
 var t = this.getClassAttribute();
 t = (" " + t + " ").replace(" " + e + " ", " ").slice(1, -1), this.setClassAttribute(t);
 }
 },
-addRemoveClass: function(e, t) {
+addRemoveClass(e, t) {
 this[t ? "addClass" : "removeClass"](e);
 },
-initStyles: function() {
+initStyles() {
 this.domStyles = this.domStyles || {}, enyo.Control.cssTextToDomStyles(this.kindStyle, this.domStyles), this.domCssText = enyo.Control.domStylesToCssText(this.domStyles);
 },
-styleChanged: function() {
+styleChanged() {
 this.invalidateTags(), this.renderStyles();
 },
-applyStyle: function(e, t) {
+applyStyle(e, t) {
 this.domStyles[e] = t, this.domStylesChanged();
 },
-addStyles: function(e) {
+addStyles(e) {
 enyo.Control.cssTextToDomStyles(e, this.domStyles), this.domStylesChanged();
 },
-getComputedStyleValue: function(e, t) {
+getComputedStyleValue(e, t) {
 return this.hasNode() ? enyo.dom.getComputedStyleValue(this.node, e) : t;
 },
-domStylesChanged: function() {
+domStylesChanged() {
 this.domCssText = enyo.Control.domStylesToCssText(this.domStyles), this.invalidateTags(), this.renderStyles();
 },
-stylesToNode: function() {
+stylesToNode() {
 this.node.style.cssText = this.style + (this.style[this.style.length - 1] == ";" ? " " : "; ") + this.domCssText;
 },
-setupBodyFitting: function() {
+setupBodyFitting() {
 enyo.dom.applyBodyFit(), this.addClass("enyo-fit enyo-clip");
 },
-setupOverflowScrolling: function() {
+setupOverflowScrolling() {
 if (enyo.platform.android || enyo.platform.androidChrome) return;
 document.getElementsByTagName("body")[0].className += " webkitOverflowScrolling";
 },
-render: function() {
+render() {
 if (this.parent) {
 this.parent.beforeChildRender(this);
 if (!this.parent.generated) return this;
 }
 return this.hasNode() || this.renderNode(), this.hasNode() && (this.renderDom(), this.rendered()), this;
 },
-renderInto: function(e) {
+renderInto(e) {
 this.teardownRender();
 var t = enyo.dom.byId(e);
 return t == document.body ? this.setupBodyFitting() : this.fit && this.addClass("enyo-fit enyo-clip"), this.setupOverflowScrolling(), t.innerHTML = this.generateHtml(), this.rendered(), this;
 },
-write: function() {
+write() {
 return this.fit && this.setupBodyFitting(), this.setupOverflowScrolling(), document.write(this.generateHtml()), this.rendered(), this;
 },
-rendered: function() {
+rendered() {
 this.reflow();
 for (var e = 0, t; t = this.children[e]; e++) t.rendered();
 },
-show: function() {
+show() {
 this.setShowing(!0);
 },
-hide: function() {
+hide() {
 this.setShowing(!1);
 },
-getBounds: function() {
+getBounds() {
 var e = this.node || this.hasNode() || 0;
 return {
 left: e.offsetLeft,
@@ -1445,41 +1489,44 @@ width: e.offsetWidth,
 height: e.offsetHeight
 };
 },
-setBounds: function(e, t) {
-var n = this.domStyles, r = t || "px", i = [ "width", "height", "left", "top", "right", "bottom" ];
-for (var s = 0, o, u; u = i[s]; s++) {
-o = e[u];
-if (o || o === 0) n[u] = o + (enyo.isString(o) ? "" : r);
-}
-this.domStylesChanged();
+setBounds(e, t) {
+  var n = this.domStyles;
+  var r = t || "px";
+  var i = [ "width", "height", "left", "top", "right", "bottom" ];
+  for (var s = 0, o, u; u = i[s]; s++) {
+  o = e[u];
+  if (o || o === 0) n[u] = o + (enyo.isString(o) ? "" : r);
+  }
+  this.domStylesChanged();
 },
-findNodeById: function() {
+findNodeById() {
 return this.id && (this.node = enyo.dom.byId(this.id));
 },
-idChanged: function(e) {
+idChanged(e) {
 e && enyo.Control.unregisterDomEvents(e), this.setAttribute("id", this.id), this.id && enyo.Control.registerDomEvents(this.id, this);
 },
-contentChanged: function() {
+contentChanged() {
 this.hasNode() && this.renderContent();
 },
-getSrc: function() {
+getSrc() {
 return this.getAttribute("src");
 },
-srcChanged: function() {
+srcChanged() {
 this.setAttribute("src", enyo.path.rewrite(this.src));
 },
-attributesChanged: function() {
+attributesChanged() {
 this.invalidateTags(), this.renderAttributes();
 },
-generateHtml: function() {
-if (this.canGenerate === !1) return "";
-var e = this.generateInnerHtml(), t = this.generateOuterHtml(e);
-return this.generated = !0, t;
+generateHtml() {
+  if (this.canGenerate === !1) return "";
+  var e = this.generateInnerHtml();
+  var t = this.generateOuterHtml(e);
+  return this.generated = !0, t;
 },
-generateInnerHtml: function() {
+generateInnerHtml() {
 return this.flow(), this.children.length ? this.generateChildHtml() : this.allowHtml ? this.content : enyo.Control.escapeHtml(this.content);
 },
-generateChildHtml: function() {
+generateChildHtml() {
 var e = "";
 for (var t = 0, n; n = this.children[t]; t++) {
 var r = n.generateHtml();
@@ -1487,85 +1534,85 @@ e += r;
 }
 return e;
 },
-generateOuterHtml: function(e) {
+generateOuterHtml(e) {
 return this.tag ? (this.tagsValid || this.prepareTags(), this._openTag + e + this._closeTag) : e;
 },
-invalidateTags: function() {
+invalidateTags() {
 this.tagsValid = !1;
 },
-prepareTags: function() {
+prepareTags() {
 var e = this.domCssText + this.style;
 this._openTag = "<" + this.tag + (e ? ' style="' + e + '"' : "") + enyo.Control.attributesToHtml(this.attributes), enyo.Control.selfClosing[this.tag] ? (this._openTag += "/>", this._closeTag = "") : (this._openTag += ">", this._closeTag = "</" + this.tag + ">"), this.tagsValid = !0;
 },
-attributeToNode: function(e, t) {
+attributeToNode(e, t) {
 t === null || t === !1 || t === "" ? this.node.removeAttribute(e) : this.node.setAttribute(e, t);
 },
-attributesToNode: function() {
+attributesToNode() {
 for (var e in this.attributes) this.attributeToNode(e, this.attributes[e]);
 },
-getParentNode: function() {
+getParentNode() {
 return this.parentNode || this.parent && (this.parent.hasNode() || this.parent.getParentNode());
 },
-addNodeToParent: function() {
+addNodeToParent() {
 if (this.node) {
 var e = this.getParentNode();
 e && (this.addBefore !== undefined ? this.insertNodeInParent(e, this.addBefore && this.addBefore.hasNode()) : this.appendNodeToParent(e));
 }
 },
-appendNodeToParent: function(e) {
+appendNodeToParent(e) {
 e.appendChild(this.node);
 },
-insertNodeInParent: function(e, t) {
+insertNodeInParent(e, t) {
 e.insertBefore(this.node, t || e.firstChild);
 },
-removeNodeFromDom: function() {
+removeNodeFromDom() {
 this.hasNode() && this.node.parentNode && this.node.parentNode.removeChild(this.node);
 },
-teardownRender: function() {
+teardownRender() {
 this.generated && this.teardownChildren(), this.node = null, this.generated = !1;
 },
-teardownChildren: function() {
+teardownChildren() {
 for (var e = 0, t; t = this.children[e]; e++) t.teardownRender();
 },
-renderNode: function() {
+renderNode() {
 this.teardownRender(), this.node = document.createElement(this.tag), this.addNodeToParent(), this.generated = !0;
 },
-renderDom: function() {
+renderDom() {
 this.renderAttributes(), this.renderStyles(), this.renderContent();
 },
-renderContent: function() {
+renderContent() {
 this.generated && this.teardownChildren(), this.node.innerHTML = this.generateInnerHtml();
 },
-renderStyles: function() {
+renderStyles() {
 this.hasNode() && this.stylesToNode();
 },
-renderAttributes: function() {
+renderAttributes() {
 this.hasNode() && this.attributesToNode();
 },
-beforeChildRender: function() {
+beforeChildRender() {
 this.generated && this.flow();
 },
-syncDisplayToShowing: function() {
+syncDisplayToShowing() {
 var e = this.domStyles;
 this.showing ? e.display == "none" && this.applyStyle("display", this._displayStyle || "") : (this._displayStyle = e.display == "none" ? "" : e.display, this.applyStyle("display", "none"));
 },
-showingChanged: function() {
+showingChanged() {
 this.syncDisplayToShowing();
 },
-getShowing: function() {
+getShowing() {
 return this.showing = this.domStyles.display != "none";
 },
-fitChanged: function(e) {
+fitChanged(e) {
 this.parent.reflow();
 },
 statics: {
-escapeHtml: function(e) {
+escapeHtml(e) {
 return e != null ? String(e).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;") : "";
 },
-registerDomEvents: function(e, t) {
+registerDomEvents(e, t) {
 enyo.$[e] = t;
 },
-unregisterDomEvents: function(e) {
+unregisterDomEvents(e) {
 enyo.$[e] = null;
 },
 selfClosing: {
@@ -1587,31 +1634,35 @@ source: 1,
 track: 1,
 col: 1
 },
-cssTextToDomStyles: function(e, t) {
+cssTextToDomStyles(e, t) {
 if (e) {
 var n = e.replace(/; /g, ";").split(";");
 for (var r = 0, i, s, o, u; u = n[r]; r++) i = u.split(":"), s = i.shift(), o = i.join(":"), t[s] = o;
 }
 },
-domStylesToCssText: function(e) {
-var t, n, r = "";
-for (t in e) n = e[t], n !== null && n !== undefined && n !== "" && (r += t + ":" + n + ";");
-return r;
+domStylesToCssText(e) {
+  var t;
+  var n;
+  var r = "";
+  for (t in e) n = e[t], n !== null && n !== undefined && n !== "" && (r += t + ":" + n + ";");
+  return r;
 },
-stylesToHtml: function(e) {
+stylesToHtml(e) {
 var t = enyo.Control.domStylesToCssText(e);
 return t ? ' style="' + t + '"' : "";
 },
-escapeAttribute: function(e) {
+escapeAttribute(e) {
 return enyo.isString(e) ? String(e).replace(/&/g, "&amp;").replace(/\"/g, "&quot;") : e;
 },
-attributesToHtml: function(e) {
-var t, n, r = "";
-for (t in e) n = e[t], n !== null && n !== !1 && n !== "" && (r += " " + t + '="' + enyo.Control.escapeAttribute(n) + '"');
-return r;
+attributesToHtml(e) {
+  var t;
+  var n;
+  var r = "";
+  for (t in e) n = e[t], n !== null && n !== !1 && n !== "" && (r += " " + t + '="' + enyo.Control.escapeAttribute(n) + '"');
+  return r;
 }
 }
-}), enyo.defaultCtor = enyo.Control, enyo.Control.subclass = function(e, t) {
+}), enyo.defaultCtor = enyo.Control, enyo.Control.subclass = (e, t) => {
 var n = e.prototype;
 if (n.classes) {
 var r = n.kindClasses;
@@ -1632,103 +1683,104 @@ n.kindAttributes = enyo.mixin(enyo.clone(s), n.attributes), n.attributes = null;
 enyo.platform = {
 touch: Boolean("ontouchstart" in window || window.navigator.msPointerEnabled),
 gesture: Boolean("ongesturestart" in window || window.navigator.msPointerEnabled)
-}, function() {
-var e = navigator.userAgent, t = enyo.platform, n = [ {
-platform: "androidChrome",
-regex: /Android .* Chrome\/(\d+)[.\d]+/
-}, {
-platform: "android",
-regex: /Android (\d+)/
-}, {
-platform: "android",
-regex: /Silk\/1./,
-forceVersion: 2
-}, {
-platform: "android",
-regex: /Silk\/2./,
-forceVersion: 4
-}, {
-platform: "ie",
-regex: /MSIE (\d+)/
-}, {
-platform: "ios",
-regex: /iP(?:hone|ad;(?: U;)? CPU) OS (\d+)/
-}, {
-platform: "webos",
-regex: /(?:web|hpw)OS\/(\d+)/
-}, {
-platform: "safari",
-regex: /Version\/(\d+)[.\d]+\s+Safari/
-}, {
-platform: "chrome",
-regex: /Chrome\/(\d+)[.\d]+/
-}, {
-platform: "androidFirefox",
-regex: /Android;.*Firefox\/(\d+)/
-}, {
-platform: "firefox",
-regex: /Firefox\/(\d+)/
-} ];
-for (var r = 0, i, s, o; i = n[r]; r++) {
-s = i.regex.exec(e);
-if (s) {
-i.forceVersion ? o = i.forceVersion : o = Number(s[1]), t[i.platform] = o;
-break;
-}
-}
-enyo.dumbConsole = Boolean(t.android || t.ios || t.webos);
-}();
+}, (() => {
+  var e = navigator.userAgent;
+  var t = enyo.platform;
+
+  var n = [ {
+  platform: "androidChrome",
+  regex: /Android .* Chrome\/(\d+)[.\d]+/
+  }, {
+  platform: "android",
+  regex: /Android (\d+)/
+  }, {
+  platform: "android",
+  regex: /Silk\/1./,
+  forceVersion: 2
+  }, {
+  platform: "android",
+  regex: /Silk\/2./,
+  forceVersion: 4
+  }, {
+  platform: "ie",
+  regex: /MSIE (\d+)/
+  }, {
+  platform: "ios",
+  regex: /iP(?:hone|ad;(?: U;)? CPU) OS (\d+)/
+  }, {
+  platform: "webos",
+  regex: /(?:web|hpw)OS\/(\d+)/
+  }, {
+  platform: "safari",
+  regex: /Version\/(\d+)[.\d]+\s+Safari/
+  }, {
+  platform: "chrome",
+  regex: /Chrome\/(\d+)[.\d]+/
+  }, {
+  platform: "androidFirefox",
+  regex: /Android;.*Firefox\/(\d+)/
+  }, {
+  platform: "firefox",
+  regex: /Firefox\/(\d+)/
+  } ];
+
+  for (var r = 0, i, s, o; i = n[r]; r++) {
+  s = i.regex.exec(e);
+  if (s) {
+  i.forceVersion ? o = i.forceVersion : o = Number(s[1]), t[i.platform] = o;
+  break;
+  }
+  }
+  enyo.dumbConsole = Boolean(t.android || t.ios || t.webos);
+})();
 
 // animation.js
 
-(function() {
-var e = Math.round(1e3 / 60), t = [ "webkit", "moz", "ms", "o", "" ], n = "requestAnimationFrame", r = "cancel" + enyo.cap(n), i = function(t) {
-return window.setTimeout(t, e);
-}, s = function(e) {
-return window.clearTimeout(e);
-};
-for (var o = 0, u = t.length, a, f, l; (a = t[o]) || o < u; o++) {
-if (enyo.platform.ios >= 6) break;
-f = a ? a + enyo.cap(r) : r, l = a ? a + enyo.cap(n) : n;
-if (window[f]) {
-s = window[f], i = window[l], a == "webkit" && s(i(enyo.nop));
-break;
-}
-}
-enyo.requestAnimationFrame = function(e, t) {
-return i(e, t);
-}, enyo.cancelRequestAnimationFrame = function(e) {
-return s(e);
-};
-})(), enyo.easing = {
-cubicIn: function(e) {
-return Math.pow(e, 3);
+((() => {
+  var e = Math.round(1e3 / 60);
+  var t = [ "webkit", "moz", "ms", "o", "" ];
+  var n = "requestAnimationFrame";
+  var r = "cancel" + enyo.cap(n);
+  var i = t => window.setTimeout(t, e);
+  var s = e => window.clearTimeout(e);
+  for (var o = 0, u = t.length, a, f, l; (a = t[o]) || o < u; o++) {
+  if (enyo.platform.ios >= 6) break;
+  f = a ? a + enyo.cap(r) : r, l = a ? a + enyo.cap(n) : n;
+  if (window[f]) {
+  s = window[f], i = window[l], a == "webkit" && s(i(enyo.nop));
+  break;
+  }
+  }
+  enyo.requestAnimationFrame = (e, t) => i(e, t), enyo.cancelRequestAnimationFrame = e => s(e);
+}))(), enyo.easing = {
+cubicIn(e) {
+return e ** 3;
 },
-cubicOut: function(e) {
-return Math.pow(e - 1, 3) + 1;
+cubicOut(e) {
+return (e - 1) ** 3 + 1;
 },
-expoOut: function(e) {
-return e == 1 ? 1 : -1 * Math.pow(2, -10 * e) + 1;
+expoOut(e) {
+return e == 1 ? 1 : -1 * (2 ** (-10 * e)) + 1;
 },
-quadInOut: function(e) {
-return e *= 2, e < 1 ? Math.pow(e, 2) / 2 : -1 * (--e * (e - 2) - 1) / 2;
+quadInOut(e) {
+return e *= 2, e < 1 ? e ** 2 / 2 : -1 * (--e * (e - 2) - 1) / 2;
 },
-linear: function(e) {
+linear(e) {
 return e;
 }
-}, enyo.easedLerp = function(e, t, n, r) {
+}, enyo.easedLerp = (e, t, n, r) => {
 var i = (enyo.now() - e) / t;
 return r ? i >= 1 ? 0 : 1 - n(1 - i) : i >= 1 ? 1 : n(i);
 };
 
 // phonegap.js
 
-(function() {
+((() => {
 if (window.cordova || window.PhoneGap) {
 var e = [ "deviceready", "pause", "resume", "online", "offline", "backbutton", "batterycritical", "batterylow", "batterystatus", "menubutton", "searchbutton", "startcallbutton", "endcallbutton", "volumedownbutton", "volumeupbutton" ];
 for (var t = 0, n; n = e[t]; t++) document.addEventListener(n, enyo.bind(enyo.Signals, "send", "on" + n), !1);
 }
-})();
+}))();
 
 // dispatcher.js
 
@@ -1736,101 +1788,107 @@ enyo.$ = {}, enyo.dispatcher = {
 events: [ "mousedown", "mouseup", "mouseover", "mouseout", "mousemove", "mousewheel", "click", "dblclick", "change", "keydown", "keyup", "keypress", "input" ],
 windowEvents: [ "resize", "load", "unload", "message" ],
 features: [],
-connect: function() {
-var e = enyo.dispatcher, t, n;
-for (t = 0; n = e.events[t]; t++) e.listen(document, n);
-for (t = 0; n = e.windowEvents[t]; t++) {
-if (n === "unload" && typeof window.chrome == "object" && window.chrome.app) continue;
-e.listen(window, n);
-}
+connect() {
+  var e = enyo.dispatcher;
+  var t;
+  var n;
+  for (t = 0; n = e.events[t]; t++) e.listen(document, n);
+  for (t = 0; n = e.windowEvents[t]; t++) {
+  if (n === "unload" && typeof window.chrome == "object" && window.chrome.app) continue;
+  e.listen(window, n);
+  }
 },
-listen: function(e, t, n) {
+listen(e, t, n) {
 var r = enyo.dispatch;
-e.addEventListener ? this.listen = function(e, t, n) {
+e.addEventListener ? this.listen = (e, t, n) => {
 e.addEventListener(t, n || r, !1);
-} : this.listen = function(e, t, n) {
-e.attachEvent("on" + t, function(e) {
-return e.target = e.srcElement, e.preventDefault || (e.preventDefault = enyo.iePreventDefault), (n || r)(e);
-});
+} : this.listen = (e, t, n) => {
+e.attachEvent("on" + t, e => (e.target = e.srcElement, e.preventDefault || (e.preventDefault = enyo.iePreventDefault), (n || r)(e)));
 }, this.listen(e, t, n);
 },
-dispatch: function(e) {
+dispatch(e) {
 var t = this.findDispatchTarget(e.target) || this.findDefaultTarget(e);
 e.dispatchTarget = t;
 for (var n = 0, r; r = this.features[n]; n++) if (r.call(this, e) === !0) return;
 t && !e.preventDispatch && this.dispatchBubble(e, t);
 },
-findDispatchTarget: function(e) {
-var t, n = e;
-try {
-while (n) {
-if (t = enyo.$[n.id]) {
-t.eventNode = n;
-break;
-}
-n = n.parentNode;
-}
-} catch (r) {
-console.log(r, n);
-}
-return t;
+findDispatchTarget(e) {
+  var t;
+  var n = e;
+  try {
+  while (n) {
+  if (t = enyo.$[n.id]) {
+  t.eventNode = n;
+  break;
+  }
+  n = n.parentNode;
+  }
+  } catch (r) {
+  console.log(r, n);
+  }
+  return t;
 },
-findDefaultTarget: function(e) {
+findDefaultTarget(e) {
 return enyo.master;
 },
-dispatchBubble: function(e, t) {
+dispatchBubble(e, t) {
 return t.bubble("on" + e.type, e, t);
 }
 }, enyo.iePreventDefault = function() {
 this.returnValue = !1;
-}, enyo.dispatch = function(e) {
-return enyo.dispatcher.dispatch(e);
-}, enyo.bubble = function(e) {
+}, enyo.dispatch = e => enyo.dispatcher.dispatch(e), enyo.bubble = e => {
 var t = e || window.event;
 t && (t.target || (t.target = t.srcElement), enyo.dispatch(t));
-}, enyo.bubbler = "enyo.bubble(arguments[0])", function() {
-var e = function() {
-enyo.bubble(arguments[0]);
+}, enyo.bubbler = "enyo.bubble(arguments[0])", (() => {
+var e = function(...args) {
+enyo.bubble(args[0]);
 };
-enyo.makeBubble = function() {
-var t = Array.prototype.slice.call(arguments, 0), n = t.shift();
-typeof n == "object" && typeof n.hasNode == "function" && enyo.forEach(t, function(t) {
-this.hasNode() && enyo.dispatcher.listen(this.node, t, e);
-}, n);
+enyo.makeBubble = function(...args) {
+  var t = Array.prototype.slice.call(args, 0);
+  var n = t.shift();
+  typeof n == "object" && typeof n.hasNode == "function" && enyo.forEach(t, function(t) {
+  this.hasNode() && enyo.dispatcher.listen(this.node, t, e);
+  }, n);
 };
-}(), enyo.requiresWindow(enyo.dispatcher.connect);
+})(), enyo.requiresWindow(enyo.dispatcher.connect);
 
 // preview.js
 
-(function() {
-var e = "previewDomEvent", t = {
-feature: function(e) {
-t.dispatch(e, e.dispatchTarget);
-},
-dispatch: function(t, n) {
-var r = this.buildLineage(n);
-for (var i = 0, s; s = r[i]; i++) if (s[e] && s[e](t) === !0) {
-t.preventDispatch = !0;
-return;
-}
-},
-buildLineage: function(e) {
-var t = [], n = e;
-while (n) t.unshift(n), n = n.parent;
-return t;
-}
-};
-enyo.dispatcher.features.push(t.feature);
-})();
+((() => {
+  var e = "previewDomEvent";
+
+  var t = {
+  feature(e) {
+  t.dispatch(e, e.dispatchTarget);
+  },
+  dispatch(t, n) {
+  var r = this.buildLineage(n);
+  for (var i = 0, s; s = r[i]; i++) if (s[e] && s[e](t) === !0) {
+  t.preventDispatch = !0;
+  return;
+  }
+  },
+  buildLineage(e) {
+  var t = [], n = e;
+  while (n) t.unshift(n), n = n.parent;
+  return t;
+  }
+  };
+
+  enyo.dispatcher.features.push(t.feature);
+}))();
 
 // modal.js
 
 enyo.dispatcher.features.push(function(e) {
-var t = e.dispatchTarget, n = this.captureTarget && !this.noCaptureEvents[e.type], r = n && !(t && t.isDescendantOf && t.isDescendantOf(this.captureTarget));
-if (r) {
-var i = e.captureTarget = this.captureTarget, s = this.autoForwardEvents[e.type] || this.forwardEvents;
-this.dispatchBubble(e, i), s || (e.preventDispatch = !0);
-}
+  var t = e.dispatchTarget;
+  var n = this.captureTarget && !this.noCaptureEvents[e.type];
+  var r = n && !(t && t.isDescendantOf && t.isDescendantOf(this.captureTarget));
+  if (r) {
+    var i = e.captureTarget = this.captureTarget;
+    var s = this.autoForwardEvents[e.type] || this.forwardEvents;
+    this.dispatchBubble(e, i), s || (e.preventDispatch = !0);
+  }
 }), enyo.mixin(enyo.dispatcher, {
 noCaptureEvents: {
 load: 1,
@@ -1842,17 +1900,17 @@ leave: 1,
 resize: 1
 },
 captures: [],
-capture: function(e, t) {
+capture(e, t) {
 var n = {
 target: e,
 forward: t
 };
 this.captures.push(n), this.setCaptureInfo(n);
 },
-release: function() {
+release() {
 this.captures.pop(), this.setCaptureInfo(this.captures[this.captures.length - 1]);
 },
-setCaptureInfo: function(e) {
+setCaptureInfo(e) {
 this.captureTarget = e && e.target, this.forwardEvents = e && e.forward;
 }
 });
@@ -1861,7 +1919,7 @@ this.captureTarget = e && e.target, this.forwardEvents = e && e.forward;
 
 enyo.gesture = {
 eventProps: [ "target", "relatedTarget", "clientX", "clientY", "pageX", "pageY", "screenX", "screenY", "altKey", "ctrlKey", "metaKey", "shiftKey", "detail", "identifier", "dispatchTarget", "which", "srcEvent" ],
-makeEvent: function(e, t) {
+makeEvent(e, t) {
 var n = {
 type: e
 };
@@ -1874,41 +1932,42 @@ n.which = s & 1 ? 1 : s & 2 ? 2 : s & 4 ? 3 : 0;
 } else (enyo.platform.webos || window.PalmSystem) && n.which === 0 && (n.which = 1);
 return n;
 },
-down: function(e) {
+down(e) {
 var t = this.makeEvent("down", e);
 enyo.dispatch(t), this.downEvent = t;
 },
-move: function(e) {
+move(e) {
 var t = this.makeEvent("move", e);
 t.dx = t.dy = t.horizontal = t.vertical = 0, t.which && this.downEvent && (t.dx = e.clientX - this.downEvent.clientX, t.dy = e.clientY - this.downEvent.clientY, t.horizontal = Math.abs(t.dx) > Math.abs(t.dy), t.vertical = !t.horizontal), enyo.dispatch(t);
 },
-up: function(e) {
-var t = this.makeEvent("up", e), n = !1;
-t.preventTap = function() {
-n = !0;
-}, enyo.dispatch(t), !n && this.downEvent && this.downEvent.which == 1 && this.sendTap(t), this.downEvent = null;
+up(e) {
+  var t = this.makeEvent("up", e);
+  var n = !1;
+  t.preventTap = () => {
+  n = !0;
+  }, enyo.dispatch(t), !n && this.downEvent && this.downEvent.which == 1 && this.sendTap(t), this.downEvent = null;
 },
-over: function(e) {
+over(e) {
 enyo.dispatch(this.makeEvent("enter", e));
 },
-out: function(e) {
+out(e) {
 enyo.dispatch(this.makeEvent("leave", e));
 },
-sendTap: function(e) {
+sendTap(e) {
 var t = this.findCommonAncestor(this.downEvent.target, e.target);
 if (t) {
 var n = this.makeEvent("tap", e);
 n.target = t, enyo.dispatch(n);
 }
 },
-findCommonAncestor: function(e, t) {
+findCommonAncestor(e, t) {
 var n = t;
 while (n) {
 if (this.isTargetDescendantOf(e, n)) return n;
 n = n.parentNode;
 }
 },
-isTargetDescendantOf: function(e, t) {
+isTargetDescendantOf(e, t) {
 var n = e;
 while (n) {
 if (n == t) return !0;
@@ -1919,28 +1978,28 @@ n = n.parentNode;
 this.srcEvent && this.srcEvent.preventDefault();
 }, enyo.gesture.disablePrevention = function() {
 this.preventDefault = enyo.nop, this.srcEvent && (this.srcEvent.preventDefault = enyo.nop);
-}, enyo.dispatcher.features.push(function(e) {
+}, enyo.dispatcher.features.push(e => {
 if (enyo.gesture.events[e.type]) return enyo.gesture.events[e.type](e);
 }), enyo.gesture.events = {
-mousedown: function(e) {
+mousedown(e) {
 enyo.gesture.down(e);
 },
-mouseup: function(e) {
+mouseup(e) {
 enyo.gesture.up(e);
 },
-mousemove: function(e) {
+mousemove(e) {
 enyo.gesture.move(e);
 },
-mouseover: function(e) {
+mouseover(e) {
 enyo.gesture.over(e);
 },
-mouseout: function(e) {
+mouseout(e) {
 enyo.gesture.out(e);
 }
-}, enyo.requiresWindow(function() {
-document.addEventListener && document.addEventListener("DOMMouseScroll", function(e) {
+}, enyo.requiresWindow(() => {
+document.addEventListener && document.addEventListener("DOMMouseScroll", e => {
 var t = enyo.clone(e);
-t.preventDefault = function() {
+t.preventDefault = () => {
 e.preventDefault();
 }, t.type = "mousewheel";
 var n = t.VERTICAL_AXIS == t.axis ? "wheelDeltaY" : "wheelDeltaX";
@@ -1950,7 +2009,7 @@ t[n] = t.detail * -12, enyo.dispatch(t);
 
 // drag.js
 
-enyo.dispatcher.features.push(function(e) {
+enyo.dispatcher.features.push(e => {
 if (enyo.gesture.drag[e.type]) return enyo.gesture.drag[e.type](e);
 }), enyo.gesture.drag = {
 hysteresisSquared: 16,
@@ -1958,10 +2017,10 @@ holdPulseDelay: 200,
 trackCount: 5,
 minFlick: .1,
 minTrack: 8,
-down: function(e) {
+down(e) {
 this.stopDragging(e), this.cancelHold(), this.target = e.target, this.startTracking(e), this.beginHold(e);
 },
-move: function(e) {
+move(e) {
 if (this.tracking) {
 this.track(e);
 if (!e.which) {
@@ -1971,75 +2030,81 @@ return;
 this.dragEvent ? this.sendDrag(e) : this.dy * this.dy + this.dx * this.dx >= this.hysteresisSquared && (this.sendDragStart(e), this.cancelHold());
 }
 },
-up: function(e) {
+up(e) {
 this.endTracking(e), this.stopDragging(e), this.cancelHold();
 },
-leave: function(e) {
+leave(e) {
 this.dragEvent && this.sendDragOut(e);
 },
-stopDragging: function(e) {
+stopDragging(e) {
 if (this.dragEvent) {
 this.sendDrop(e);
 var t = this.sendDragFinish(e);
 return this.dragEvent = null, t;
 }
 },
-makeDragEvent: function(e, t, n, r) {
-var i = Math.abs(this.dx), s = Math.abs(this.dy), o = i > s, u = (o ? s / i : i / s) < .414, a = {
-type: e,
-dx: this.dx,
-dy: this.dy,
-ddx: this.dx - this.lastDx,
-ddy: this.dy - this.lastDy,
-xDirection: this.xDirection,
-yDirection: this.yDirection,
-pageX: n.pageX,
-pageY: n.pageY,
-clientX: n.clientX,
-clientY: n.clientY,
-horizontal: o,
-vertical: !o,
-lockable: u,
-target: t,
-dragInfo: r,
-ctrlKey: n.ctrlKey,
-altKey: n.altKey,
-metaKey: n.metaKey,
-shiftKey: n.shiftKey,
-srcEvent: n.srcEvent
-};
-return enyo.platform.ie == 8 && a.target && (a.pageX = a.clientX + a.target.scrollLeft, a.pageY = a.clientY + a.target.scrollTop), a.preventDefault = enyo.gesture.preventDefault, a.disablePrevention = enyo.gesture.disablePrevention, a;
+makeDragEvent(e, t, n, r) {
+  var i = Math.abs(this.dx);
+  var s = Math.abs(this.dy);
+  var o = i > s;
+  var u = (o ? s / i : i / s) < .414;
+
+  var a = {
+  type: e,
+  dx: this.dx,
+  dy: this.dy,
+  ddx: this.dx - this.lastDx,
+  ddy: this.dy - this.lastDy,
+  xDirection: this.xDirection,
+  yDirection: this.yDirection,
+  pageX: n.pageX,
+  pageY: n.pageY,
+  clientX: n.clientX,
+  clientY: n.clientY,
+  horizontal: o,
+  vertical: !o,
+  lockable: u,
+  target: t,
+  dragInfo: r,
+  ctrlKey: n.ctrlKey,
+  altKey: n.altKey,
+  metaKey: n.metaKey,
+  shiftKey: n.shiftKey,
+  srcEvent: n.srcEvent
+  };
+
+  return enyo.platform.ie == 8 && a.target && (a.pageX = a.clientX + a.target.scrollLeft, a.pageY = a.clientY + a.target.scrollTop), a.preventDefault = enyo.gesture.preventDefault, a.disablePrevention = enyo.gesture.disablePrevention, a;
 },
-sendDragStart: function(e) {
+sendDragStart(e) {
 this.dragEvent = this.makeDragEvent("dragstart", this.target, e), enyo.dispatch(this.dragEvent);
 },
-sendDrag: function(e) {
+sendDrag(e) {
 var t = this.makeDragEvent("dragover", e.target, e, this.dragEvent.dragInfo);
 enyo.dispatch(t), t.type = "drag", t.target = this.dragEvent.target, enyo.dispatch(t);
 },
-sendDragFinish: function(e) {
+sendDragFinish(e) {
 var t = this.makeDragEvent("dragfinish", this.dragEvent.target, e, this.dragEvent.dragInfo);
-t.preventTap = function() {
+t.preventTap = () => {
 e.preventTap && e.preventTap();
 }, enyo.dispatch(t);
 },
-sendDragOut: function(e) {
+sendDragOut(e) {
 var t = this.makeDragEvent("dragout", e.target, e, this.dragEvent.dragInfo);
 enyo.dispatch(t);
 },
-sendDrop: function(e) {
+sendDrop(e) {
 var t = this.makeDragEvent("drop", e.target, e, this.dragEvent.dragInfo);
-t.preventTap = function() {
+t.preventTap = () => {
 e.preventTap && e.preventTap();
 }, enyo.dispatch(t);
 },
-startTracking: function(e) {
+startTracking(e) {
 this.tracking = !0, this.px0 = e.clientX, this.py0 = e.clientY, this.flickInfo = {
 startEvent: e,
 moves: []
 }, this.track(e);
 },
-track: function(e) {
+track(e) {
 this.lastDx = this.dx, this.lastDy = this.dy, this.dx = e.clientX - this.px0, this.dy = e.clientY - this.py0, this.xDirection = this.calcDirection(this.dx - this.lastDx, 0), this.yDirection = this.calcDirection(this.dy - this.lastDy, 0);
 var t = this.flickInfo;
 t.moves.push({
@@ -2048,44 +2113,46 @@ y: e.clientY,
 t: enyo.now()
 }), t.moves.length > this.trackCount && t.moves.shift();
 },
-endTracking: function(e) {
-this.tracking = !1;
-var t = this.flickInfo, n = t && t.moves;
-if (n && n.length > 1) {
-var r = n[n.length - 1], i = enyo.now();
-for (var s = n.length - 2, o = 0, u = 0, a = 0, f = 0, l = 0, c = 0, h = 0, p; p = n[s]; s--) {
-o = i - p.t, u = (r.x - p.x) / o, a = (r.y - p.y) / o, c = c || (u < 0 ? -1 : u > 0 ? 1 : 0), h = h || (a < 0 ? -1 : a > 0 ? 1 : 0);
-if (u * c > f * c || a * h > l * h) f = u, l = a;
-}
-var d = Math.sqrt(f * f + l * l);
-d > this.minFlick && this.sendFlick(t.startEvent, f, l, d);
-}
-this.flickInfo = null;
+endTracking(e) {
+  this.tracking = !1;
+  var t = this.flickInfo;
+  var n = t && t.moves;
+  if (n && n.length > 1) {
+    var r = n[n.length - 1];
+    var i = enyo.now();
+    for (var s = n.length - 2, o = 0, u = 0, a = 0, f = 0, l = 0, c = 0, h = 0, p; p = n[s]; s--) {
+    o = i - p.t, u = (r.x - p.x) / o, a = (r.y - p.y) / o, c = c || (u < 0 ? -1 : u > 0 ? 1 : 0), h = h || (a < 0 ? -1 : a > 0 ? 1 : 0);
+    if (u * c > f * c || a * h > l * h) f = u, l = a;
+    }
+    var d = Math.sqrt(f * f + l * l);
+    d > this.minFlick && this.sendFlick(t.startEvent, f, l, d);
+  }
+  this.flickInfo = null;
 },
-calcDirection: function(e, t) {
+calcDirection(e, t) {
 return e > 0 ? 1 : e < 0 ? -1 : t;
 },
-beginHold: function(e) {
+beginHold(e) {
 this.holdStart = enyo.now(), this.holdJob = setInterval(enyo.bind(this, "sendHoldPulse", e), this.holdPulseDelay);
 },
-cancelHold: function() {
+cancelHold() {
 clearInterval(this.holdJob), this.holdJob = null, this.sentHold && (this.sentHold = !1, this.sendRelease(this.holdEvent));
 },
-sendHoldPulse: function(e) {
+sendHoldPulse(e) {
 this.sentHold || (this.sentHold = !0, this.sendHold(e));
 var t = enyo.gesture.makeEvent("holdpulse", e);
 t.holdTime = enyo.now() - this.holdStart, enyo.dispatch(t);
 },
-sendHold: function(e) {
+sendHold(e) {
 this.holdEvent = e;
 var t = enyo.gesture.makeEvent("hold", e);
 enyo.dispatch(t);
 },
-sendRelease: function(e) {
+sendRelease(e) {
 var t = enyo.gesture.makeEvent("release", e);
 enyo.dispatch(t);
 },
-sendFlick: function(e, t, n, r) {
+sendFlick(e, t, n, r) {
 var i = enyo.gesture.makeEvent("flick", e);
 i.xVelocity = t, i.yVelocity = n, i.velocity = r, enyo.dispatch(i);
 }
@@ -2093,205 +2160,212 @@ i.xVelocity = t, i.yVelocity = n, i.velocity = r, enyo.dispatch(i);
 
 // touch.js
 
-enyo.requiresWindow(function() {
-var e = enyo.gesture, t = e.events;
-e.events.touchstart = function(t) {
-e.events = n, e.events.touchstart(t);
-};
-var n = {
-_touchCount: 0,
-touchstart: function(t) {
-enyo.job.stop("resetGestureEvents"), this._touchCount += t.changedTouches.length, this.excludedTarget = null;
-var n = this.makeEvent(t);
-e.down(n), n = this.makeEvent(t), this.overEvent = n, e.over(n);
-},
-touchmove: function(t) {
-enyo.job.stop("resetGestureEvents");
-var n = e.drag.dragEvent;
-this.excludedTarget = n && n.dragInfo && n.dragInfo.node;
-var r = this.makeEvent(t);
-e.move(r), enyo.bodyIsFitting && t.preventDefault(), this.overEvent && this.overEvent.target != r.target && (this.overEvent.relatedTarget = r.target, r.relatedTarget = this.overEvent.target, e.out(this.overEvent), e.over(r)), this.overEvent = r;
-},
-touchend: function(n) {
-e.up(this.makeEvent(n)), e.out(this.overEvent), this._touchCount -= n.changedTouches.length, enyo.platform.chrome && this._touchCount === 0 && enyo.job("resetGestureEvents", function() {
-e.events = t;
-}, 10);
-},
-makeEvent: function(e) {
-var t = enyo.clone(e.changedTouches[0]);
-return t.srcEvent = e, t.target = this.findTarget(t), t.which = 1, t;
-},
-calcNodeOffset: function(e) {
-if (e.getBoundingClientRect) {
-var t = e.getBoundingClientRect();
-return {
-left: t.left,
-top: t.top,
-width: t.width,
-height: t.height
-};
-}
-},
-findTarget: function(e) {
-return document.elementFromPoint(e.clientX, e.clientY);
-},
-findTargetTraverse: function(e, t, n) {
-var r = e || document.body, i = this.calcNodeOffset(r);
-if (i && r != this.excludedTarget) {
-var s = t - i.left, o = n - i.top;
-if (s > 0 && o > 0 && s <= i.width && o <= i.height) {
-var u;
-for (var a = r.childNodes, f = a.length - 1, l; l = a[f]; f--) {
-u = this.findTargetTraverse(l, t, n);
-if (u) return u;
-}
-return r;
-}
-}
-},
-connect: function() {
-enyo.forEach([ "ontouchstart", "ontouchmove", "ontouchend", "ongesturestart", "ongesturechange", "ongestureend" ], function(e) {
-document[e] = enyo.dispatch;
-}), enyo.platform.androidChrome <= 18 ? this.findTarget = function(e) {
-return document.elementFromPoint(e.screenX, e.screenY);
-} : document.elementFromPoint || (this.findTarget = function(e) {
-return this.findTargetTraverse(null, e.clientX, e.clientY);
-});
-}
-};
-n.connect();
+enyo.requiresWindow(() => {
+  var e = enyo.gesture;
+  var t = e.events;
+  e.events.touchstart = t => {
+  e.events = n, e.events.touchstart(t);
+  };
+  var n = {
+  _touchCount: 0,
+  touchstart(t) {
+  enyo.job.stop("resetGestureEvents"), this._touchCount += t.changedTouches.length, this.excludedTarget = null;
+  var n = this.makeEvent(t);
+  e.down(n), n = this.makeEvent(t), this.overEvent = n, e.over(n);
+  },
+  touchmove(t) {
+  enyo.job.stop("resetGestureEvents");
+  var n = e.drag.dragEvent;
+  this.excludedTarget = n && n.dragInfo && n.dragInfo.node;
+  var r = this.makeEvent(t);
+  e.move(r), enyo.bodyIsFitting && t.preventDefault(), this.overEvent && this.overEvent.target != r.target && (this.overEvent.relatedTarget = r.target, r.relatedTarget = this.overEvent.target, e.out(this.overEvent), e.over(r)), this.overEvent = r;
+  },
+  touchend(n) {
+  e.up(this.makeEvent(n)), e.out(this.overEvent), this._touchCount -= n.changedTouches.length, enyo.platform.chrome && this._touchCount === 0 && enyo.job("resetGestureEvents", () => {
+  e.events = t;
+  }, 10);
+  },
+  makeEvent(e) {
+  var t = enyo.clone(e.changedTouches[0]);
+  return t.srcEvent = e, t.target = this.findTarget(t), t.which = 1, t;
+  },
+  calcNodeOffset(e) {
+  if (e.getBoundingClientRect) {
+  var t = e.getBoundingClientRect();
+  return {
+  left: t.left,
+  top: t.top,
+  width: t.width,
+  height: t.height
+  };
+  }
+  },
+  findTarget(e) {
+  return document.elementFromPoint(e.clientX, e.clientY);
+  },
+  findTargetTraverse(e, t, n) {
+    var r = e || document.body;
+    var i = this.calcNodeOffset(r);
+    if (i && r != this.excludedTarget) {
+      var s = t - i.left;
+      var o = n - i.top;
+      if (s > 0 && o > 0 && s <= i.width && o <= i.height) {
+      var u;
+      for (var a = r.childNodes, f = a.length - 1, l; l = a[f]; f--) {
+      u = this.findTargetTraverse(l, t, n);
+      if (u) return u;
+      }
+      return r;
+      }
+    }
+  },
+  connect() {
+  enyo.forEach([ "ontouchstart", "ontouchmove", "ontouchend", "ongesturestart", "ongesturechange", "ongestureend" ], e => {
+  document[e] = enyo.dispatch;
+  }), enyo.platform.androidChrome <= 18 ? this.findTarget = e => document.elementFromPoint(e.screenX, e.screenY) : document.elementFromPoint || (this.findTarget = function(e) {
+  return this.findTargetTraverse(null, e.clientX, e.clientY);
+  });
+  }
+  };
+  n.connect();
 });
 
 // msevents.js
 
-(function() {
-if (window.navigator.msPointerEnabled) {
-var e = [ "MSPointerDown", "MSPointerUp", "MSPointerMove", "MSPointerOver", "MSPointerOut", "MSPointerCancel", "MSGestureTap", "MSGestureDoubleTap", "MSGestureHold", "MSGestureStart", "MSGestureChange", "MSGestureEnd" ];
-enyo.forEach(e, function(e) {
-enyo.dispatcher.listen(document, e);
-}), enyo.dispatcher.features.push(function(e) {
-n[e.type] && n[e.type](e);
-});
-}
-var t = function(e, t) {
-var n = enyo.clone(t);
-return enyo.mixin(n, {
-pageX: t.translationX || 0,
-pageY: t.translationY || 0,
-rotation: t.rotation * (180 / Math.PI) || 0,
-type: e,
-srcEvent: t,
-preventDefault: enyo.gesture.preventDefault,
-disablePrevention: enyo.gesture.disablePrevention
-});
-}, n = {
-MSGestureStart: function(e) {
-enyo.dispatch(t("gesturestart", e));
-},
-MSGestureChange: function(e) {
-enyo.dispatch(t("gesturechange", e));
-},
-MSGestureEnd: function(e) {
-enyo.dispatch(t("gestureend", e));
-}
-};
-})();
+((() => {
+  if (window.navigator.msPointerEnabled) {
+  var e = [ "MSPointerDown", "MSPointerUp", "MSPointerMove", "MSPointerOver", "MSPointerOut", "MSPointerCancel", "MSGestureTap", "MSGestureDoubleTap", "MSGestureHold", "MSGestureStart", "MSGestureChange", "MSGestureEnd" ];
+  enyo.forEach(e, e => {
+  enyo.dispatcher.listen(document, e);
+  }), enyo.dispatcher.features.push(e => {
+  n[e.type] && n[e.type](e);
+  });
+  }
+
+  var t = (e, t) => {
+  var n = enyo.clone(t);
+  return enyo.mixin(n, {
+  pageX: t.translationX || 0,
+  pageY: t.translationY || 0,
+  rotation: t.rotation * (180 / Math.PI) || 0,
+  type: e,
+  srcEvent: t,
+  preventDefault: enyo.gesture.preventDefault,
+  disablePrevention: enyo.gesture.disablePrevention
+  });
+  };
+
+  var n = {
+  MSGestureStart(e) {
+  enyo.dispatch(t("gesturestart", e));
+  },
+  MSGestureChange(e) {
+  enyo.dispatch(t("gesturechange", e));
+  },
+  MSGestureEnd(e) {
+  enyo.dispatch(t("gestureend", e));
+  }
+  };
+}))();
 
 // gesture.js
 
-(function() {
-!enyo.platform.gesture && enyo.platform.touch && enyo.dispatcher.features.push(function(n) {
-e[n.type] && t[n.type](n);
-});
-var e = {
-touchstart: !0,
-touchmove: !0,
-touchend: !0
-}, t = {
-orderedTouches: [],
-gesture: null,
-touchstart: function(e) {
-enyo.forEach(e.changedTouches, function(e) {
-var t = e.identifier;
-enyo.indexOf(t, this.orderedTouches) < 0 && this.orderedTouches.push(t);
-}, this);
-if (e.touches.length >= 2 && !this.gesture) {
-var t = this.gesturePositions(e);
-this.gesture = this.gestureVector(t), this.gesture.angle = this.gestureAngle(t), this.gesture.scale = 1, this.gesture.rotation = 0;
-var n = this.makeGesture("gesturestart", e, {
-vector: this.gesture,
-scale: 1,
-rotation: 0
-});
-enyo.dispatch(n);
-}
-},
-touchend: function(e) {
-enyo.forEach(e.changedTouches, function(e) {
-enyo.remove(e.identifier, this.orderedTouches);
-}, this);
-if (e.touches.length <= 1 && this.gesture) {
-var t = e.touches[0] || e.changedTouches[e.changedTouches.length - 1];
-enyo.dispatch(this.makeGesture("gestureend", e, {
-vector: {
-xcenter: t.pageX,
-ycenter: t.pageY
-},
-scale: this.gesture.scale,
-rotation: this.gesture.rotation
-})), this.gesture = null;
-}
-},
-touchmove: function(e) {
-if (this.gesture) {
-var t = this.makeGesture("gesturechange", e);
-this.gesture.scale = t.scale, this.gesture.rotation = t.rotation, enyo.dispatch(t);
-}
-},
-findIdentifiedTouch: function(e, t) {
-for (var n = 0, r; r = e[n]; n++) if (r.identifier === t) return r;
-},
-gesturePositions: function(e) {
-var t = this.findIdentifiedTouch(e.touches, this.orderedTouches[0]), n = this.findIdentifiedTouch(e.touches, this.orderedTouches[this.orderedTouches.length - 1]), r = t.pageX, i = n.pageX, s = t.pageY, o = n.pageY, u = i - r, a = o - s, f = Math.sqrt(u * u + a * a);
-return {
-x: u,
-y: a,
-h: f,
-fx: r,
-lx: i,
-fy: s,
-ly: o
-};
-},
-gestureAngle: function(e) {
-var t = e, n = Math.asin(t.y / t.h) * (180 / Math.PI);
-return t.x < 0 && (n = 180 - n), t.x > 0 && t.y < 0 && (n += 360), n;
-},
-gestureVector: function(e) {
-var t = e;
-return {
-magnitude: t.h,
-xcenter: Math.abs(Math.round(t.fx + t.x / 2)),
-ycenter: Math.abs(Math.round(t.fy + t.y / 2))
-};
-},
-makeGesture: function(e, t, n) {
-var r, i, s;
-if (n) r = n.vector, i = n.scale, s = n.rotation; else {
-var o = this.gesturePositions(t);
-r = this.gestureVector(o), i = r.magnitude / this.gesture.magnitude, s = (360 + this.gestureAngle(o) - this.gesture.angle) % 360;
-}
-var u = enyo.clone(t);
-return enyo.mixin(u, {
-type: e,
-scale: i,
-pageX: r.xcenter,
-pageY: r.ycenter,
-rotation: s
-});
-}
-};
-})();
+((() => {
+  !enyo.platform.gesture && enyo.platform.touch && enyo.dispatcher.features.push(n => {
+  e[n.type] && t[n.type](n);
+  });
+
+  var e = {
+  touchstart: !0,
+  touchmove: !0,
+  touchend: !0
+  };
+
+  var t = {
+  orderedTouches: [],
+  gesture: null,
+  touchstart(e) {
+  enyo.forEach(e.changedTouches, function(e) {
+  var t = e.identifier;
+  enyo.indexOf(t, this.orderedTouches) < 0 && this.orderedTouches.push(t);
+  }, this);
+  if (e.touches.length >= 2 && !this.gesture) {
+  var t = this.gesturePositions(e);
+  this.gesture = this.gestureVector(t), this.gesture.angle = this.gestureAngle(t), this.gesture.scale = 1, this.gesture.rotation = 0;
+  var n = this.makeGesture("gesturestart", e, {
+  vector: this.gesture,
+  scale: 1,
+  rotation: 0
+  });
+  enyo.dispatch(n);
+  }
+  },
+  touchend(e) {
+  enyo.forEach(e.changedTouches, function(e) {
+  enyo.remove(e.identifier, this.orderedTouches);
+  }, this);
+  if (e.touches.length <= 1 && this.gesture) {
+  var t = e.touches[0] || e.changedTouches[e.changedTouches.length - 1];
+  enyo.dispatch(this.makeGesture("gestureend", e, {
+  vector: {
+  xcenter: t.pageX,
+  ycenter: t.pageY
+  },
+  scale: this.gesture.scale,
+  rotation: this.gesture.rotation
+  })), this.gesture = null;
+  }
+  },
+  touchmove(e) {
+  if (this.gesture) {
+  var t = this.makeGesture("gesturechange", e);
+  this.gesture.scale = t.scale, this.gesture.rotation = t.rotation, enyo.dispatch(t);
+  }
+  },
+  findIdentifiedTouch(e, t) {
+  for (var n = 0, r; r = e[n]; n++) if (r.identifier === t) return r;
+  },
+  gesturePositions(e) {
+  var t = this.findIdentifiedTouch(e.touches, this.orderedTouches[0]), n = this.findIdentifiedTouch(e.touches, this.orderedTouches[this.orderedTouches.length - 1]), r = t.pageX, i = n.pageX, s = t.pageY, o = n.pageY, u = i - r, a = o - s, f = Math.sqrt(u * u + a * a);
+  return {
+  x: u,
+  y: a,
+  h: f,
+  fx: r,
+  lx: i,
+  fy: s,
+  ly: o
+  };
+  },
+  gestureAngle(e) {
+  var t = e, n = Math.asin(t.y / t.h) * (180 / Math.PI);
+  return t.x < 0 && (n = 180 - n), t.x > 0 && t.y < 0 && (n += 360), n;
+  },
+  gestureVector(e) {
+  var t = e;
+  return {
+  magnitude: t.h,
+  xcenter: Math.abs(Math.round(t.fx + t.x / 2)),
+  ycenter: Math.abs(Math.round(t.fy + t.y / 2))
+  };
+  },
+  makeGesture(e, t, n) {
+  var r, i, s;
+  if (n) r = n.vector, i = n.scale, s = n.rotation; else {
+  var o = this.gesturePositions(t);
+  r = this.gestureVector(o), i = r.magnitude / this.gesture.magnitude, s = (360 + this.gestureAngle(o) - this.gesture.angle) % 360;
+  }
+  var u = enyo.clone(t);
+  return enyo.mixin(u, {
+  type: e,
+  scale: i,
+  pageX: r.xcenter,
+  pageY: r.ycenter,
+  rotation: s
+  });
+  }
+  };
+}))();
 
 // ScrollMath.js
 
@@ -2324,62 +2398,71 @@ x0: 0,
 x: 0,
 y0: 0,
 y: 0,
-destroy: function() {
-this.stop(), this.inherited(arguments);
+destroy(...args) {
+this.stop(), this.inherited(args);
 },
-verlet: function(e) {
+verlet(e) {
 var t = this.x;
 this.x += t - this.x0, this.x0 = t;
 var n = this.y;
 this.y += n - this.y0, this.y0 = n;
 },
-damping: function(e, t, n, r) {
-var i = .5, s = e - t;
-return Math.abs(s) < i ? t : e * r > t * r ? n * s + t : e;
+damping(e, t, n, r) {
+  var i = .5;
+  var s = e - t;
+  return Math.abs(s) < i ? t : e * r > t * r ? n * s + t : e;
 },
-boundaryDamping: function(e, t, n, r) {
+boundaryDamping(e, t, n, r) {
 return this.damping(this.damping(e, t, r, 1), n, r, -1);
 },
-constrain: function() {
+constrain() {
 var e = this.boundaryDamping(this.y, this.topBoundary, this.bottomBoundary, this.kSpringDamping);
 e != this.y && (this.y0 = e - (this.y - this.y0) * this.kSnapFriction, this.y = e);
 var t = this.boundaryDamping(this.x, this.leftBoundary, this.rightBoundary, this.kSpringDamping);
 t != this.x && (this.x0 = t - (this.x - this.x0) * this.kSnapFriction, this.x = t);
 },
-friction: function(e, t, n) {
-var r = this[e] - this[t], i = Math.abs(r) > this.kFrictionEpsilon ? n : 0;
-this[e] = this[t] + i * r;
+friction(e, t, n) {
+  var r = this[e] - this[t];
+  var i = Math.abs(r) > this.kFrictionEpsilon ? n : 0;
+  this[e] = this[t] + i * r;
 },
 frame: 10,
-simulate: function(e) {
+simulate(e) {
 while (e >= this.frame) e -= this.frame, this.dragging || this.constrain(), this.verlet(), this.friction("y", "y0", this.kFrictionDamping), this.friction("x", "x0", this.kFrictionDamping);
 return e;
 },
-animate: function() {
-this.stop();
-var e = enyo.now(), t = 0, n, r, i = enyo.bind(this, function() {
-var s = enyo.now();
-this.job = enyo.requestAnimationFrame(i);
-var o = s - e;
-e = s, this.dragging && (this.y0 = this.y = this.uy, this.x0 = this.x = this.ux), t += Math.max(16, o), this.fixedTime && !this.isInOverScroll() && (t = this.interval), t = this.simulate(t), r != this.y || n != this.x ? this.scroll() : this.dragging || (this.stop(!0), this.scroll()), r = this.y, n = this.x;
-});
-this.job = enyo.requestAnimationFrame(i);
+animate() {
+  this.stop();
+  var e = enyo.now();
+  var t = 0;
+  var n;
+  var r;
+
+  var i = enyo.bind(this, function() {
+  var s = enyo.now();
+  this.job = enyo.requestAnimationFrame(i);
+  var o = s - e;
+  e = s, this.dragging && (this.y0 = this.y = this.uy, this.x0 = this.x = this.ux), t += Math.max(16, o), this.fixedTime && !this.isInOverScroll() && (t = this.interval), t = this.simulate(t), r != this.y || n != this.x ? this.scroll() : this.dragging || (this.stop(!0), this.scroll()), r = this.y, n = this.x;
+  });
+
+  this.job = enyo.requestAnimationFrame(i);
 },
-start: function() {
+start() {
 this.job || (this.animate(), this.doScrollStart());
 },
-stop: function(e) {
+stop(e) {
 this.job = enyo.cancelRequestAnimationFrame(this.job), e && this.doScrollStop();
 },
-stabilize: function() {
-this.start();
-var e = Math.min(this.topBoundary, Math.max(this.bottomBoundary, this.y)), t = Math.min(this.leftBoundary, Math.max(this.rightBoundary, this.x));
-this.y = this.y0 = e, this.x = this.x0 = t, this.scroll(), this.stop(!0);
+stabilize() {
+  this.start();
+  var e = Math.min(this.topBoundary, Math.max(this.bottomBoundary, this.y));
+  var t = Math.min(this.leftBoundary, Math.max(this.rightBoundary, this.x));
+  this.y = this.y0 = e, this.x = this.x0 = t, this.scroll(), this.stop(!0);
 },
-startDrag: function(e) {
+startDrag(e) {
 this.dragging = !0, this.my = e.pageY, this.py = this.uy = this.y, this.mx = e.pageX, this.px = this.ux = this.x;
 },
-drag: function(e) {
+drag(e) {
 if (this.dragging) {
 var t = this.vertical ? e.pageY - this.my : 0;
 this.uy = t + this.py, this.uy = this.boundaryDamping(this.uy, this.topBoundary, this.bottomBoundary, this.kDragDamping);
@@ -2387,43 +2470,43 @@ var n = this.horizontal ? e.pageX - this.mx : 0;
 return this.ux = n + this.px, this.ux = this.boundaryDamping(this.ux, this.leftBoundary, this.rightBoundary, this.kDragDamping), this.start(), !0;
 }
 },
-dragDrop: function(e) {
+dragDrop(e) {
 if (this.dragging && !window.PalmSystem) {
 var t = .5;
 this.y = this.uy, this.y0 = this.y - (this.y - this.y0) * t, this.x = this.ux, this.x0 = this.x - (this.x - this.x0) * t;
 }
 this.dragFinish();
 },
-dragFinish: function() {
+dragFinish() {
 this.dragging = !1;
 },
-flick: function(e) {
+flick(e) {
 var t;
 this.vertical && (t = e.yVelocity > 0 ? Math.min(this.kMaxFlick, e.yVelocity) : Math.max(-this.kMaxFlick, e.yVelocity), this.y = this.y0 + t * this.kFlickScalar), this.horizontal && (t = e.xVelocity > 0 ? Math.min(this.kMaxFlick, e.xVelocity) : Math.max(-this.kMaxFlick, e.xVelocity), this.x = this.x0 + t * this.kFlickScalar), this.start();
 },
-mousewheel: function(e) {
+mousewheel(e) {
 var t = this.vertical ? e.wheelDeltaY || e.wheelDelta : 0;
 if (t > 0 && this.y < this.topBoundary || t < 0 && this.y > this.bottomBoundary) return this.stop(!0), this.y = this.y0 = this.y0 + t, this.start(), !0;
 },
-scroll: function() {
+scroll() {
 this.doScroll();
 },
-scrollTo: function(e, t) {
+scrollTo(e, t) {
 e !== null && (this.y = this.y0 - (e + this.y0) * (1 - this.kFrictionDamping)), t !== null && (this.x = this.x0 - (t + this.x0) * (1 - this.kFrictionDamping)), this.start();
 },
-setScrollX: function(e) {
+setScrollX(e) {
 this.x = this.x0 = e;
 },
-setScrollY: function(e) {
+setScrollY(e) {
 this.y = this.y0 = e;
 },
-setScrollPosition: function(e) {
+setScrollPosition(e) {
 this.setScrollY(e);
 },
-isScrolling: function() {
+isScrolling() {
 return Boolean(this.job);
 },
-isInOverScroll: function() {
+isInOverScroll() {
 return this.job && (this.x > this.leftBoundary || this.x < this.rightBoundary || this.y > this.topBoundary || this.y < this.bottomBoundary);
 }
 });
@@ -2446,106 +2529,120 @@ ondragfinish: "dragfinish",
 ondown: "down",
 onmove: "move"
 },
-create: function() {
-this.inherited(arguments), this.horizontalChanged(), this.verticalChanged(), this.maxHeightChanged();
+create(...args) {
+this.inherited(args), this.horizontalChanged(), this.verticalChanged(), this.maxHeightChanged();
 },
-rendered: function() {
-this.inherited(arguments), enyo.makeBubble(this.container, "scroll"), this.scrollNode = this.calcScrollNode();
+rendered(...args) {
+this.inherited(args), enyo.makeBubble(this.container, "scroll"), this.scrollNode = this.calcScrollNode();
 },
-teardownRender: function() {
-this.inherited(arguments), this.scrollNode = null;
+teardownRender(...args) {
+this.inherited(args), this.scrollNode = null;
 },
-calcScrollNode: function() {
+calcScrollNode() {
 return this.container.hasNode();
 },
-horizontalChanged: function() {
+horizontalChanged() {
 this.container.applyStyle("overflow-x", this.horizontal == "default" ? "auto" : this.horizontal);
 },
-verticalChanged: function() {
+verticalChanged() {
 this.container.applyStyle("overflow-y", this.vertical == "default" ? "auto" : this.vertical);
 },
-maxHeightChanged: function() {
+maxHeightChanged() {
 this.container.applyStyle("max-height", this.maxHeight);
 },
-scrollTo: function(e, t) {
+scrollTo(e, t) {
 this.scrollNode && (this.setScrollLeft(e), this.setScrollTop(t));
 },
-scrollToNode: function(e, t) {
+scrollToNode(e, t) {
 if (this.scrollNode) {
-var n = this.getScrollBounds(), r = e, i = {
-height: r.offsetHeight,
-width: r.offsetWidth,
-top: 0,
-left: 0
-};
-while (r && r.parentNode && r.id != this.scrollNode.id) i.top += r.offsetTop, i.left += r.offsetLeft, r = r.parentNode;
-this.setScrollTop(Math.min(n.maxTop, t === !1 ? i.top - n.clientHeight + i.height : i.top)), this.setScrollLeft(Math.min(n.maxLeft, t === !1 ? i.left - n.clientWidth + i.width : i.left));
+  var n = this.getScrollBounds();
+  var r = e;
+
+  var i = {
+  height: r.offsetHeight,
+  width: r.offsetWidth,
+  top: 0,
+  left: 0
+  };
+
+  while (r && r.parentNode && r.id != this.scrollNode.id) i.top += r.offsetTop, i.left += r.offsetLeft, r = r.parentNode;
+  this.setScrollTop(Math.min(n.maxTop, t === !1 ? i.top - n.clientHeight + i.height : i.top)), this.setScrollLeft(Math.min(n.maxLeft, t === !1 ? i.left - n.clientWidth + i.width : i.left));
 }
 },
-scrollIntoView: function(e, t) {
+scrollIntoView(e, t) {
 e.hasNode() && e.node.scrollIntoView(t);
 },
-isInView: function(e) {
-var t = this.getScrollBounds(), n = e.offsetTop, r = e.offsetHeight, i = e.offsetLeft, s = e.offsetWidth;
-return n >= t.top && n + r <= t.top + t.clientHeight && i >= t.left && i + s <= t.left + t.clientWidth;
+isInView(e) {
+  var t = this.getScrollBounds();
+  var n = e.offsetTop;
+  var r = e.offsetHeight;
+  var i = e.offsetLeft;
+  var s = e.offsetWidth;
+  return n >= t.top && n + r <= t.top + t.clientHeight && i >= t.left && i + s <= t.left + t.clientWidth;
 },
-setScrollTop: function(e) {
+setScrollTop(e) {
 this.scrollTop = e, this.scrollNode && (this.scrollNode.scrollTop = this.scrollTop);
 },
-setScrollLeft: function(e) {
+setScrollLeft(e) {
 this.scrollLeft = e, this.scrollNode && (this.scrollNode.scrollLeft = this.scrollLeft);
 },
-getScrollLeft: function() {
+getScrollLeft() {
 return this.scrollNode ? this.scrollNode.scrollLeft : this.scrollLeft;
 },
-getScrollTop: function() {
+getScrollTop() {
 return this.scrollNode ? this.scrollNode.scrollTop : this.scrollTop;
 },
-_getScrollBounds: function() {
-var e = this.getScrollSize(), t = this.container.hasNode(), n = {
-left: this.getScrollLeft(),
-top: this.getScrollTop(),
-clientHeight: t ? t.clientHeight : 0,
-clientWidth: t ? t.clientWidth : 0,
-height: e.height,
-width: e.width
-};
-return n.maxLeft = Math.max(0, n.width - n.clientWidth), n.maxTop = Math.max(0, n.height - n.clientHeight), n;
+_getScrollBounds() {
+  var e = this.getScrollSize();
+  var t = this.container.hasNode();
+
+  var n = {
+  left: this.getScrollLeft(),
+  top: this.getScrollTop(),
+  clientHeight: t ? t.clientHeight : 0,
+  clientWidth: t ? t.clientWidth : 0,
+  height: e.height,
+  width: e.width
+  };
+
+  return n.maxLeft = Math.max(0, n.width - n.clientWidth), n.maxTop = Math.max(0, n.height - n.clientHeight), n;
 },
-getScrollSize: function() {
+getScrollSize() {
 var e = this.scrollNode;
 return {
 width: e ? e.scrollWidth : 0,
 height: e ? e.scrollHeight : 0
 };
 },
-getScrollBounds: function() {
+getScrollBounds() {
 return this._getScrollBounds();
 },
-calcStartInfo: function() {
-var e = this.getScrollBounds(), t = this.getScrollTop(), n = this.getScrollLeft();
-this.canVertical = e.maxTop > 0 && this.vertical != "hidden", this.canHorizontal = e.maxLeft > 0 && this.horizontal != "hidden", this.startEdges = {
-top: t === 0,
-bottom: t === e.maxTop,
-left: n === 0,
-right: n === e.maxLeft
-};
+calcStartInfo() {
+  var e = this.getScrollBounds();
+  var t = this.getScrollTop();
+  var n = this.getScrollLeft();
+  this.canVertical = e.maxTop > 0 && this.vertical != "hidden", this.canHorizontal = e.maxLeft > 0 && this.horizontal != "hidden", this.startEdges = {
+  top: t === 0,
+  bottom: t === e.maxTop,
+  left: n === 0,
+  right: n === e.maxLeft
+  };
 },
-shouldDrag: function(e) {
+shouldDrag(e) {
 var t = e.vertical;
 return t && this.canVertical || !t && this.canHorizontal;
 },
-dragstart: function(e, t) {
+dragstart(e, t) {
 this.dragging = this.shouldDrag(t);
 if (this.dragging) return this.preventDragPropagation;
 },
-dragfinish: function(e, t) {
+dragfinish(e, t) {
 this.dragging && (this.dragging = !1, t.preventTap());
 },
-down: function(e, t) {
+down(e, t) {
 this.calcStartInfo();
 },
-move: function(e, t) {
+move(e, t) {
 t.which && (this.canVertical && t.vertical || this.canHorizontal && t.horizontal) && t.disablePrevention();
 }
 });
@@ -2558,33 +2655,41 @@ axis: "v",
 minSize: 4,
 cornerSize: 6,
 classes: "enyo-thumb",
-create: function() {
-this.inherited(arguments);
+create(...args) {
+this.inherited(args);
 var e = this.axis == "v";
 this.dimension = e ? "height" : "width", this.offset = e ? "top" : "left", this.translation = e ? "translateY" : "translateX", this.positionMethod = e ? "getScrollTop" : "getScrollLeft", this.sizeDimension = e ? "clientHeight" : "clientWidth", this.addClass("enyo-" + this.axis + "thumb"), this.transform = enyo.dom.canTransform(), enyo.dom.canAccelerate() && enyo.dom.transformValue(this, "translateZ", 0);
 },
-sync: function(e) {
+sync(e) {
 this.scrollBounds = e._getScrollBounds(), this.update(e);
 },
-update: function(e) {
+update(e) {
 if (this.showing) {
-var t = this.dimension, n = this.offset, r = this.scrollBounds[this.sizeDimension], i = this.scrollBounds[t], s = 0, o = 0, u = 0;
-if (r >= i) {
-this.hide();
-return;
-}
-e.isOverscrolling() && (u = e.getOverScrollBounds()["over" + n], s = Math.abs(u), o = Math.max(u, 0));
-var a = e[this.positionMethod]() - u, f = r - this.cornerSize, l = Math.floor(r * r / i - s);
-l = Math.max(this.minSize, l);
-var c = Math.floor(f * a / i + o);
-c = Math.max(0, Math.min(f - this.minSize, c)), this.needed = l < r, this.needed && this.hasNode() ? (this._pos !== c && (this._pos = c, this.transform ? enyo.dom.transformValue(this, this.translation, c + "px") : this.axis == "v" ? this.setBounds({
-top: c + "px"
-}) : this.setBounds({
-left: c + "px"
-})), this._size !== l && (this._size = l, this.node.style[t] = this.domStyles[t] = l + "px")) : this.hide();
+  var t = this.dimension;
+  var n = this.offset;
+  var r = this.scrollBounds[this.sizeDimension];
+  var i = this.scrollBounds[t];
+  var s = 0;
+  var o = 0;
+  var u = 0;
+  if (r >= i) {
+  this.hide();
+  return;
+  }
+  e.isOverscrolling() && (u = e.getOverScrollBounds()["over" + n], s = Math.abs(u), o = Math.max(u, 0));
+  var a = e[this.positionMethod]() - u;
+  var f = r - this.cornerSize;
+  var l = Math.floor(r * r / i - s);
+  l = Math.max(this.minSize, l);
+  var c = Math.floor(f * a / i + o);
+  c = Math.max(0, Math.min(f - this.minSize, c)), this.needed = l < r, this.needed && this.hasNode() ? (this._pos !== c && (this._pos = c, this.transform ? enyo.dom.transformValue(this, this.translation, c + "px") : this.axis == "v" ? this.setBounds({
+  top: c + "px"
+  }) : this.setBounds({
+  left: c + "px"
+  })), this._size !== l && (this._size = l, this.node.style[t] = this.domStyles[t] = l + "px")) : this.hide();
 }
 },
-setShowing: function(e) {
+setShowing(e) {
 if (e && e != this.showing && this.scrollBounds[this.sizeDimension] >= this.scrollBounds[this.dimension]) return;
 this.hasNode() && this.cancelDelayHide();
 if (e != this.showing) {
@@ -2592,10 +2697,10 @@ var t = this.showing;
 this.showing = e, this.showingChanged(t);
 }
 },
-delayHide: function(e) {
+delayHide(e) {
 this.showing && enyo.job(this.id + "hide", enyo.bind(this, "hide"), e || 0);
 },
-cancelDelayHide: function() {
+cancelDelayHide() {
 enyo.job.stop(this.id + "hide");
 }
 });
@@ -2653,99 +2758,106 @@ components: [ {
 name: "client",
 classes: "enyo-touch-scroller"
 } ],
-create: function() {
-this.inherited(arguments), this.transform = enyo.dom.canTransform(), this.transform || this.overscroll && this.$.client.applyStyle("position", "relative"), this.accel = enyo.dom.canAccelerate();
+create(...args) {
+this.inherited(args), this.transform = enyo.dom.canTransform(), this.transform || this.overscroll && this.$.client.applyStyle("position", "relative"), this.accel = enyo.dom.canAccelerate();
 var e = "enyo-touch-strategy-container";
 enyo.platform.ios && this.accel && (e += " enyo-composite"), this.scrimChanged(), this.container.addClass(e), this.translation = this.accel ? "translate3d" : "translate";
 },
-initComponents: function() {
-this.createChrome(this.tools), this.inherited(arguments);
+initComponents(...args) {
+this.createChrome(this.tools), this.inherited(args);
 },
-destroy: function() {
-this.container.removeClass("enyo-touch-strategy-container"), this.inherited(arguments);
+destroy(...args) {
+this.container.removeClass("enyo-touch-strategy-container"), this.inherited(args);
 },
-rendered: function() {
-this.inherited(arguments), enyo.makeBubble(this.$.client, "scroll"), this.calcBoundaries(), this.syncScrollMath(), this.thumb && this.alertThumbs();
+rendered(...args) {
+this.inherited(args), enyo.makeBubble(this.$.client, "scroll"), this.calcBoundaries(), this.syncScrollMath(), this.thumb && this.alertThumbs();
 },
-scrimChanged: function() {
+scrimChanged() {
 this.scrim && !this.$.scrim && this.makeScrim(), !this.scrim && this.$.scrim && this.$.scrim.destroy();
 },
-makeScrim: function() {
+makeScrim() {
 var e = this.controlParent;
 this.controlParent = null, this.createChrome(this.scrimTools), this.controlParent = e;
 var t = this.container.hasNode();
 t && (this.$.scrim.parentNode = t, this.$.scrim.render());
 },
-isScrolling: function() {
+isScrolling() {
 return this.$.scrollMath.isScrolling();
 },
-isOverscrolling: function() {
+isOverscrolling() {
 return this.overscroll ? this.$.scrollMath.isInOverScroll() : !1;
 },
-domScroll: function() {
+domScroll() {
 this.isScrolling() || (this.calcBoundaries(), this.syncScrollMath(), this.thumb && this.alertThumbs());
 },
-horizontalChanged: function() {
+horizontalChanged() {
 this.$.scrollMath.horizontal = this.horizontal != "hidden";
 },
-verticalChanged: function() {
+verticalChanged() {
 this.$.scrollMath.vertical = this.vertical != "hidden";
 },
-maxHeightChanged: function() {
+maxHeightChanged() {
 this.$.client.applyStyle("max-height", this.maxHeight), this.$.client.addRemoveClass("enyo-scrollee-fit", !this.maxHeight);
 },
-thumbChanged: function() {
+thumbChanged() {
 this.hideThumbs();
 },
-stop: function() {
+stop() {
 this.isScrolling() && this.$.scrollMath.stop(!0);
 },
-stabilize: function() {
+stabilize() {
 this.$.scrollMath.stabilize();
 },
-scrollTo: function(e, t) {
+scrollTo(e, t) {
 this.stop(), this.$.scrollMath.scrollTo(t || t === 0 ? t : null, e);
 },
-scrollIntoView: function() {
-this.stop(), this.inherited(arguments);
+scrollIntoView(...args) {
+this.stop(), this.inherited(args);
 },
-setScrollLeft: function() {
-this.stop(), this.inherited(arguments);
+setScrollLeft(...args) {
+this.stop(), this.inherited(args);
 },
-setScrollTop: function() {
-this.stop(), this.inherited(arguments);
+setScrollTop(...args) {
+this.stop(), this.inherited(args);
 },
-getScrollLeft: function() {
-return this.isScrolling() ? this.scrollLeft : this.inherited(arguments);
+getScrollLeft(...args) {
+return this.isScrolling() ? this.scrollLeft : this.inherited(args);
 },
-getScrollTop: function() {
-return this.isScrolling() ? this.scrollTop : this.inherited(arguments);
+getScrollTop(...args) {
+return this.isScrolling() ? this.scrollTop : this.inherited(args);
 },
-calcScrollNode: function() {
+calcScrollNode() {
 return this.$.client.hasNode();
 },
-calcAutoScrolling: function() {
-var e = this.vertical == "auto", t = this.horizontal == "auto" || this.horizontal == "default";
-if ((e || t) && this.scrollNode) {
-var n = this.getScrollBounds();
-e && (this.$.scrollMath.vertical = n.height > n.clientHeight), t && (this.$.scrollMath.horizontal = n.width > n.clientWidth);
-}
+calcAutoScrolling() {
+  var e = this.vertical == "auto";
+  var t = this.horizontal == "auto" || this.horizontal == "default";
+  if ((e || t) && this.scrollNode) {
+  var n = this.getScrollBounds();
+  e && (this.$.scrollMath.vertical = n.height > n.clientHeight), t && (this.$.scrollMath.horizontal = n.width > n.clientWidth);
+  }
 },
-shouldDrag: function(e, t) {
-this.calcAutoScrolling();
-var n = t.vertical, r = this.$.scrollMath.horizontal && !n, i = this.$.scrollMath.vertical && n, s = t.dy < 0, o = t.dx < 0, u = !s && this.startEdges.top || s && this.startEdges.bottom, a = !o && this.startEdges.left || o && this.startEdges.right;
-!t.boundaryDragger && (r || i) && (t.boundaryDragger = this);
-if (!u && i || !a && r) return t.dragger = this, !0;
+shouldDrag(e, t) {
+  this.calcAutoScrolling();
+  var n = t.vertical;
+  var r = this.$.scrollMath.horizontal && !n;
+  var i = this.$.scrollMath.vertical && n;
+  var s = t.dy < 0;
+  var o = t.dx < 0;
+  var u = !s && this.startEdges.top || s && this.startEdges.bottom;
+  var a = !o && this.startEdges.left || o && this.startEdges.right;
+  !t.boundaryDragger && (r || i) && (t.boundaryDragger = this);
+  if (!u && i || !a && r) return t.dragger = this, !0;
 },
-flick: function(e, t) {
+flick(e, t) {
 var n = Math.abs(t.xVelocity) > Math.abs(t.yVelocity) ? this.$.scrollMath.horizontal : this.$.scrollMath.vertical;
 if (n && this.dragging) return this.$.scrollMath.flick(t), this.preventDragPropagation;
 },
-hold: function(e, t) {
+hold(e, t) {
 if (this.isScrolling() && !this.isOverscrolling()) return this.$.scrollMath.stop(t), !0;
 },
-move: function(e, t) {},
-dragstart: function(e, t) {
+move(e, t) {},
+dragstart(e, t) {
 if (!this.dragDuringGesture && t.srcEvent.touches && t.srcEvent.touches.length > 1) return !0;
 this.doShouldDrag(t), this.dragging = t.dragger == this || !t.dragger && t.boundaryDragger == this;
 if (this.dragging) {
@@ -2753,78 +2865,82 @@ t.preventDefault(), this.syncScrollMath(), this.$.scrollMath.startDrag(t);
 if (this.preventDragPropagation) return !0;
 }
 },
-drag: function(e, t) {
+drag(e, t) {
 this.dragging && (t.preventDefault(), this.$.scrollMath.drag(t), this.scrim && this.$.scrim.show());
 },
-dragfinish: function(e, t) {
+dragfinish(e, t) {
 this.dragging && (t.preventTap(), this.$.scrollMath.dragFinish(), this.dragging = !1, this.scrim && this.$.scrim.hide());
 },
-mousewheel: function(e, t) {
+mousewheel(e, t) {
 if (!this.dragging) {
 this.calcBoundaries(), this.syncScrollMath();
 if (this.$.scrollMath.mousewheel(t)) return t.preventDefault(), !0;
 }
 },
-scrollMathStart: function(e) {
+scrollMathStart(e) {
 this.scrollNode && (this.calcBoundaries(), this.thumb && this.showThumbs());
 },
-scrollMathScroll: function(e) {
+scrollMathScroll(e) {
 this.overscroll ? this.effectScroll(-e.x, -e.y) : this.effectScroll(-Math.min(e.leftBoundary, Math.max(e.rightBoundary, e.x)), -Math.min(e.topBoundary, Math.max(e.bottomBoundary, e.y))), this.thumb && this.updateThumbs();
 },
-scrollMathStop: function(e) {
+scrollMathStop(e) {
 this.effectScrollStop(), this.thumb && this.delayHideThumbs(100);
 },
-calcBoundaries: function() {
-var e = this.$.scrollMath, t = this._getScrollBounds();
-e.bottomBoundary = t.clientHeight - t.height, e.rightBoundary = t.clientWidth - t.width;
+calcBoundaries() {
+  var e = this.$.scrollMath;
+  var t = this._getScrollBounds();
+  e.bottomBoundary = t.clientHeight - t.height, e.rightBoundary = t.clientWidth - t.width;
 },
-syncScrollMath: function() {
+syncScrollMath() {
 var e = this.$.scrollMath;
 e.setScrollX(-this.getScrollLeft()), e.setScrollY(-this.getScrollTop());
 },
-effectScroll: function(e, t) {
+effectScroll(e, t) {
 this.scrollNode && (this.scrollLeft = this.scrollNode.scrollLeft = e, this.scrollTop = this.scrollNode.scrollTop = t, this.effectOverscroll(Math.round(e), Math.round(t)));
 },
-effectScrollStop: function() {
+effectScrollStop() {
 this.effectOverscroll(null, null);
 },
-effectOverscroll: function(e, t) {
-var n = this.scrollNode, r = "0", i = "0", s = this.accel ? ",0" : "";
-t !== null && Math.abs(t - n.scrollTop) > 1 && (i = n.scrollTop - t), e !== null && Math.abs(e - n.scrollLeft) > 1 && (r = n.scrollLeft - e), this.transform ? enyo.dom.transformValue(this.$.client, this.translation, r + "px, " + i + "px" + s) : this.$.client.setBounds({
-left: r + "px",
-top: i + "px"
-});
+effectOverscroll(e, t) {
+  var n = this.scrollNode;
+  var r = "0";
+  var i = "0";
+  var s = this.accel ? ",0" : "";
+  t !== null && Math.abs(t - n.scrollTop) > 1 && (i = n.scrollTop - t), e !== null && Math.abs(e - n.scrollLeft) > 1 && (r = n.scrollLeft - e), this.transform ? enyo.dom.transformValue(this.$.client, this.translation, r + "px, " + i + "px" + s) : this.$.client.setBounds({
+  left: r + "px",
+  top: i + "px"
+  });
 },
-getOverScrollBounds: function() {
+getOverScrollBounds() {
 var e = this.$.scrollMath;
 return {
 overleft: Math.min(e.leftBoundary - e.x, 0) || Math.max(e.rightBoundary - e.x, 0),
 overtop: Math.min(e.topBoundary - e.y, 0) || Math.max(e.bottomBoundary - e.y, 0)
 };
 },
-_getScrollBounds: function() {
-var e = this.inherited(arguments);
+_getScrollBounds(...args) {
+var e = this.inherited(args);
 return enyo.mixin(e, this.getOverScrollBounds()), e;
 },
-getScrollBounds: function() {
-return this.stop(), this.inherited(arguments);
+getScrollBounds(...args) {
+return this.stop(), this.inherited(args);
 },
-alertThumbs: function() {
+alertThumbs() {
 this.showThumbs(), this.delayHideThumbs(500);
 },
-syncThumbs: function() {
+syncThumbs() {
 this.$.vthumb.sync(this), this.$.hthumb.sync(this);
 },
-updateThumbs: function() {
+updateThumbs() {
 this.$.vthumb.update(this), this.$.hthumb.update(this);
 },
-showThumbs: function() {
+showThumbs() {
 this.syncThumbs(), this.$.vthumb.show(), this.$.hthumb.show();
 },
-hideThumbs: function() {
+hideThumbs() {
 this.$.vthumb.hide(), this.$.hthumb.hide();
 },
-delayHideThumbs: function(e) {
+delayHideThumbs(e) {
 this.$.vthumb.delayHide(e), this.$.hthumb.delayHide(e);
 }
 });
@@ -2842,68 +2958,71 @@ components: [ {
 name: "client"
 } ]
 } ],
-rendered: function() {
-this.inherited(arguments), enyo.makeBubble(this.$.clientContainer, "scroll");
+rendered(...args) {
+this.inherited(args), enyo.makeBubble(this.$.clientContainer, "scroll");
 },
-getScrollSize: function() {
+getScrollSize() {
 var e = this.$.client.hasNode();
 return {
 width: e ? e.scrollWidth : 0,
 height: e ? e.scrollHeight : 0
 };
 },
-create: function() {
-this.inherited(arguments), enyo.dom.transformValue(this.$.client, this.translation, "0,0,0");
+create(...args) {
+this.inherited(args), enyo.dom.transformValue(this.$.client, this.translation, "0,0,0");
 },
-calcScrollNode: function() {
+calcScrollNode() {
 return this.$.clientContainer.hasNode();
 },
-maxHeightChanged: function() {
+maxHeightChanged() {
 this.$.client.applyStyle("min-height", this.maxHeight ? null : "100%"), this.$.client.applyStyle("max-height", this.maxHeight), this.$.clientContainer.addRemoveClass("enyo-scrollee-fit", !this.maxHeight);
 },
-shouldDrag: function(e, t) {
+shouldDrag(e, t) {
 return this.stop(), this.calcStartInfo(), this.inherited(arguments);
 },
-syncScrollMath: function() {
-this.translateOptimized || this.inherited(arguments);
+syncScrollMath(...args) {
+this.translateOptimized || this.inherited(args);
 },
-setScrollLeft: function(e) {
+setScrollLeft(e) {
 this.stop();
 if (this.translateOptimized) {
 var t = this.$.scrollMath;
 t.setScrollX(-e), t.stabilize();
 } else this.inherited(arguments);
 },
-setScrollTop: function(e) {
+setScrollTop(e) {
 this.stop();
 if (this.translateOptimized) {
 var t = this.$.scrollMath;
 t.setScrollY(-e), t.stabilize();
 } else this.inherited(arguments);
 },
-getScrollLeft: function() {
-return this.translateOptimized ? this.scrollLeft : this.inherited(arguments);
+getScrollLeft(...args) {
+return this.translateOptimized ? this.scrollLeft : this.inherited(args);
 },
-getScrollTop: function() {
-return this.translateOptimized ? this.scrollTop : this.inherited(arguments);
+getScrollTop(...args) {
+return this.translateOptimized ? this.scrollTop : this.inherited(args);
 },
-scrollMathStart: function(e) {
+scrollMathStart(e) {
 this.inherited(arguments), this.scrollStarting = !0, this.startX = 0, this.startY = 0, !this.translateOptimized && this.scrollNode && (this.startX = this.getScrollLeft(), this.startY = this.getScrollTop());
 },
-scrollMathScroll: function(e) {
+scrollMathScroll(e) {
 this.overscroll ? (this.scrollLeft = -e.x, this.scrollTop = -e.y) : (this.scrollLeft = -Math.min(e.leftBoundary, Math.max(e.rightBoundary, e.x)), this.scrollTop = -Math.min(e.topBoundary, Math.max(e.bottomBoundary, e.y))), this.isScrolling() && (this.$.scrollMath.isScrolling() && this.effectScroll(this.startX - this.scrollLeft, this.startY - this.scrollTop), this.thumb && this.updateThumbs());
 },
-effectScroll: function(e, t) {
+effectScroll(e, t) {
 var n = e + "px, " + t + "px" + (this.accel ? ",0" : "");
 enyo.dom.transformValue(this.$.client, this.translation, n);
 },
-effectScrollStop: function() {
+effectScrollStop() {
 if (!this.translateOptimized) {
-var e = "0,0" + (this.accel ? ",0" : ""), t = this.$.scrollMath, n = this._getScrollBounds(), r = Boolean(n.maxTop + t.bottomBoundary || n.maxLeft + t.rightBoundary);
-enyo.dom.transformValue(this.$.client, this.translation, r ? null : e), this.setScrollLeft(this.scrollLeft), this.setScrollTop(this.scrollTop), r && enyo.dom.transformValue(this.$.client, this.translation, e);
+  var e = "0,0" + (this.accel ? ",0" : "");
+  var t = this.$.scrollMath;
+  var n = this._getScrollBounds();
+  var r = Boolean(n.maxTop + t.bottomBoundary || n.maxLeft + t.rightBoundary);
+  enyo.dom.transformValue(this.$.client, this.translation, r ? null : e), this.setScrollLeft(this.scrollLeft), this.setScrollTop(this.scrollTop), r && enyo.dom.transformValue(this.$.client, this.translation, e);
 }
 },
-twiddle: function() {
+twiddle() {
 this.translateOptimized && this.scrollNode && (this.scrollNode.scrollTop = 1, this.scrollNode.scrollTop = 0);
 },
 down: enyo.nop
@@ -2955,37 +3074,37 @@ version: 5
 os: "webos",
 version: 1e9
 } ],
-hasTouchScrolling: function() {
+hasTouchScrolling() {
 for (var e = 0, t, n; t = this.osInfo[e]; e++) if (enyo.platform[t.os]) return !0;
 },
-hasNativeScrolling: function() {
+hasNativeScrolling() {
 for (var e = 0, t, n; t = this.osInfo[e]; e++) if (enyo.platform[t.os] < t.version) return !1;
 return !0;
 },
-getTouchStrategy: function() {
+getTouchStrategy() {
 return enyo.platform.android >= 3 ? "TranslateScrollStrategy" : "TouchScrollStrategy";
 }
 },
 controlParentName: "strategy",
-create: function() {
-this.inherited(arguments), this.horizontalChanged(), this.verticalChanged();
+create(...args) {
+this.inherited(args), this.horizontalChanged(), this.verticalChanged();
 },
-importProps: function(e) {
+importProps(e) {
 this.inherited(arguments), e && e.strategyKind === undefined && (enyo.Scroller.touchScrolling || this.touch) && (this.strategyKind = enyo.Scroller.getTouchStrategy());
 },
-initComponents: function() {
-this.strategyKindChanged(), this.inherited(arguments);
+initComponents(...args) {
+this.strategyKindChanged(), this.inherited(args);
 },
-teardownChildren: function() {
-this.cacheScrollPosition(), this.inherited(arguments);
+teardownChildren(...args) {
+this.cacheScrollPosition(), this.inherited(args);
 },
-rendered: function() {
-this.inherited(arguments), this.restoreScrollPosition();
+rendered(...args) {
+this.inherited(args), this.restoreScrollPosition();
 },
-strategyKindChanged: function() {
+strategyKindChanged() {
 this.$.strategy && (this.$.strategy.destroy(), this.controlParent = null), this.createStrategy(), this.hasNode() && this.render();
 },
-createStrategy: function() {
+createStrategy() {
 this.createComponents([ {
 name: "strategy",
 maxHeight: this.maxHeight,
@@ -2996,88 +3115,88 @@ overscroll: this.touchOverscroll,
 isChrome: !0
 } ]);
 },
-getStrategy: function() {
+getStrategy() {
 return this.$.strategy;
 },
-maxHeightChanged: function() {
+maxHeightChanged() {
 this.$.strategy.setMaxHeight(this.maxHeight);
 },
-showingChanged: function() {
-this.showing || (this.cacheScrollPosition(), this.setScrollLeft(0), this.setScrollTop(0)), this.inherited(arguments), this.showing && this.restoreScrollPosition();
+showingChanged(...args) {
+this.showing || (this.cacheScrollPosition(), this.setScrollLeft(0), this.setScrollTop(0)), this.inherited(args), this.showing && this.restoreScrollPosition();
 },
-thumbChanged: function() {
+thumbChanged() {
 this.$.strategy.setThumb(this.thumb);
 },
-cacheScrollPosition: function() {
+cacheScrollPosition() {
 this.cachedPosition = {
 left: this.getScrollLeft(),
 top: this.getScrollTop()
 };
 },
-restoreScrollPosition: function() {
+restoreScrollPosition() {
 this.cachedPosition && (this.setScrollLeft(this.cachedPosition.left), this.setScrollTop(this.cachedPosition.top), this.cachedPosition = null);
 },
-horizontalChanged: function() {
+horizontalChanged() {
 this.$.strategy.setHorizontal(this.horizontal);
 },
-verticalChanged: function() {
+verticalChanged() {
 this.$.strategy.setVertical(this.vertical);
 },
-setScrollLeft: function(e) {
+setScrollLeft(e) {
 this.scrollLeft = e, this.$.strategy.setScrollLeft(this.scrollLeft);
 },
-setScrollTop: function(e) {
+setScrollTop(e) {
 this.scrollTop = e, this.$.strategy.setScrollTop(e);
 },
-getScrollLeft: function() {
+getScrollLeft() {
 return this.$.strategy.getScrollLeft();
 },
-getScrollTop: function() {
+getScrollTop() {
 return this.$.strategy.getScrollTop();
 },
-getScrollBounds: function() {
+getScrollBounds() {
 return this.$.strategy.getScrollBounds();
 },
-scrollIntoView: function(e, t) {
+scrollIntoView(e, t) {
 this.$.strategy.scrollIntoView(e, t);
 },
-scrollTo: function(e, t) {
+scrollTo(e, t) {
 this.$.strategy.scrollTo(e, t);
 },
-scrollToControl: function(e, t) {
+scrollToControl(e, t) {
 this.scrollToNode(e.hasNode(), t);
 },
-scrollToNode: function(e, t) {
+scrollToNode(e, t) {
 this.$.strategy.scrollToNode(e, t);
 },
-domScroll: function(e, t) {
+domScroll(e, t) {
 return this.$.strategy.domScroll && t.originator == this && this.$.strategy.scroll(e, t), this.doScroll(t), !0;
 },
-shouldStopScrollEvent: function(e) {
+shouldStopScrollEvent(e) {
 return this.preventScrollPropagation && e.originator.owner != this.$.strategy;
 },
-scrollStart: function(e, t) {
+scrollStart(e, t) {
 return this.shouldStopScrollEvent(t);
 },
-scroll: function(e, t) {
+scroll(e, t) {
 return t.dispatchTarget ? this.preventScrollPropagation && t.originator != this && t.originator.owner != this.$.strategy : this.shouldStopScrollEvent(t);
 },
-scrollStop: function(e, t) {
+scrollStop(e, t) {
 return this.shouldStopScrollEvent(t);
 },
-scrollToTop: function() {
+scrollToTop() {
 this.setScrollTop(0);
 },
-scrollToBottom: function() {
+scrollToBottom() {
 this.setScrollTop(this.getScrollBounds().maxTop);
 },
-scrollToRight: function() {
+scrollToRight() {
 this.setScrollTop(this.getScrollBounds().maxLeft);
 },
-scrollToLeft: function() {
+scrollToLeft() {
 this.setScrollLeft(0);
 },
-stabilize: function() {
+stabilize() {
 var e = this.getStrategy();
 e.stabilize && e.stabilize();
 }
@@ -3100,45 +3219,46 @@ onStep: "",
 onEnd: "",
 onStop: ""
 },
-constructed: function() {
-this.inherited(arguments), this._next = enyo.bind(this, "next");
+constructed(...args) {
+this.inherited(args), this._next = enyo.bind(this, "next");
 },
-destroy: function() {
-this.stop(), this.inherited(arguments);
+destroy(...args) {
+this.stop(), this.inherited(args);
 },
-play: function(e) {
+play(e) {
 return this.stop(), this.reversed = !1, e && enyo.mixin(this, e), this.t0 = this.t1 = enyo.now(), this.value = this.startValue, this.job = !0, this.next(), this;
 },
-stop: function() {
+stop() {
 if (this.isAnimating()) return this.cancel(), this.fire("onStop"), this;
 },
-reverse: function() {
+reverse() {
 if (this.isAnimating()) {
-this.reversed = !this.reversed;
-var e = this.t1 = enyo.now(), t = e - this.t0;
-this.t0 = e + t - this.duration;
-var n = this.startValue;
-return this.startValue = this.endValue, this.endValue = n, this;
+  this.reversed = !this.reversed;
+  var e = this.t1 = enyo.now();
+  var t = e - this.t0;
+  this.t0 = e + t - this.duration;
+  var n = this.startValue;
+  return this.startValue = this.endValue, this.endValue = n, this;
 }
 },
-isAnimating: function() {
+isAnimating() {
 return Boolean(this.job);
 },
-requestNext: function() {
+requestNext() {
 this.job = enyo.requestAnimationFrame(this._next, this.node);
 },
-cancel: function() {
+cancel() {
 enyo.cancelRequestAnimationFrame(this.job), this.node = null, this.job = null;
 },
-shouldEnd: function() {
+shouldEnd() {
 return this.dt >= this.duration;
 },
-next: function() {
+next() {
 this.t1 = enyo.now(), this.dt = this.t1 - this.t0;
 var e = this.fraction = enyo.easedLerp(this.t0, this.duration, this.easingFunction, this.reversed);
 this.value = this.startValue + e * (this.endValue - this.startValue), e >= 1 || this.shouldEnd() ? (this.value = this.endValue, this.fraction = 1, this.fire("onStep"), this.fire("onEnd"), this.cancel()) : (this.fire("onStep"), this.requestNext());
 },
-fire: function(e) {
+fire(e) {
 var t = this[e];
 enyo.isString(t) ? this.bubble(e) : t && t.call(this.context || window, this);
 }
@@ -3150,8 +3270,8 @@ enyo.kind({
 name: "enyo.BaseLayout",
 kind: enyo.Layout,
 layoutClass: "enyo-positioned",
-reflow: function() {
-enyo.forEach(this.container.children, function(e) {
+reflow() {
+enyo.forEach(this.container.children, e => {
 e.fit !== null && e.addRemoveClass("enyo-fit", e.fit);
 }, this);
 }
@@ -3166,11 +3286,11 @@ tag: "img",
 attributes: {
 draggable: "false"
 },
-create: function() {
-this.noEvents && (delete this.attributes.onload, delete this.attributes.onerror), this.inherited(arguments);
+create(...args) {
+this.noEvents && (delete this.attributes.onload, delete this.attributes.onerror), this.inherited(args);
 },
-rendered: function() {
-this.inherited(arguments), enyo.makeBubble(this, "load", "error");
+rendered(...args) {
+this.inherited(args), enyo.makeBubble(this, "load", "error");
 }
 });
 
@@ -3197,44 +3317,45 @@ oninput: "input",
 onclear: "clear",
 ondragstart: "dragstart"
 },
-create: function() {
-enyo.platform.ie && (this.handlers.onkeyup = "iekeyup"), this.inherited(arguments), this.placeholderChanged(), this.type && this.typeChanged(), this.valueChanged();
+create(...args) {
+enyo.platform.ie && (this.handlers.onkeyup = "iekeyup"), this.inherited(args), this.placeholderChanged(), this.type && this.typeChanged(), this.valueChanged();
 },
-rendered: function() {
-this.inherited(arguments), enyo.makeBubble(this, "focus", "blur"), this.disabledChanged(), this.defaultFocus && this.focus();
+rendered(...args) {
+this.inherited(args), enyo.makeBubble(this, "focus", "blur"), this.disabledChanged(), this.defaultFocus && this.focus();
 },
-typeChanged: function() {
+typeChanged() {
 this.setAttribute("type", this.type);
 },
-placeholderChanged: function() {
+placeholderChanged() {
 this.setAttribute("placeholder", this.placeholder);
 },
-disabledChanged: function() {
+disabledChanged() {
 this.setAttribute("disabled", this.disabled), this.bubble("onDisabledChange");
 },
-getValue: function() {
+getValue() {
 return this.getNodeProperty("value", this.value);
 },
-valueChanged: function() {
+valueChanged() {
 this.setAttribute("value", this.value), this.setNodeProperty("value", this.value);
 },
-iekeyup: function(e, t) {
-var n = enyo.platform.ie, r = t.keyCode;
-(n <= 8 || n == 9 && (r == 8 || r == 46)) && this.bubble("oninput", t);
+iekeyup(e, t) {
+  var n = enyo.platform.ie;
+  var r = t.keyCode;
+  (n <= 8 || n == 9 && (r == 8 || r == 46)) && this.bubble("oninput", t);
 },
-clear: function() {
+clear() {
 this.setValue("");
 },
-focus: function() {
+focus() {
 this.hasNode() && this.node.focus();
 },
-dragstart: function() {
+dragstart() {
 return !0;
 },
-focused: function() {
+focused() {
 this.selectOnFocus && enyo.asyncMethod(this, "selectContents");
 },
-selectContents: function() {
+selectContents() {
 var e = this.hasNode();
 if (e && e.setSelectionRange) e.setSelectionRange(0, e.value.length); else if (e && e.createTextRange) {
 var t = e.createTextRange();
@@ -3262,7 +3383,7 @@ version: 3
 os: "ios",
 version: 5
 } ],
-hasContentEditable: function() {
+hasContentEditable() {
 for (var e = 0, t, n; t = enyo.RichText.osInfo[e]; e++) if (enyo.platform[t.os] < t.version) return !1;
 return !0;
 }
@@ -3275,48 +3396,48 @@ handlers: {
 onfocus: "focusHandler",
 onblur: "blurHandler"
 },
-create: function() {
-this.setTag(enyo.RichText.hasContentEditable() ? "div" : "textarea"), this.inherited(arguments);
+create(...args) {
+this.setTag(enyo.RichText.hasContentEditable() ? "div" : "textarea"), this.inherited(args);
 },
-focusHandler: function() {
+focusHandler() {
 this._value = this.getValue();
 },
-blurHandler: function() {
+blurHandler() {
 this._value !== this.getValue() && this.bubble("onchange");
 },
-valueChanged: function() {
+valueChanged() {
 this.hasFocus() ? (this.selectAll(), this.insertAtCursor(this.value)) : this.setPropertyValue("content", this.value, "contentChanged");
 },
-getValue: function() {
+getValue() {
 if (this.hasNode()) return this.node.innerHTML;
 },
-hasFocus: function() {
+hasFocus() {
 if (this.hasNode()) return document.activeElement === this.node;
 },
-getSelection: function() {
+getSelection() {
 if (this.hasFocus()) return window.getSelection();
 },
-removeSelection: function(e) {
+removeSelection(e) {
 var t = this.getSelection();
 t && t[e ? "collapseToStart" : "collapseToEnd"]();
 },
-modifySelection: function(e, t, n) {
+modifySelection(e, t, n) {
 var r = this.getSelection();
 r && r.modify(e || "move", t, n);
 },
-moveCursor: function(e, t) {
+moveCursor(e, t) {
 this.modifySelection("move", e, t);
 },
-moveCursorToEnd: function() {
+moveCursorToEnd() {
 this.moveCursor("forward", "documentboundary");
 },
-moveCursorToStart: function() {
+moveCursorToStart() {
 this.moveCursor("backward", "documentboundary");
 },
-selectAll: function() {
+selectAll() {
 this.hasFocus() && document.execCommand("selectAll");
 },
-insertAtCursor: function(e) {
+insertAtCursor(e) {
 if (this.hasFocus()) {
 var t = this.allowHtml ? e : enyo.Control.escapeHtml(e).replace(/\n/g, "<br/>");
 document.execCommand("insertHTML", !1, t);
@@ -3331,8 +3452,8 @@ name: "enyo.TextArea",
 kind: enyo.Input,
 tag: "textarea",
 classes: "enyo-textarea",
-rendered: function() {
-this.inherited(arguments), this.valueChanged();
+rendered(...args) {
+this.inherited(args), this.valueChanged();
 }
 });
 
@@ -3348,25 +3469,25 @@ onchange: "change"
 },
 tag: "select",
 defaultKind: "enyo.Option",
-rendered: function() {
-this.inherited(arguments), this.selectedChanged();
+rendered(...args) {
+this.inherited(args), this.selectedChanged();
 },
-getSelected: function() {
+getSelected() {
 return Number(this.getNodeProperty("selectedIndex", this.selected));
 },
-setSelected: function(e) {
+setSelected(e) {
 this.setPropertyValue("selected", Number(e), "selectedChanged");
 },
-selectedChanged: function() {
+selectedChanged() {
 this.setNodeProperty("selectedIndex", this.selected);
 },
-change: function() {
+change() {
 this.selected = this.getSelected();
 },
-render: function() {
-enyo.platform.ie ? this.parent.render() : this.inherited(arguments);
+render(...args) {
+enyo.platform.ie ? this.parent.render() : this.inherited(args);
 },
-getValue: function() {
+getValue() {
 if (this.hasNode()) return this.node.value;
 }
 }), enyo.kind({
@@ -3375,10 +3496,10 @@ published: {
 value: ""
 },
 tag: "option",
-create: function() {
-this.inherited(arguments), this.valueChanged();
+create(...args) {
+this.inherited(args), this.valueChanged();
 },
-valueChanged: function() {
+valueChanged() {
 this.setAttribute("value", this.value);
 }
 }), enyo.kind({
@@ -3388,10 +3509,10 @@ label: ""
 },
 tag: "optgroup",
 defaultKind: "enyo.Option",
-create: function() {
-this.inherited(arguments), this.labelChanged();
+create(...args) {
+this.inherited(args), this.labelChanged();
 },
-labelChanged: function() {
+labelChanged() {
 this.setAttribute("label", this.label);
 }
 });
@@ -3407,10 +3528,10 @@ active: null
 handlers: {
 onActivate: "activate"
 },
-activate: function(e, t) {
+activate(e, t) {
 this.highlander && (t.originator.active ? this.setActive(t.originator) : t.originator == this.active && this.active.setActive(!0));
 },
-activeChanged: function(e) {
+activeChanged(e) {
 e && (e.setActive(!1), e.removeClass("active")), this.active && this.active.addClass("active");
 }
 });
@@ -3422,10 +3543,10 @@ name: "enyo.GroupItem",
 published: {
 active: !1
 },
-rendered: function() {
-this.inherited(arguments), this.activeChanged();
+rendered(...args) {
+this.inherited(args), this.activeChanged();
 },
-activeChanged: function() {
+activeChanged() {
 this.bubble("onActivate");
 }
 });
@@ -3447,13 +3568,13 @@ tag: "button",
 published: {
 disabled: !1
 },
-create: function() {
-this.inherited(arguments), this.disabledChanged();
+create(...args) {
+this.inherited(args), this.disabledChanged();
 },
-disabledChanged: function() {
+disabledChanged() {
 this.setAttribute("disabled", this.disabled);
 },
-tap: function() {
+tap() {
 if (this.disabled) return !0;
 this.setActive(!0);
 }
@@ -3478,32 +3599,32 @@ handlers: {
 onchange: "change",
 onclick: "click"
 },
-create: function() {
-this.inherited(arguments);
+create(...args) {
+this.inherited(args);
 },
-rendered: function() {
-this.inherited(arguments), this.active && this.activeChanged(), this.checkedChanged();
+rendered(...args) {
+this.inherited(args), this.active && this.activeChanged(), this.checkedChanged();
 },
-getChecked: function() {
+getChecked() {
 return Boolean(this.getNodeProperty("checked", this.checked));
 },
-checkedChanged: function() {
+checkedChanged() {
 this.setNodeProperty("checked", this.checked), this.setAttribute("checked", this.checked ? "checked" : ""), this.setActive(this.checked);
 },
-activeChanged: function() {
+activeChanged() {
 this.active = Boolean(this.active), this.setChecked(this.active), this.bubble("onActivate");
 },
-setValue: function(e) {
+setValue(e) {
 this.setChecked(Boolean(e));
 },
-getValue: function() {
+getValue() {
 return this.getChecked();
 },
-valueChanged: function() {},
-change: function() {
+valueChanged() {},
+change() {
 this.setActive(this.getChecked());
 },
-click: function(e, t) {
+click(e, t) {
 enyo.platform.ie <= 8 && this.bubble("onchange", t);
 }
 });
@@ -3518,22 +3639,22 @@ count: 0
 events: {
 onSetupItem: ""
 },
-create: function() {
-this.inherited(arguments), this.countChanged();
+create(...args) {
+this.inherited(args), this.countChanged();
 },
-initComponents: function() {
-this.itemComponents = this.components || this.kindComponents, this.components = this.kindComponents = null, this.inherited(arguments);
+initComponents(...args) {
+this.itemComponents = this.components || this.kindComponents, this.components = this.kindComponents = null, this.inherited(args);
 },
-setCount: function(e) {
+setCount(e) {
 this.setPropertyValue("count", e, "countChanged");
 },
-countChanged: function() {
+countChanged() {
 this.build();
 },
-itemAtIndex: function(e) {
+itemAtIndex(e) {
 return this.controlAtIndex(e);
 },
-build: function() {
+build() {
 this.destroyClientControls();
 for (var e = 0, t; e < this.count; e++) t = this.createComponent({
 kind: "enyo.OwnerProxy",
@@ -3544,7 +3665,7 @@ item: t
 });
 this.render();
 },
-renderRow: function(e) {
+renderRow(e) {
 var t = this.itemAtIndex(e);
 this.doSetupItem({
 index: e,
@@ -3554,10 +3675,10 @@ item: t
 }), enyo.kind({
 name: "enyo.OwnerProxy",
 tag: null,
-decorateEvent: function(e, t, n) {
+decorateEvent(e, t, n) {
 t && (t.index = this.index), this.inherited(arguments);
 },
-delegateEvent: function(e, t, n, r, i) {
+delegateEvent(e, t, n, r, i) {
 return e == this && (e = this.owner.owner), this.inherited(arguments, [ e, t, n, r, i ]);
 }
 });
@@ -3568,8 +3689,8 @@ enyo.kind({
 name: "enyo._DragAvatar",
 style: "position: absolute; z-index: 10; pointer-events: none; cursor: move;",
 showing: !1,
-showingChanged: function() {
-this.inherited(arguments), document.body.style.cursor = this.showing ? "move" : null;
+showingChanged(...args) {
+this.inherited(args), document.body.style.cursor = this.showing ? "move" : null;
 }
 }), enyo.kind({
 name: "enyo.DragAvatar",
@@ -3579,10 +3700,10 @@ showing: !1,
 offsetX: 20,
 offsetY: 30
 },
-initComponents: function() {
-this.avatarComponents = this.components, this.components = null, this.inherited(arguments);
+initComponents(...args) {
+this.avatarComponents = this.components, this.components = null, this.inherited(args);
 },
-requireAvatar: function() {
+requireAvatar() {
 this.avatar || (this.avatar = this.createComponent({
 kind: enyo._DragAvatar,
 parentNode: document.body,
@@ -3590,19 +3711,19 @@ showing: !1,
 components: this.avatarComponents
 }).render());
 },
-showingChanged: function() {
+showingChanged() {
 this.avatar.setShowing(this.showing), document.body.style.cursor = this.showing ? "move" : null;
 },
-drag: function(e) {
+drag(e) {
 this.requireAvatar(), this.avatar.setBounds({
 top: e.pageY - this.offsetY,
 left: e.pageX + this.offsetX
 }), this.show();
 },
-show: function() {
+show() {
 this.setShowing(!0);
 },
-hide: function() {
+hide() {
 this.setShowing(!1);
 }
 });
@@ -3611,19 +3732,19 @@ this.setShowing(!1);
 
 enyo.kind({
 name: "enyo.FloatingLayer",
-create: function() {
-this.inherited(arguments), this.setParent(null);
+create(...args) {
+this.inherited(args), this.setParent(null);
 },
-render: function() {
-return this.parentNode = document.body, this.inherited(arguments);
+render(...args) {
+return this.parentNode = document.body, this.inherited(args);
 },
-generateInnerHtml: function() {
+generateInnerHtml() {
 return "";
 },
-beforeChildRender: function() {
+beforeChildRender() {
 this.hasNode() || this.render();
 },
-teardownChildren: function() {}
+teardownChildren() {}
 }), enyo.floatingLayer = new enyo.FloatingLayer;
 
 // Popup.js
@@ -3656,19 +3777,19 @@ tools: [ {
 kind: "Signals",
 onKeydown: "keydown"
 } ],
-create: function() {
-this.inherited(arguments), this.canGenerate = !this.floating;
+create(...args) {
+this.inherited(args), this.canGenerate = !this.floating;
 },
-render: function() {
-this.floating && (enyo.floatingLayer.hasNode() || enyo.floatingLayer.render(), this.parentNode = enyo.floatingLayer.hasNode()), this.inherited(arguments);
+render(...args) {
+this.floating && (enyo.floatingLayer.hasNode() || enyo.floatingLayer.render(), this.parentNode = enyo.floatingLayer.hasNode()), this.inherited(args);
 },
-destroy: function() {
-this.showing && this.release(), this.inherited(arguments);
+destroy(...args) {
+this.showing && this.release(), this.inherited(args);
 },
-reflow: function() {
-this.updatePosition(), this.inherited(arguments);
+reflow(...args) {
+this.updatePosition(), this.inherited(args);
 },
-calcViewportSize: function() {
+calcViewportSize() {
 if (window.innerWidth) return {
 width: window.innerWidth,
 height: window.innerHeight
@@ -3679,38 +3800,39 @@ width: e.offsetWidth,
 height: e.offsetHeight
 };
 },
-updatePosition: function() {
+updatePosition() {
 if (this.centered) {
-var e = this.calcViewportSize(), t = this.getBounds();
-this.addStyles("top: " + Math.max((e.height - t.height) / 2, 0) + "px; left: " + Math.max((e.width - t.width) / 2, 0) + "px;");
+  var e = this.calcViewportSize();
+  var t = this.getBounds();
+  this.addStyles("top: " + Math.max((e.height - t.height) / 2, 0) + "px; left: " + Math.max((e.width - t.width) / 2, 0) + "px;");
 }
 },
-showingChanged: function() {
-this.floating && this.showing && !this.hasNode() && this.render(), this.centered && this.applyStyle("visibility", "hidden"), this.inherited(arguments), this.showing ? (this.resized(), this.captureEvents && this.capture()) : this.captureEvents && this.release(), this.centered && this.applyStyle("visibility", null), this.hasNode() && this[this.showing ? "doShow" : "doHide"]();
+showingChanged(...args) {
+this.floating && this.showing && !this.hasNode() && this.render(), this.centered && this.applyStyle("visibility", "hidden"), this.inherited(args), this.showing ? (this.resized(), this.captureEvents && this.capture()) : this.captureEvents && this.release(), this.centered && this.applyStyle("visibility", null), this.hasNode() && this[this.showing ? "doShow" : "doHide"]();
 },
-capture: function() {
+capture() {
 enyo.dispatcher.capture(this, !this.modal);
 },
-release: function() {
+release() {
 enyo.dispatcher.release();
 },
-down: function(e, t) {
+down(e, t) {
 this.downEvent = t, this.modal && !t.dispatchTarget.isDescendantOf(this) && t.preventDefault();
 },
-tap: function(e, t) {
+tap(e, t) {
 if (this.autoDismiss && !t.dispatchTarget.isDescendantOf(this) && this.downEvent && !this.downEvent.dispatchTarget.isDescendantOf(this)) return this.downEvent = null, this.hide(), !0;
 },
-dragstart: function(e, t) {
+dragstart(e, t) {
 var n = t.dispatchTarget === this || t.dispatchTarget.isDescendantOf(this);
 return e.autoDismiss && !n && e.setShowing(!1), !0;
 },
-keydown: function(e, t) {
+keydown(e, t) {
 this.showing && this.autoDismiss && t.keyCode == 27 && this.hide();
 },
-blur: function(e, t) {
+blur(e, t) {
 t.dispatchTarget.isDescendantOf(this) && (this.lastFocus = t.originator);
 },
-focus: function(e, t) {
+focus(e, t) {
 var n = t.dispatchTarget;
 if (this.modal && !n.isDescendantOf(this)) {
 n.hasNode() && n.node.blur();
@@ -3718,10 +3840,10 @@ var r = this.lastFocus && this.lastFocus.hasNode() || this.hasNode();
 r && r.focus();
 }
 },
-requestShow: function(e, t) {
+requestShow(e, t) {
 return this.show(), !0;
 },
-requestHide: function(e, t) {
+requestHide(e, t) {
 return this.hide(), !0;
 }
 });
@@ -3739,22 +3861,22 @@ onSelect: "",
 onDeselect: "",
 onChange: ""
 },
-create: function() {
-this.clear(), this.inherited(arguments);
+create(...args) {
+this.clear(), this.inherited(args);
 },
-multiChanged: function() {
+multiChanged() {
 this.multi || this.clear(), this.doChange();
 },
-highlander: function(e) {
+highlander(e) {
 this.multi || this.deselect(this.lastSelected);
 },
-clear: function() {
+clear() {
 this.selected = {};
 },
-isSelected: function(e) {
+isSelected(e) {
 return this.selected[e];
 },
-setByKey: function(e, t, n) {
+setByKey(e, t, n) {
 if (t) this.selected[e] = n || !0, this.lastSelected = e, this.doSelect({
 key: e,
 data: this.selected[e]
@@ -3767,19 +3889,19 @@ data: r
 }
 this.doChange();
 },
-deselect: function(e) {
+deselect(e) {
 this.isSelected(e) && this.setByKey(e, !1);
 },
-select: function(e, t) {
+select(e, t) {
 this.multi ? this.setByKey(e, !this.isSelected(e), t) : this.isSelected(e) || (this.highlander(), this.setByKey(e, !0, t));
 },
-toggle: function(e, t) {
+toggle(e, t) {
 !this.multi && this.lastSelected != e && this.deselect(this.lastSelected), this.setByKey(e, !this.isSelected(e), t);
 },
-getSelected: function() {
+getSelected() {
 return this.selected;
 },
-remove: function(e) {
+remove(e) {
 var t = {};
 for (var n in this.selected) n < e ? t[n] = this.selected[n] : n > e && (t[n - 1] = this.selected[n]);
 this.selected = t;

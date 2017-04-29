@@ -1,7 +1,7 @@
 enyo.kind({
 	name: "XhrTest",
 	kind: enyo.TestSuite,
-	testXhrSync: function() {
+	testXhrSync() {
 		var x = enyo.xhr.request({
 			url: "php/test1.php?format=text",
 			sync: true

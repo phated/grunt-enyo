@@ -18,14 +18,14 @@ enyo.kind({
 		disabled: false
 	},
 	//* @protected
-	create: function() {
-		this.inherited(arguments);
+	create(...args) {
+		this.inherited(args);
 		this.disabledChanged();
 	},
-	disabledChanged: function() {
+	disabledChanged() {
 		this.setAttribute("disabled", this.disabled);
 	},
-	tap: function() {
+	tap() {
 		if (this.disabled) {
 			// work around for platforms like Chrome on Android or Opera that send
 			// mouseup to disabled form controls

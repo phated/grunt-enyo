@@ -13,7 +13,7 @@ enyo.xhr = {
 		- _xhrFields_: Optional object containing name/value pairs to mix directly into the generated xhr object.
 		- _mimeType_: Optional string to override the MIME-Type.
 	*/
-	request: function(inParams) {
+	request(inParams) {
 		var xhr = this.getXMLHttpRequest(inParams.url);
 		//
 		var method = inParams.method || "GET";
@@ -48,7 +48,7 @@ enyo.xhr = {
 	},
 	//* remove any callbacks that might be set from Enyo code for an existing XHR
 	//* and stop the XHR from completing.
-	cancel: function(inXhr) {
+	cancel(inXhr) {
 		if (inXhr.onload) {
 			inXhr.onload = null;
 		}
@@ -60,32 +60,33 @@ enyo.xhr = {
 		}
 	},
 	//* @protected
-	makeReadyStateHandler: function(inXhr, inCallback) {
+	makeReadyStateHandler(inXhr, inCallback) {
 		if (window.XDomainRequest && inXhr instanceof XDomainRequest) {
-			inXhr.onload = function() {
-				inCallback.apply(null, [inXhr.responseText, inXhr]);
+			inXhr.onload = () => {
+				inCallback(...[inXhr.responseText, inXhr]);
 			};
 		}
-		inXhr.onreadystatechange = function() {
+		inXhr.onreadystatechange = () => {
 			if (inXhr.readyState == 4) {
-				inCallback.apply(null, [inXhr.responseText, inXhr]);
+				inCallback(...[inXhr.responseText, inXhr]);
 			}
 		};
 	},
-	inOrigin: function(inUrl) {
-		var a = document.createElement("a"), result = false;
-		a.href = inUrl;
-		// protocol is ":" for relative URLs
-		if (a.protocol === ":" ||
+	inOrigin(inUrl) {
+        var a = document.createElement("a");
+        var result = false;
+        a.href = inUrl;
+        // protocol is ":" for relative URLs
+        if (a.protocol === ":" ||
 				(a.protocol === window.location.protocol &&
 					a.hostname === window.location.hostname &&
 					a.port === (window.location.port || 
 						(window.location.protocol === "https:" ? "443" : "80")))) {
 			result = true;
 		}
-		return result;
-	},
-	getXMLHttpRequest: function(inUrl) {
+        return result;
+    },
+	getXMLHttpRequest(inUrl) {
 		try {
 			if (window.XDomainRequest && !this.inOrigin(inUrl) && !/^file:\/\//.test(window.location.href)) {
 				return new XDomainRequest();

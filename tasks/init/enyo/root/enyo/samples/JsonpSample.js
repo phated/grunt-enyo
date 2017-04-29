@@ -10,7 +10,7 @@ enyo.kind({
 		]},
 		{kind: "onyx.TextArea", fit:true, classes:"jsonp-sample-source"}
 	],
-	fetch: function() {    
+	fetch() {    
 		var jsonp = new enyo.JsonpRequest({
 			url: "http://query.yahooapis.com/v1/public/yql?format=json", 
 			callbackName: "callback"
@@ -22,7 +22,7 @@ enyo.kind({
 		// attach responders to the transaction object
 		jsonp.response(this, "processResponse");
 	},
-	processResponse: function(inSender, inResponse) {
+	processResponse(inSender, inResponse) {
 		// do something with it
 		this.$.textArea.setValue(JSON.stringify(inResponse, null, 2));
 	}

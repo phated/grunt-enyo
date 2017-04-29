@@ -36,23 +36,23 @@ enyo.kind({
 		//* Sends the item index, and the item control, for decoration.
 		onSetupItem: ""
 	},
-	create: function() {
-		this.inherited(arguments);
+	create(...args) {
+		this.inherited(args);
 		this.countChanged();
 	},
 	//* @protected
-	initComponents: function() {
+	initComponents(...args) {
 		this.itemComponents = this.components || this.kindComponents;
 		this.components = this.kindComponents = null;
-		this.inherited(arguments);
+		this.inherited(args);
 	},
-	setCount: function(inCount) {
+	setCount(inCount) {
 		this.setPropertyValue("count", inCount, "countChanged");
 	},
-	countChanged: function() {
+	countChanged() {
 		this.build();
 	},
-	itemAtIndex: function(inIndex) {
+	itemAtIndex(inIndex) {
 		return this.controlAtIndex(inIndex);
 	},
 	//* @public
@@ -61,7 +61,7 @@ enyo.kind({
 		This is called automatically if _setCount_ is called, even if the count
 		remains the same.
 	*/
-	build: function() {
+	build() {
 		this.destroyClientControls();
 		for (var i=0, c; i<this.count; i++) {
 			c = this.createComponent({kind: "enyo.OwnerProxy", index: i});
@@ -77,7 +77,7 @@ enyo.kind({
 		item, but just calls the _onSetupItem_ event handler again for it, so
 		any state stored in	the item is preserved.
 	*/
-	renderRow: function(inIndex) {
+	renderRow(inIndex) {
 		var c = this.itemAtIndex(inIndex);
 		this.doSetupItem({index: inIndex, item: c});
 	}
@@ -89,13 +89,13 @@ enyo.kind({
 enyo.kind({
 	name: "enyo.OwnerProxy",
 	tag: null,
-	decorateEvent: function(inEventName, inEvent, inSender) {
+	decorateEvent(inEventName, inEvent, inSender) {
 		if (inEvent) {
 			inEvent.index = this.index;
 		}
 		this.inherited(arguments);
 	},
-	delegateEvent: function(inDelegate, inName, inEventName, inEvent, inSender) {
+	delegateEvent(inDelegate, inName, inEventName, inEvent, inSender) {
 		if (inDelegate == this) {
 			inDelegate = this.owner.owner;
 		}

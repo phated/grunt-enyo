@@ -31,18 +31,18 @@ enyo.mixin(enyo.dispatcher, {
 	autoForwardEvents: {leave: 1, resize: 1},
 	captures: [],
 	//* Capture events for `inTarget` and optionally forward them
-	capture: function(inTarget, inShouldForward) {
+	capture(inTarget, inShouldForward) {
 		var info = {target: inTarget, forward: inShouldForward};
 		this.captures.push(info);
 		this.setCaptureInfo(info);
 	},
 	//* Release the last captured event
-	release: function() {
+	release() {
 		this.captures.pop();
 		this.setCaptureInfo(this.captures[this.captures.length-1]);
 	},
 	//* Set the information for a captured event
-	setCaptureInfo: function(inInfo) {
+	setCaptureInfo(inInfo) {
 		this.captureTarget = inInfo && inInfo.target;
 		this.forwardEvents = inInfo && inInfo.forward;
 	}

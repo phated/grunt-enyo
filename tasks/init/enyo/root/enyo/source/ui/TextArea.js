@@ -9,8 +9,8 @@ enyo.kind({
 	tag: "textarea",
 	classes: "enyo-textarea",
 	// textarea does use value attribute; needs to be kicked when rendered.
-	rendered: function() {
-		this.inherited(arguments);
+	rendered(...args) {
+		this.inherited(args);
 		this.valueChanged();
 	}
 });

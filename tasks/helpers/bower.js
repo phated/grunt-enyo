@@ -1,4 +1,4 @@
-exports.init = function(grunt){
+exports.init = grunt => {
   'use strict';
 
   var exports = {};
@@ -12,23 +12,23 @@ exports.init = function(grunt){
     var done = this.async();
 
     install(this.args, {})
-      .on('data', function (data){
+      .on('data', data => {
         if(data){
           grunt.log.writeln(data);
         }
       })
-      .on('error', function (err){
+      .on('error', err => {
         template('error', {
           message: err.message
         })
-        .on('data', function (d){
+        .on('data', d => {
           grunt.log.error(d);
         })
-        .on('end', function (){
+        .on('end', () => {
           done(false);
         });
       })
-      .on('end', function (data){
+      .on('end', data => {
         if(data){
           grunt.log.writeln(data);
         }
@@ -47,23 +47,23 @@ exports.init = function(grunt){
     var done = this.async();
 
     uninstall(this.args, {})
-      .on('data', function (data){
+      .on('data', data => {
         if(data){
           grunt.log.writeln(data);
         }
       })
-      .on('error', function (err){
+      .on('error', err => {
         template('error', {
           message: err.message
         })
-        .on('data', function (d){
+        .on('data', d => {
           grunt.log.error(d);
         })
-        .on('end', function (){
+        .on('end', () => {
           done(false);
         });
       })
-      .on('end', function (data){
+      .on('end', data => {
         if(data){
           grunt.log.writeln(data);
         }
@@ -82,23 +82,23 @@ exports.init = function(grunt){
     var done = this.async();
 
     update(this.args, {})
-      .on('data', function (data){
+      .on('data', data => {
         if(data){
           grunt.log.writeln(data);
         }
       })
-      .on('error', function (err){
+      .on('error', err => {
         template('error', {
           message: err.message
         })
-        .on('data', function (d){
+        .on('data', d => {
           grunt.log.error(d);
         })
-        .on('end', function (){
+        .on('end', () => {
           done(false);
         });
       })
-      .on('end', function (data){
+      .on('end', data => {
         if(data){
           grunt.log.writeln(data);
         }
@@ -117,23 +117,23 @@ exports.init = function(grunt){
     var done = this.async();
 
     search(query)
-      .on('data', function (data){
+      .on('data', data => {
         if(data){
           grunt.log.writeln(data);
         }
       })
-      .on('error', function (err){
+      .on('error', err => {
         template('error', {
           message: err.message
         })
-        .on('data', function (d){
+        .on('data', d => {
           grunt.log.error(d);
         })
-        .on('end', function (){
+        .on('end', () => {
           done(false);
         });
       })
-      .on('end', function (data){
+      .on('end', data => {
         if(data){
           grunt.log.writeln(data);
         }
@@ -152,23 +152,23 @@ exports.init = function(grunt){
     var done = this.async();
 
     lookup(query)
-      .on('data', function (data){
+      .on('data', data => {
         if(data){
           grunt.log.writeln(data);
         }
       })
-      .on('error', function (err){
+      .on('error', err => {
         template('error', {
           message: err.message
         })
-        .on('data', function (d){
+        .on('data', d => {
           grunt.log.error(d);
         })
-        .on('end', function (){
+        .on('end', () => {
           done(false);
         });
       })
-      .on('end', function (data){
+      .on('end', data => {
         if(data){
           grunt.log.writeln(data);
         }
@@ -193,23 +193,23 @@ exports.init = function(grunt){
     };
 
     list(fakeOptions)
-      .on('data', function (data){
+      .on('data', data => {
         if(data){
           grunt.log.writeln(data);
         }
       })
-      .on('error', function (err){
+      .on('error', err => {
         template('error', {
           message: err.message
         })
-        .on('data', function (d){
+        .on('data', d => {
           grunt.log.error(d);
         })
-        .on('end', function (){
+        .on('end', () => {
           done(false);
         });
       })
-      .on('end', function (data){
+      .on('end', data => {
         if(data){
           grunt.log.writeln(data);
         }

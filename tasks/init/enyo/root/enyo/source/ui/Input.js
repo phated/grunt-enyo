@@ -46,11 +46,11 @@ enyo.kind({
 		onclear: "clear",
 		ondragstart: "dragstart"
 	},
-	create: function() {
+	create(...args) {
 		if (enyo.platform.ie) {
 			this.handlers.onkeyup = "iekeyup";
 		}
-		this.inherited(arguments);
+		this.inherited(args);
 		this.placeholderChanged();
 		// prevent overriding a custom attribute with null
 		if (this.type) {
@@ -58,47 +58,48 @@ enyo.kind({
 		}
 		this.valueChanged();
 	},
-	rendered: function() {
-		this.inherited(arguments);
+	rendered(...args) {
+		this.inherited(args);
 		this.disabledChanged();
 		if (this.defaultFocus) {
 			this.focus();
 		}
 	},
-	typeChanged: function() {
+	typeChanged() {
 		this.setAttribute("type", this.type);
 	},
-	placeholderChanged: function() {
+	placeholderChanged() {
 		this.setAttribute("placeholder", this.placeholder);
 	},
-	disabledChanged: function() {
+	disabledChanged() {
 		this.setAttribute("disabled", this.disabled);
 		this.bubble("onDisabledChange");
 	},
-	getValue: function() {
+	getValue() {
 		return this.getNodeProperty("value", this.value);
 	},
-	valueChanged: function() {
+	valueChanged() {
 		this.setAttribute("value", this.value);
 		this.setNodeProperty("value", this.value);
 	},
-	iekeyup: function(inSender, inEvent) {
-		var ie = enyo.platform.ie, kc = inEvent.keyCode;
-		// input event missing on ie 8, fails to fire on backspace and delete keys in ie 9
-		if (ie <= 8 || (ie == 9 && (kc == 8 || kc == 46))) {
+	iekeyup(inSender, inEvent) {
+        var ie = enyo.platform.ie;
+        var kc = inEvent.keyCode;
+        // input event missing on ie 8, fails to fire on backspace and delete keys in ie 9
+        if (ie <= 8 || (ie == 9 && (kc == 8 || kc == 46))) {
 			this.bubble("oninput", inEvent);
 		}
-	},
-	clear: function() {
+    },
+	clear() {
 		this.setValue("");
 	},
-	focus: function() {
+	focus() {
 		if (this.hasNode()) {
 			this.node.focus();
 		}
 	},
 	// note: we disallow dragging of an input to allow text selection on all platforms
-	dragstart: function() {
+	dragstart() {
 		return true;
 	}
 });

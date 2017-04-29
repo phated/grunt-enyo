@@ -1,10 +1,10 @@
-(function() {
+((() => {
 	// enyo can use information from the script tag that loads this bootstrap file
 	var thisScript = "enyo.js";
 
 	enyo = window.enyo || {};
 
-	enyo.locateScript = function(inName) {
+	enyo.locateScript = inName => {
 		var scripts = document.getElementsByTagName("script");
 		for (var i=scripts.length-1, s, src, l=inName.length; (i>=0) && (s=scripts[i]); i--) {
 			if (!s.located) {
@@ -31,11 +31,11 @@
 
 	var root = enyo.args.root;
 
-	var script = function(inSrc) {
+	var script = inSrc => {
 		document.write('<scri' + 'pt src="' + root + "/source/boot/" + inSrc + '"></scri' + 'pt>');
 	};
 
 	script("../../loader.js");
 	script("boot.js");
 	script("../package.js");
-})();
+}))();

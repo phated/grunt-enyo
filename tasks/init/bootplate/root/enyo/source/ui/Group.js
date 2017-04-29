@@ -18,7 +18,7 @@ enyo.kind({
 	handlers: {
 		onActivate: "activate"
 	},
-	activate: function(inSender, inEvent) {
+	activate(inSender, inEvent) {
 		if (this.highlander) {
 			// deactivation messages are ignored unless it's an attempt
 			// to deactivate the highlander
@@ -34,7 +34,7 @@ enyo.kind({
 			}
 		}
 	},
-	activeChanged: function(inOld) {
+	activeChanged(inOld) {
 		if (inOld) {
 			inOld.setActive(false);
 			inOld.removeClass("active");

@@ -14,7 +14,7 @@ enyo.kind({
 		]},
 		{kind: "onyx.TextArea", fit:true, classes:"ajax-sample-source"}
 	],
-	fetch: function() {    
+	fetch() {    
 		var ajax = new enyo.Ajax({
 			url: this.$.baseUrl.getValue()
 		});
@@ -27,11 +27,11 @@ enyo.kind({
 		// handle error
 		ajax.error(this, "processError");
 	},
-	processResponse: function(inSender, inResponse) {
+	processResponse(inSender, inResponse) {
 		// do something with it
 		this.$.textArea.setValue(JSON.stringify(inResponse, null, 2));
 	},
-	processError: function(inSender, inResponse) {
+	processError(inSender, inResponse) {
 		alert("Error!");
 	}
 });

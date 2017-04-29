@@ -62,37 +62,37 @@ enyo.kind({
 		onError: ""
 	},
 	//* @protected
-	constructor: function(inProps) {
+	constructor(inProps) {
 		this.inherited(arguments);
 	},
 	//* @public
 	//* Sends a Web request with the passed-in parameters, returning the
 	//* associated Async instance.
-	send: function(inParams) {
+	send(inParams) {
 		return this.jsonp ? this.sendJsonp(inParams) : this.sendAjax(inParams);
 	},
 	//* @protected
-	sendJsonp: function(inParams) {
+	sendJsonp(inParams) {
 		var jsonp = new enyo.JsonpRequest();
 		for (var n in {'url':1, 'callbackName':1, 'charset':1}) {
 			jsonp[n] = this[n];
 		}
 		return this.sendAsync(jsonp, inParams);
 	},
-	sendAjax: function(inParams) {
+	sendAjax(inParams) {
 		var ajax = new enyo.Ajax();
 		for (var n in enyo.AjaxProperties) {
 			ajax[n] = this[n];
 		}
 		return this.sendAsync(ajax, inParams);
 	},
-	sendAsync: function(inAjax, inParams) {
+	sendAsync(inAjax, inParams) {
 		return inAjax.go(inParams).response(this, "response").error(this, "error");
 	},
-	response: function(inSender, inData) {
+	response(inSender, inData) {
 		this.doResponse({ajax: inSender, data: inData});
 	},
-	error: function(inSender, inData) {
+	error(inSender, inData) {
 		this.doError({ajax: inSender, data: inData});
 	}
 });

@@ -1,12 +1,12 @@
 // machine for a loader instance
 enyo.machine = {
-	sheet: function(s) {
+	sheet(s) {
 		document.write('<link href="' + s + '" media="screen" rel="stylesheet" type="text/css" />');
 	},
-	script: function(inSrc, onLoad, onError) {
+	script(inSrc, onLoad, onError) {
 		document.write('<scri' + 'pt src="' + inSrc + '"' + (onLoad ? ' onload="' + onLoad + '"' : '') + (onError ? ' onerror="' + onError + '"' : '') + '></scri' + 'pt>');
 	},
-	inject: function(inCode) {
+	inject(inCode) {
 		document.write('<script type="text/javascript">' + inCode + "</script>");
 	}
 };
@@ -15,7 +15,7 @@ enyo.machine = {
 enyo.loader = new enyo.loaderFactory(enyo.machine);
 
 // dependency API uses enyo loader
-enyo.depends = function() {
+enyo.depends = function(...args) {
 	var ldr = enyo.loader;
 	if (!ldr.packageFolder) {
 		var tag = enyo.locateScript("package.js");
@@ -25,7 +25,7 @@ enyo.depends = function() {
 			//console.log("detected PACKAGEFOLDER [" + ldr.packageFolder + "]");
 		}
 	}
-	ldr.load.apply(ldr, arguments);
+	ldr.load(...args);
 };
 
 // predefined path aliases

@@ -39,7 +39,7 @@
 
 //* @protected
 enyo.dispatcher.features.push(
-	function(e) {
+	e => {
 		// NOTE: beware of properties in enyo.gesture inadvertently mapped to event types
 		if (enyo.gesture.drag[e.type]) {
 			return enyo.gesture.drag[e.type](e);
@@ -55,7 +55,7 @@ enyo.gesture.drag = {
 	trackCount: 5,
 	minFlick: 0.1,
 	minTrack: 8,
-	down: function(e) {
+	down(e) {
 		// tracking if the mouse is down
 		//console.log("tracking ON");
 		// Note: 'tracking' flag indicates interest in mousemove, it's turned off
@@ -67,7 +67,7 @@ enyo.gesture.drag = {
 		this.startTracking(e);
 		this.beginHold(e);
 	},
-	move: function(e) {
+	move(e) {
 		if (this.tracking) {
 			this.track(e);
 			// If the mouse is not down and we're tracking a drag, abort.
@@ -87,17 +87,17 @@ enyo.gesture.drag = {
 			}
 		}
 	},
-	up: function(e) {
+	up(e) {
 		this.endTracking(e);
 		this.stopDragging(e);
 		this.cancelHold();
 	},
-	leave: function(e) {
+	leave(e) {
 		if (this.dragEvent) {
 			this.sendDragOut(e);
 		}
 	},
-	stopDragging: function(e) {
+	stopDragging(e) {
 		if (this.dragEvent) {
 			this.sendDrop(e);
 			var handled = this.sendDragFinish(e);
@@ -105,12 +105,13 @@ enyo.gesture.drag = {
 			return handled;
 		}
 	},
-	makeDragEvent: function(inType, inTarget, inEvent, inInfo) {
-		var adx = Math.abs(this.dx), ady = Math.abs(this.dy);
-		var h = adx > ady;
-		// suggest locking if off-axis < 22.5 degrees
-		var l = (h ? ady/adx : adx/ady) < 0.414;
-		var e = {
+	makeDragEvent(inType, inTarget, inEvent, inInfo) {
+        var adx = Math.abs(this.dx);
+        var ady = Math.abs(this.dy);
+        var h = adx > ady;
+        // suggest locking if off-axis < 22.5 degrees
+        var l = (h ? ady/adx : adx/ady) < 0.414;
+        var e = {
 			type: inType,
 			dx: this.dx,
 			dy: this.dy,
@@ -133,21 +134,21 @@ enyo.gesture.drag = {
 			shiftKey: inEvent.shiftKey,
 			srcEvent: inEvent.srcEvent
 		};
-		//Fix for IE8, which doesn't include pageX and pageY properties
-		if(enyo.platform.ie==8 && e.target) {
+        //Fix for IE8, which doesn't include pageX and pageY properties
+        if(enyo.platform.ie==8 && e.target) {
 			e.pageX = e.clientX + e.target.scrollLeft;
 			e.pageY = e.clientY + e.target.scrollTop;
 		}
-		e.preventDefault = enyo.gesture.preventDefault;
-		e.disablePrevention = enyo.gesture.disablePrevention;
-		return e;
-	},
-	sendDragStart: function(e) {
+        e.preventDefault = enyo.gesture.preventDefault;
+        e.disablePrevention = enyo.gesture.disablePrevention;
+        return e;
+    },
+	sendDragStart(e) {
 		//console.log("dragstart");
 		this.dragEvent = this.makeDragEvent("dragstart", this.target, e);
 		enyo.dispatch(this.dragEvent);
 	},
-	sendDrag: function(e) {
+	sendDrag(e) {
 		//console.log("sendDrag to " + this.dragEvent.target.id + ", over to " + e.target.id);
 		// send dragOver event to the standard event target
 		var synth = this.makeDragEvent("dragover", e.target, e, this.dragEvent.dragInfo);
@@ -157,26 +158,26 @@ enyo.gesture.drag = {
 		synth.target = this.dragEvent.target;
 		enyo.dispatch(synth);
 	},
-	sendDragFinish: function(e) {
+	sendDragFinish(e) {
 		//console.log("dragfinish");
 		var synth = this.makeDragEvent("dragfinish", this.dragEvent.target, e, this.dragEvent.dragInfo);
-		synth.preventTap = function() {
+		synth.preventTap = () => {
 			e.preventTap && e.preventTap();
 		};
 		enyo.dispatch(synth);
 	},
-	sendDragOut: function(e) {
+	sendDragOut(e) {
 		var synth = this.makeDragEvent("dragout", e.target, e, this.dragEvent.dragInfo);
 		enyo.dispatch(synth);
 	},
-	sendDrop: function(e) {
+	sendDrop(e) {
 		var synth = this.makeDragEvent("drop", e.target, e, this.dragEvent.dragInfo);
-		synth.preventTap = function() {
+		synth.preventTap = () => {
 			e.preventTap && e.preventTap();
 		};
 		enyo.dispatch(synth);
 	},
-	startTracking: function(e) {
+	startTracking(e) {
 		this.tracking = true;
 		// note: use clientX/Y to be compatible with ie8
 		this.px0 = e.clientX;
@@ -184,7 +185,7 @@ enyo.gesture.drag = {
 		this.flickInfo = {startEvent: e, moves: []};
 		this.track(e);
 	},
-	track: function(e) {
+	track(e) {
 		this.lastDx = this.dx;
 		this.lastDy = this.dy;
 		this.dx = e.clientX - this.px0;
@@ -203,7 +204,7 @@ enyo.gesture.drag = {
 			ti.moves.shift();
 		}
 	},
-	endTracking: function(e) {
+	endTracking(e) {
 		this.tracking = false;
 		var ti = this.flickInfo;
 		var moves = ti && ti.moves;
@@ -235,14 +236,14 @@ enyo.gesture.drag = {
 		}
 		this.flickInfo = null;
 	},
-	calcDirection: function(inNum, inDefault) {
+	calcDirection(inNum, inDefault) {
 		return inNum > 0 ? 1 : (inNum < 0 ? -1 : inDefault);
 	},
-	beginHold: function(e) {
+	beginHold(e) {
 		this.holdStart = enyo.now();
 		this.holdJob = setInterval(enyo.bind(this, "sendHoldPulse", e), this.holdPulseDelay);
 	},
-	cancelHold: function() {
+	cancelHold() {
 		clearInterval(this.holdJob);
 		this.holdJob = null;
 		if (this.sentHold) {
@@ -250,7 +251,7 @@ enyo.gesture.drag = {
 			this.sendRelease(this.holdEvent);
 		}
 	},
-	sendHoldPulse: function(inEvent) {
+	sendHoldPulse(inEvent) {
 		if (!this.sentHold) {
 			this.sentHold = true;
 			this.sendHold(inEvent);
@@ -259,16 +260,16 @@ enyo.gesture.drag = {
 		e.holdTime = enyo.now() - this.holdStart;
 		enyo.dispatch(e);
 	},
-	sendHold: function(inEvent) {
+	sendHold(inEvent) {
 		this.holdEvent = inEvent;
 		var e = enyo.gesture.makeEvent("hold", inEvent);
 		enyo.dispatch(e);
 	},
-	sendRelease: function(inEvent) {
+	sendRelease(inEvent) {
 		var e = enyo.gesture.makeEvent("release", inEvent);
 		enyo.dispatch(e);
 	},
-	sendFlick: function(inEvent, inX, inY, inV) {
+	sendFlick(inEvent, inX, inY, inV) {
 		var e = enyo.gesture.makeEvent("flick", inEvent);
 		e.xVelocity = inX;
 		e.yVelocity = inY;
