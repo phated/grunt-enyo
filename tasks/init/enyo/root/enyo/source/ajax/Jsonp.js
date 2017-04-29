@@ -31,7 +31,7 @@ enyo.kind({
 		nextCallbackID: 0
 	},
 	//* @protected
-	addScriptElement: function() {
+	addScriptElement() {
 		var script = document.createElement('script');
 		script.src = this.src;
 		script.async = "async";
@@ -50,7 +50,7 @@ enyo.kind({
 		first.parentNode.insertBefore(script, first);
 		this.scriptTag = script;
 	},
-	removeScriptElement: function() {
+	removeScriptElement() {
 		var script = this.scriptTag;
 		this.scriptTag = null;
 		script.onerror = null;
@@ -58,19 +58,19 @@ enyo.kind({
 			script.parentNode.removeChild(script);
 		}
 	},
-	constructor: function(inParams) {
+	constructor(inParams) {
 		enyo.mixin(this, inParams);
 		this.inherited(arguments);
 	},
 	//* @public
 	//* Starts the JSONP request.
-	go: function(inParams) {
+	go(inParams) {
 		this.startTimer();
 		this.jsonp(inParams);
 		return this;
 	},
 	//* @protected
-	jsonp: function(inParams) {
+	jsonp(inParams) {
 		var callbackFunctionName = "enyo_jsonp_callback_" + (enyo.JsonpRequest.nextCallbackID++);
 		//
 		this.src = this.buildUrl(inParams, callbackFunctionName);
@@ -86,7 +86,7 @@ enyo.kind({
 		this.response(cleanup);
 		this.error(cleanup);
 	},
-	buildUrl: function(inParams, inCallbackFunctionName) {
+	buildUrl(inParams, inCallbackFunctionName) {
 		var parts = this.url.split("?");
 		var uri = parts.shift() || "";
 		var args = parts.join("?").split("&");
@@ -103,7 +103,7 @@ enyo.kind({
 	// replacing the string "=?" with the callback name. For the more
 	// common case of inParams being an object, we'll add a argument named
 	// using the callbackName published property.
-	bodyArgsFromParams: function(inParams, inCallbackFunctionName) {
+	bodyArgsFromParams(inParams, inCallbackFunctionName) {
 		if (enyo.isString(inParams)) {
 			return inParams.replace("=?", "=" + inCallbackFunctionName);
 		} else {

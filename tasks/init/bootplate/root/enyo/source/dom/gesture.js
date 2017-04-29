@@ -15,7 +15,7 @@ enyo.gesture = {
 	//* @protected
 	eventProps: ["target", "relatedTarget", "clientX", "clientY", "pageX", "pageY", "screenX", "screenY", "altKey", "ctrlKey", "metaKey", "shiftKey",
 		"detail", "identifier", "dispatchTarget", "which", "srcEvent"],
-	makeEvent: function(inType, inEvent) {
+	makeEvent(inType, inEvent) {
 		var e = {type: inType};
 		for (var i=0, p; p=this.eventProps[i]; i++) {
 			e[p] = inEvent[p];
@@ -46,13 +46,13 @@ enyo.gesture = {
 		}
 		return e;
 	},
-	down: function(inEvent) {
+	down(inEvent) {
 		// cancel any hold since it's possible in corner cases to get a down without an up
 		var e = this.makeEvent("down", inEvent);
 		enyo.dispatch(e);
 		this.downEvent = e;
 	},
-	move: function(inEvent) {
+	move(inEvent) {
 		var e = this.makeEvent("move", inEvent);
 		// include delta and direction v. down info in move event
 		e.dx = e.dy = e.horizontal = e.vertical = 0;
@@ -64,10 +64,10 @@ enyo.gesture = {
 		}
 		enyo.dispatch(e);
 	},
-	up: function(inEvent) {
+	up(inEvent) {
 		var e = this.makeEvent("up", inEvent);
 		var tapPrevented = false;
-		e.preventTap = function() {
+		e.preventTap = () => {
 			tapPrevented = true;
 		};
 		enyo.dispatch(e);
@@ -76,13 +76,13 @@ enyo.gesture = {
 		}
 		this.downEvent = null;
 	},
-	over: function(inEvent) {
+	over(inEvent) {
 		enyo.dispatch(this.makeEvent("enter", inEvent));
 	},
-	out: function(inEvent) {
+	out(inEvent) {
 		enyo.dispatch(this.makeEvent("leave", inEvent));
 	},
-	sendTap: function(inEvent) {
+	sendTap(inEvent) {
 		// The common ancestor for the down/up pair is the origin for the tap event
 		var t = this.findCommonAncestor(this.downEvent.target, inEvent.target);
 		if (t) {
@@ -91,7 +91,7 @@ enyo.gesture = {
 			enyo.dispatch(e);
 		}
 	},
-	findCommonAncestor: function(inA, inB) {
+	findCommonAncestor(inA, inB) {
 		var p = inB;
 		while (p) {
 			if (this.isTargetDescendantOf(inA, p)) {
@@ -100,7 +100,7 @@ enyo.gesture = {
 			p = p.parentNode;
 		}
 	},
-	isTargetDescendantOf: function(inChild, inParent) {
+	isTargetDescendantOf(inChild, inParent) {
 		var c = inChild;
 		while(c) {
 			if (c == inParent) {
@@ -128,7 +128,7 @@ enyo.gesture.disablePrevention = function() {
 };
 
 enyo.dispatcher.features.push(
-	function(e) {
+	e => {
 		// NOTE: beware of properties in enyo.gesture inadvertently mapped to event types
 		if (enyo.gesture.events[e.type]) {
 			return enyo.gesture.events[e.type](e);
@@ -137,29 +137,29 @@ enyo.dispatcher.features.push(
 );
 
 enyo.gesture.events = {
-	mousedown: function(e) {
+	mousedown(e) {
 		enyo.gesture.down(e);
 	},
-	mouseup: function(e) {
+	mouseup(e) {
 		enyo.gesture.up(e);
 	},
-	mousemove:  function(e) {
+	mousemove(e) {
 		enyo.gesture.move(e);
 	},
-	mouseover:  function(e) {
+	mouseover(e) {
 		enyo.gesture.over(e);
 	},
-	mouseout:  function(e) {
+	mouseout(e) {
 		enyo.gesture.out(e);
 	}
 };
 
 // Firefox mousewheel handling
-enyo.requiresWindow(function() {
+enyo.requiresWindow(() => {
 	if (document.addEventListener) {
-		document.addEventListener("DOMMouseScroll", function(inEvent) {
+		document.addEventListener("DOMMouseScroll", inEvent => {
 			var e = enyo.clone(inEvent);
-			e.preventDefault = function() {
+			e.preventDefault = () => {
 				inEvent.preventDefault();
 			};
 			e.type = "mousewheel";

@@ -1,38 +1,40 @@
-(function() {
+((() => {
 	enyo = window.enyo || {};
 
 	enyo.path = {
 		paths: {
 		},
-		addPath: function(inName, inPath) {
+		addPath(inName, inPath) {
 			return this.paths[inName] = inPath;
 		},
-		addPaths: function(inPaths) {
+		addPaths(inPaths) {
 			if (inPaths) {
 				for (var n in inPaths) {
 					this.addPath(n, inPaths[n]);
 				}
 			}
 		},
-		includeTrailingSlash: function(inPath) {
+		includeTrailingSlash(inPath) {
 			return (inPath && inPath.slice(-1) !== "/") ? inPath + "/" : inPath;
 		},
 		// match $name
 		rewritePattern: /\$([^\/\\]*)(\/)?/g,
 		// replace macros of the form $pathname with the mapped value of paths.pathname
-		rewrite: function (inPath) {
-			var working, its = this.includeTrailingSlash, paths = this.paths;
-			var fn = function(macro, name) {
+		rewrite(inPath) {
+            var working;
+            var its = this.includeTrailingSlash;
+            var paths = this.paths;
+            var fn = (macro, name) => {
 				working = true;
 				return its(paths[name]) || '';
 			};
-			var result = inPath;
-			do {
+            var result = inPath;
+            do {
 				working = false;
 				result = result.replace(this.rewritePattern, fn);
 			} while (working);
-			return result;
-		}
+            return result;
+        }
 	};
 
 	enyo.loaderFactory = function(inMachine) {
@@ -53,26 +55,26 @@
 		verbose: false,
 		finishCallbacks: {},
 		//
-		loadScript: function(inScript) {
+		loadScript(inScript) {
 			this.machine.script(inScript);
 		},
-		loadSheet: function(inSheet) {
+		loadSheet(inSheet) {
 			this.machine.sheet(inSheet);
 		},
-		loadPackage: function(inPackage) {
+		loadPackage(inPackage) {
 			this.machine.script(inPackage);
 		},
-		report: function() {
+		report() {
 		},
 		//
-		load: function(/*<inDependency0, inDependency1 ...>*/) {
+		load(...args) /*<inDependency0, inDependency1 ...>*/{
 			// begin processing dependencies
 			this.more({
 				index: 0,
-				depends: arguments || []
+				depends: args || []
 			});
 		},
-		more: function(inBlock) {
+		more(inBlock) {
 			// a 'block' is a dependency list with a bookmark
 			// the bookmark (index) allows us to interrupt 
 			// processing and then continue asynchronously.
@@ -100,7 +102,7 @@
 				this.finish();
 			}
 		},
-		finish: function() {
+		finish() {
 			this.packageFolder = "";
 			this.verbose && console.log("-------------- fini");
 			for (var i in this.finishCallbacks) {
@@ -110,7 +112,7 @@
 				}
 			}
 		},
-		continueBlock: function(inBlock) {
+		continueBlock(inBlock) {
 			while (inBlock.index < inBlock.depends.length) {
 				var d = inBlock.depends[inBlock.index++];
 				if (d) {
@@ -128,7 +130,7 @@
 				}
 			}
 		},
-		require: function(inPath, inBlock) {
+		require(inPath, inBlock) {
 			// process aliases
 			var path = enyo.path.rewrite(inPath);
 			// get path root
@@ -150,19 +152,19 @@
 				return true;
 			}
 		},
-		getPathPrefix: function(inPath) {
+		getPathPrefix(inPath) {
 			var delim = inPath.slice(0, 1);
 			if ((delim != "/") && (delim != "\\") && (delim != "$") && (inPath.slice(0, 5) != "http:")) {
 				return this.packageFolder;
 			}
 			return "";
 		},
-		requireStylesheet: function(inPath) {
+		requireStylesheet(inPath) {
 			// stylesheet
 			this.sheets.push(inPath);
 			this.loadSheet(inPath);
 		},
-		requireScript: function(inRawPath, inPath) {
+		requireScript(inRawPath, inPath) {
 			// script file
 			this.modules.push({
 				packageName: this.packageName,
@@ -171,18 +173,22 @@
 			});
 			this.loadScript(inPath);
 		},
-		decodePackagePath: function(inPath) {
-			// A package path can be encoded in two ways:
-			//
-			//	1. [folder]
-			//	2. [folder]/[*package.js]
-			//
-			// Note: manifest file name must end in "package.js"
-			//
-			var alias = '', target = '', folder = '', manifest = 'package.js';
-			// convert back slashes to forward slashes, remove double slashes, split on slash
-			var parts = inPath.replace(/\\/g, "/").replace(/\/\//g, "/").replace(/:\//, "://").split("/");
-			if (parts.length) {
+		decodePackagePath(inPath) {
+            // A package path can be encoded in two ways:
+            //
+            //	1. [folder]
+            //	2. [folder]/[*package.js]
+            //
+            // Note: manifest file name must end in "package.js"
+            //
+            var alias = '';
+
+            var target = '';
+            var folder = '';
+            var manifest = 'package.js';
+            // convert back slashes to forward slashes, remove double slashes, split on slash
+            var parts = inPath.replace(/\\/g, "/").replace(/\/\//g, "/").replace(/:\//, "://").split("/");
+            if (parts.length) {
 				// if inPath has a trailing slash, parts has an empty string which we pop off and ignore
 				var name = parts.pop() || parts.pop() || "";
 				// test if name includes the manifest tag
@@ -232,14 +238,14 @@
 				//
 				alias = parts.join("-");
 			}
-			return {
-				alias: alias,
-				target: target,
-				folder: folder,
-				manifest: manifest
+            return {
+				alias,
+				target,
+				folder,
+				manifest
 			};
-		},
-		aliasPackage: function(inPath) {
+        },
+		aliasPackage(inPath) {
 			var parts = this.decodePackagePath(inPath);
 			// cache manifest path
 			this.manifest = parts.manifest;
@@ -268,7 +274,7 @@
 			// cache current folder
 			this.packageFolder = parts.folder;
 		},
-		requirePackage: function(inPath, inBlock) {
+		requirePackage(inPath, inBlock) {
 			// cache the interrupted packageFolder
 			inBlock.folder = this.packageFolder;
 			this.aliasPackage(inPath);
@@ -284,4 +290,4 @@
 			this.loadPackage(this.manifest);
 		}
 	};
-})();
+}))();

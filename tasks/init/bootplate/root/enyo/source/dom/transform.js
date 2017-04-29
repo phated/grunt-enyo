@@ -1,6 +1,6 @@
 //* @protected
-(function() {
-	enyo.dom.calcCanAccelerate = function() {
+((() => {
+	enyo.dom.calcCanAccelerate = () => {
 		/* Android 2 is a liar: it does NOT support 3D transforms, even though Perspective is the best check */
 		if (enyo.platform.android <= 2) {
 			return false;
@@ -32,16 +32,18 @@
 			}
 		}
 	};
-	enyo.dom.domTransformsToCss = function(inTransforms) {
-		var n, v, text = '';
-		for (n in inTransforms) {
+	enyo.dom.domTransformsToCss = inTransforms => {
+        var n;
+        var v;
+        var text = '';
+        for (n in inTransforms) {
 			v = inTransforms[n];
 			if ((v !== null) && (v !== undefined) && (v !== "")) {
 				text +=  n + '(' + v + ') ';
 			}
 		}
-		return text;
-	};
+        return text;
+    };
 	enyo.dom.transformsToDom = function(inControl) {
 		var t = this.domTransformsToCss(inControl.domTransforms);
 		var st = inControl.hasNode() ? inControl.node.style : null;
@@ -136,4 +138,4 @@
 		var v = inValue == "auto" ? this.canAccelerate() : inValue;
 		this.transformValue(inControl, "translateZ", v ? 0 : null);
 	};
-})();
+}))();

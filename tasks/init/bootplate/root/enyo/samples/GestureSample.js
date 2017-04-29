@@ -50,15 +50,15 @@ enyo.kind({
 			]},
 		]}
 	],
-	create: function() {
-		this.inherited(arguments);
+	create(...args) {
+		this.inherited(args);
 		enyo.forEach(["All events","down","up","tap","move","enter","leave","dragstart","drag","dragover","hold","release","holdpulse","flick","gesturestart","gesturechange","gestureend"], enyo.bind(this, function(event) {
 			this.$.eventPicker.createComponent({content:event, style:"text-align:left"});
 		}));
 	},
 	eventList:{},
 	eventCount:0,
-	handleEvent: function(inSender, inEvent) {
+	handleEvent(inSender, inEvent) {
 		var event = enyo.clone(inEvent);
 		if (this.monitorEvent && (event.type != this.monitorEvent)) {
 			return true;
@@ -70,7 +70,7 @@ enyo.kind({
 			this.eventCount++;
 			eventItem = this.$.eventList.createComponent({
 				kind: "enyo.sample.EventItem",
-				event:event,
+				event,
 				truncate: this.$.truncateDetail.getValue(),
 				persist: this.monitorEvent
 			});
@@ -81,14 +81,14 @@ enyo.kind({
 		this.reflow();
 		return true;
 	},
-	truncateChanged: function() {
+	truncateChanged() {
 		for (var i in this.eventList) {
 			this.eventList[i].setTruncate(this.$.truncateDetail.getValue());
 		}
 		this.reflow();
 		return false;
 	},
-	removeEvent: function(inSender, inEvent) {
+	removeEvent(inSender, inEvent) {
 		this.eventCount--;
 		this.eventList[inEvent.type].destroy();
 		delete this.eventList[inEvent.type];
@@ -98,7 +98,7 @@ enyo.kind({
 		this.reflow();
 		return true;
 	},
-	removeAllEvents: function() {
+	removeAllEvents() {
 		for (var i in this.eventList) {
 			this.eventList[i].destroy();
 			delete this.eventList[i];
@@ -107,14 +107,14 @@ enyo.kind({
 		this.$.waiting.show();
 		this.reflow();
 	},
-	toggleSettings: function() {
+	toggleSettings() {
 		this.$.settings.setShowing(!this.$.settings.getShowing());
 		this.reflow();
 	},
-	preventDefault: function() {
+	preventDefault() {
 		return true;
 	},
-	monitorEventSelected: function(inSender, inEvent) {
+	monitorEventSelected(inSender, inEvent) {
 		this.removeAllEvents();
 		if (inEvent.originator.content == "All events") {
 			this.monitorEvent = null;
@@ -139,15 +139,15 @@ enyo.kind({
 		{name:"eventProps", allowHtml:true},
 		{kind:"Animator", duration:1000, startValue:0, endValue:255, onStep:"stepAnimation", onEnd:"animationEnded"}
 	],
-	create: function() {
-		this.inherited(arguments);
+	create(...args) {
+		this.inherited(args);
 		this.eventChanged();
 		this.truncateChanged();
 	},
-	truncateChanged: function() {
+	truncateChanged() {
 		this.$.eventProps.addRemoveClass("gesture-sample-truncate", this.truncate);
 	},
-	eventChanged: function(inOld) {
+	eventChanged(inOld) {
 		if (this.event) {
 			if (this.timeout) {
 				clearTimeout(this.timeout);
@@ -158,25 +158,25 @@ enyo.kind({
 			this.$.animator.play();
 		}
 	},
-	stepAnimation: function(inSender, inEvent) {
+	stepAnimation(inSender, inEvent) {
 		var v = Math.floor(inSender.value);
 		this.applyStyle("background-color", "rgb(" + v + ",255," + v + ");");
 	},
-	animationEnded: function() {
+	animationEnded() {
 		if (!this.persist) {
 			this.timeout = setTimeout(enyo.bind(this, function() {
 				this.doDone({type:this.event.type});
 			}), 2000);
 		}
 	},
-	destroy: function() {
+	destroy(...args) {
 		if (this.timeout) {
 			clearTimeout(this.timeout);
 			this.timeout = null;
 		}
-		this.inherited(arguments);
+		this.inherited(args);
 	},
-	getPropsString: function() {
+	getPropsString() {
 		var props = [];
 		for (var i in this.event) {
 			if ((this.event[i] != undefined) &&

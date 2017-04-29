@@ -1,7 +1,7 @@
 enyo.kind({
 	name: "ComponentTest",
 	kind: enyo.TestSuite,
-	testNestedComponentUndefinedKind: function() {
+	testNestedComponentUndefinedKind() {
 		var pass = false;
 		// should throw exception as this is an error
 		try {

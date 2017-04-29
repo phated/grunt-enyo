@@ -7,7 +7,7 @@ enyo.json = {
 		<i>inReplacer</i> is the optional value inclusion array or replacement function.
 		<i>inSpace</i> is the optional number or string to use for pretty-printing whitespace.
 	*/
-	stringify: function(inValue, inReplacer, inSpace) {
+	stringify(inValue, inReplacer, inSpace) {
 		return JSON.stringify(inValue, inReplacer, inSpace);
 	},
 	/**
@@ -15,7 +15,7 @@ enyo.json = {
 		routine.
 		<i>inJson</i> is the JSON string to be converted to a JavaScript object.
 	*/
-	parse: function(inJson, inReviver) {
+	parse(inJson, inReviver) {
 		return inJson ? JSON.parse(inJson, inReviver) : null;
 	}
 };

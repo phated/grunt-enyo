@@ -31,7 +31,7 @@ exports.notes = '';
 exports.warnOn = '*';
 
 // The actual init template.
-exports.template = function(grunt, init, done) {
+exports.template = (grunt, init, done) => {
   'use strict';
 
   grunt.helper('prompt', {type: 'enyo'}, [
@@ -52,7 +52,7 @@ exports.template = function(grunt, init, done) {
       default: 'layout onyx',
       warning: 'Space separated list of enyo libraries dependencies'
     }
-  ], function(err, props) {
+  ], (err, props) => {
     // Scrub name of hyphens and underscores
     // A little heavy handed but don't want dashes at beginning because that is difficult to deal with in templates
     props.name = grunt.utils._.camelize(props.name);
@@ -63,7 +63,7 @@ exports.template = function(grunt, init, done) {
     var compact = grunt.utils._.compact;
     props.enyo_dependencies = compact(words(clean(props.enyo_dependencies))) || [];
     var component_deps = {};
-    props.enyo_dependencies.forEach(function(dependency){
+    props.enyo_dependencies.forEach(dependency => {
       component_deps[dependency] = "*";
     });
 

@@ -10,8 +10,8 @@ enyo.kind({
 	layoutClass: "enyo-positioned",
 	//* Adds or removes the _enyo-fit_ class for components whose _fit_ property
 	//* has been set.
-	reflow: function() {
-		enyo.forEach(this.container.children, function(c) {
+	reflow() {
+		enyo.forEach(this.container.children, c => {
 			if (c.fit !== null) {
 				c.addRemoveClass("enyo-fit", c.fit);
 			}

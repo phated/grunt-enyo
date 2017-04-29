@@ -1,7 +1,7 @@
 enyo.kind({
 	name: "AjaxTest",
 	kind: enyo.TestSuite,
-	testAjax200: function() {
+	testAjax200() {
 		new enyo.Ajax({url: "index.html", handleAs: "text"})
 			.response(this, function(inSender, inValue){
 				this.finish();
@@ -11,7 +11,7 @@ enyo.kind({
 			})
 			.go();
 	},
-	testAjax404: function() {
+	testAjax404() {
 		new enyo.Ajax({url: "noexist.not"})
 			.response(this, function(inSender, inValue){
 				this.finish("ajax failed to fail");
@@ -21,9 +21,9 @@ enyo.kind({
 			})
 			.go();
 	},
-	testAjaxCustomError: function() {
+	testAjaxCustomError() {
 		new enyo.Ajax({url: "appinfo.json"})
-			.response(function(inSender, inValue){
+			.response((inSender, inValue) => {
 				inSender.fail("cuz I said so");
 			})
 			.error(this, function(inSender, inValue) {
@@ -31,13 +31,13 @@ enyo.kind({
 			})
 			.go();
 	},
-	testAjaxSerial: function() {
+	testAjaxSerial() {
 		// if the test finishes before ready, it's a failure
 		var ready = false;
 		//
 		// when 'index' request completes, we are 'ready'
 		var index = new enyo.Ajax({url: "index.html", handleAs: "text"});
-		index.response(function() {
+		index.response(() => {
 			ready = true;
 		});
 		//

@@ -9,11 +9,11 @@ enyo.kind({
 			]}
 		]}
 	],
-	create: function() {
-		this.inherited(arguments);
+	create(...args) {
+		this.inherited(args);
 		this.$.repeater.setCount(this.people.length);
 	},
-	setupItem: function(inSender, inEvent) {
+	setupItem(inSender, inEvent) {
 		var index = inEvent.index;
 		var item = inEvent.item;
 		var person = this.people[index];

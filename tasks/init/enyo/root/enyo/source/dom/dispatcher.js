@@ -8,7 +8,7 @@ enyo.dispatcher = {
 	windowEvents: ["resize", "load", "unload", "message"],
 	// feature plugins (aka filters)
 	features: [],
-	connect: function() {
+	connect() {
 		var d = enyo.dispatcher;
 		for (var i=0, n; n=d.events[i]; i++) {
 			d.listen(document, n);
@@ -17,16 +17,16 @@ enyo.dispatcher = {
 			d.listen(window, n);
 		}
 	},
-	listen: function(inListener, inEventName) {
+	listen(inListener, inEventName) {
 		var d = enyo.dispatch;
 		if (inListener.addEventListener) {
-			this.listen = function(inListener, inEventName) {
+			this.listen = (inListener, inEventName) => {
 				inListener.addEventListener(inEventName, d, false);
 			};
 		} else {
 			//console.log("IE8 COMPAT: using 'attachEvent'");
-			this.listen = function(inListener, inEvent, inCb) {
-				inListener.attachEvent("on" + inEvent, function(e) {
+			this.listen = (inListener, inEvent, inCb) => {
+				inListener.attachEvent("on" + inEvent, e => {
 					e.target = e.srcElement;
 					if (!e.preventDefault) {
 						e.preventDefault = enyo.iePreventDefault;
@@ -38,7 +38,7 @@ enyo.dispatcher = {
 		this.listen(inListener, inEventName);
 	},
 	//* Fires an event for Enyo to listen for.
-	dispatch: function(e) {
+	dispatch(e) {
 		// Find the control who maps to e.target, or the first control that maps to an ancestor of e.target.
 		var c = this.findDispatchTarget(e.target) || this.findDefaultTarget(e);
 		// Cache the original target
@@ -54,12 +54,13 @@ enyo.dispatcher = {
 		}
 	},
 	//* Takes an Event.target and finds the corresponding Enyo control.
-	findDispatchTarget: function(inNode) {
-		var t, n = inNode;
-		// FIXME: Mozilla: try/catch is here to squelch "Permission denied to access property xxx from a non-chrome context" 
-		// which appears to happen for scrollbar nodes in particular. It's unclear why those nodes are valid targets if 
-		// it is illegal to interrogate them. Would like to trap the bad nodes explicitly rather than using an exception block.
-		try {
+	findDispatchTarget(inNode) {
+        var t;
+        var n = inNode;
+        // FIXME: Mozilla: try/catch is here to squelch "Permission denied to access property xxx from a non-chrome context" 
+        // which appears to happen for scrollbar nodes in particular. It's unclear why those nodes are valid targets if 
+        // it is illegal to interrogate them. Would like to trap the bad nodes explicitly rather than using an exception block.
+        try {
 			while (n) {
 				if (t = enyo.$[n.id]) {
 					// there could be multiple nodes with this id, the relevant node for this event is n
@@ -73,13 +74,13 @@ enyo.dispatcher = {
 		} catch(x) {
 			console.log(x, n);
 		}
-		return t;
-	},
+        return t;
+    },
 	//* Returns the default Enyo control for events.
-	findDefaultTarget: function(e) {
+	findDefaultTarget(e) {
 		return enyo.master;
 	},
-	dispatchBubble: function(e, c) {
+	dispatchBubble(e, c) {
 		return c.bubble("on" + e.type, e, c);
 	}
 };
@@ -89,11 +90,9 @@ enyo.iePreventDefault = function() {
 	this.returnValue = false;
 };
 
-enyo.dispatch = function(inEvent) {
-	return enyo.dispatcher.dispatch(inEvent);
-};
+enyo.dispatch = inEvent => enyo.dispatcher.dispatch(inEvent);
 
-enyo.bubble = function(inEvent) {
+enyo.bubble = inEvent => {
 	// '|| window.event' clause needed for IE8
 	var e = inEvent || window.event;
 	if (e) {

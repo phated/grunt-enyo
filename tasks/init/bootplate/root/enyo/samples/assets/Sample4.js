@@ -10,15 +10,15 @@ enyo.kind({
 		]},
 		{name: "output"}
 	],
-	addTap: function(inSender, inEvent) {
+	addTap(inSender, inEvent) {
 		var content = this.$.input.hasNode().value;
 		this.createComponent({
 			tag: "button",
-			content: content,
+			content,
 			container: this.$.output
 		}).render();
 	},
-	clearTap: function(inSender, inEvent) {
+	clearTap(inSender, inEvent) {
 		this.$.output.destroyClientControls();
 	}
 });

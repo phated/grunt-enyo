@@ -27,11 +27,11 @@ enyo.kind({
 	//* @protected
 	failed: false,
 	context: null,
-	constructor: function() {
+	constructor() {
 		this.responders = [];
 		this.errorHandlers = [];
 	},
-	accumulate: function(inArray, inMethodArgs) {
+	accumulate(inArray, inMethodArgs) {
 		var fn = (inMethodArgs.length < 2) ? inMethodArgs[0] : enyo.bind(inMethodArgs[0], inMethodArgs[1]);
 		inArray.push(fn);
 	},
@@ -41,8 +41,8 @@ enyo.kind({
 		First parameter is an optional _this_ context for the response method.
 		Second (or only) parameter is the function object. 
 	*/
-	response: function(/* [inContext], inResponder */) {
-		this.accumulate(this.responders, arguments);
+	response(...args) /* [inContext], inResponder */{
+		this.accumulate(this.responders, args);
 		return this;
 	},
 	/**
@@ -50,23 +50,23 @@ enyo.kind({
 		First parameter is an optional _this_ context for the response method.
 		Second (or only) parameter is the function object. 
 	*/
-	error: function(/* [inContext], inResponder */) {
-		this.accumulate(this.errorHandlers, arguments);
+	error(...args) /* [inContext], inResponder */{
+		this.accumulate(this.errorHandlers, args);
 		return this;
 	},
 	//* @protected
-	route: function(inAsync, inValue) {
+	route(inAsync, inValue) {
 		var r = enyo.bind(this, "respond");
-		inAsync.response(function(inSender, inValue) {
+		inAsync.response((inSender, inValue) => {
 			r(inValue);
 		});
 		var f = enyo.bind(this, "fail");
-		inAsync.error(function(inSender, inValue) {
+		inAsync.error((inSender, inValue) => {
 			f(inValue);
 		});
 		inAsync.go(inValue);
 	},
-	handle: function(inValue, inHandlers) {
+	handle(inValue, inHandlers) {
 		var r = inHandlers.shift();
 		if (r) {
 			if (r instanceof enyo.Async) {
@@ -81,13 +81,13 @@ enyo.kind({
 			}
 		}
 	},
-	startTimer: function() {
+	startTimer() {
 		this.startTime = enyo.now();
 		if (this.timeout) {
 			this.timeoutJob = setTimeout(enyo.bind(this, "timeoutComplete"), this.timeout);
 		}
 	},
-	endTimer: function() {
+	endTimer() {
 		if (this.timeoutJob) {
 			this.endTime = enyo.now();
 			clearTimeout(this.timeoutJob);
@@ -95,31 +95,31 @@ enyo.kind({
 			this.latency = this.endTime - this.startTime;
 		}
 	},
-	timeoutComplete: function() {
+	timeoutComplete() {
 		this.timedout = true;
 		this.fail("timeout");
 	},
 	//* @protected
 	//* Called as part of the async implementation; triggers the handler chain.
-	respond: function(inValue) {
+	respond(inValue) {
 		this.failed = false;
 		this.endTimer();
 		this.handle(inValue, this.responders);
 	},
 	//* @public
 	//* Can be called from any handler to trigger the error chain.
-	fail: function(inError) {
+	fail(inError) {
 		this.failed = true;
 		this.endTimer();
 		this.handle(inError, this.errorHandlers);
 	},
 	//* Called from an error handler; clears the error condition and resumes
 	//* calling handler methods.
-	recover: function() {
+	recover() {
 		this.failed = false;
 	},
 	//* Starts the async activity. Overridden in subkinds.
-	go: function(inValue) {
+	go(inValue) {
 		enyo.asyncMethod(this, function() {
 			this.respond(inValue);
 		});

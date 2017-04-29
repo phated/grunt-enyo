@@ -14,15 +14,15 @@ enyo.kind({
 		// (Boolean _false_ would remove the attribute)
 		draggable: "false"
 	},
-	create: function() {
+	create(...args) {
 		if (this.noEvents) {
 			delete this.attributes.onload;
 			delete this.attributes.onerror;
 		}
-		this.inherited(arguments);
+		this.inherited(args);
 	},
-	rendered: function() {
-		this.inherited(arguments);
+	rendered(...args) {
+		this.inherited(args);
 		enyo.makeBubble(this, "load", "error");
 	}
 });

@@ -36,7 +36,7 @@ if (isWindows) {
   // to = 'C:\\orandea\\impl\\bbb'
   // The output of the function should be: '..\\..\\impl\\bbb'
   // windows version
-  exports.relative = function(from, to) {
+  exports.relative = (from, to) => {
     from = path.resolve(from);
     to = path.resolve(to);
 
@@ -91,7 +91,7 @@ if (isWindows) {
 
   // path.relative(from, to)
   // posix version
-  exports.relative = function(from, to) {
+  exports.relative = (from, to) => {
     from = path.resolve(from).substr(1);
     to = path.resolve(to).substr(1);
 

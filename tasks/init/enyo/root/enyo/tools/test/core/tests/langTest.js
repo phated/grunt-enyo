@@ -1,16 +1,16 @@
 enyo.kind({
 	name: "langTest",
 	kind: enyo.TestSuite,
-	testCallee: function() {
+	testCallee() {
 		var err = "";
-		var fn = function() {
-			err = (arguments.callee.nom !== 'fn');
+		var fn = function(...args) {
+			err = (args.callee.nom !== 'fn');
 		}
 		fn.nom = "fn";
 		fn();
 		this.finish(err);
 	},
-	testClass: function() {
+	testClass() {
 		enyo.kind({
 			name: "AClass"
 		});
@@ -18,36 +18,37 @@ enyo.kind({
 		var err = (typeof AClass !== 'function');
 		this.finish(err);
 	},
-	testisString: function() {
+	testisString() {
+        // Create alternate window context to write vars from
+        var iframe = document.createElement("iframe");
 
-		// Create alternate window context to write vars from
-		var iframe = document.createElement("iframe"),
-		iframeDoc, err;
+        var iframeDoc;
+        var err;
 
-		document.body.appendChild(iframe);
-		iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
-		iframeDoc.write("<script>parent.iString = new String('hello');</script>");
-		iframeDoc.close();
+        document.body.appendChild(iframe);
+        iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+        iframeDoc.write("<script>parent.iString = new String('hello');</script>");
+        iframeDoc.close();
 
-		if (!enyo.isString("string")) {
+        if (!enyo.isString("string")) {
 			err = "enyo.isString() cannot determine strings correctly";
 		}
-		// This will fail:
-		//  - instanceof from another context
-		//  - typeof (b/c it is a string instance)
-		// https://github.com/enyojs/enyo/issues/2
-		if (!enyo.isString(iString)) {
+        // This will fail:
+        //  - instanceof from another context
+        //  - typeof (b/c it is a string instance)
+        // https://github.com/enyojs/enyo/issues/2
+        if (!enyo.isString(iString)) {
 			err = "enyo.isString() cannot determine strings written from other window contexts correctly";
 		}
 
-		document.body.removeChild(iframe);
-		this.finish(err);
-	},
-	testindexOfRegular: function() {
+        document.body.removeChild(iframe);
+        this.finish(err);
+    },
+	testindexOfRegular() {
 		var index = enyo.indexOf("foo", [,,,,"foo"]);
 		this.finish(index !== 4 ? "Incorrect index" : false);
 	},
-	testindexOfFromIndex: function() {
+	testindexOfFromIndex() {
 		var index = enyo.indexOf("foo", [,,,,"foo"], 10);
 		this.finish(index !== -1 ? "if fromIndex is greater then array length, should return -1" : false);
 	}

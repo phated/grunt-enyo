@@ -1,10 +1,10 @@
 //* @protected
-enyo.requiresWindow(function() {
+enyo.requiresWindow(() => {
 	// add touch-specific gesture feature
 	var gesture = enyo.gesture;
 	var oldevents = gesture.events;
 	//
-	gesture.events.touchstart = function(e) {
+	gesture.events.touchstart = e => {
 		// for duration of this touch, only handle touch events.  Old event
 		// structure will be restored during touchend.
 		gesture.events = touchGesture;
@@ -13,7 +13,7 @@ enyo.requiresWindow(function() {
 	//
 	var touchGesture = {
 		_touchCount: 0,
-		touchstart: function(inEvent) {
+		touchstart(inEvent) {
 			enyo.job.stop("resetGestureEvents");
 			this._touchCount += inEvent.changedTouches.length;
 			this.excludedTarget = null;
@@ -24,7 +24,7 @@ enyo.requiresWindow(function() {
 			this.overEvent = e;
 			gesture.over(e);
 		},
-		touchmove: function(inEvent) {
+		touchmove(inEvent) {
 			enyo.job.stop("resetGestureEvents");
 			// NOTE: allow user to supply a node to exclude from event 
 			// target finding via the drag event.
@@ -47,7 +47,7 @@ enyo.requiresWindow(function() {
 			}
 			this.overEvent = e;
 		},
-		touchend: function(inEvent) {
+		touchend(inEvent) {
 			gesture.up(this.makeEvent(inEvent));
 			// NOTE: in touch land, there is no distinction between
 			// a pointer enter/leave and a drag over/out.
@@ -64,12 +64,12 @@ enyo.requiresWindow(function() {
 			// code.
 			this._touchCount -= inEvent.changedTouches.length;
 			if (enyo.platform.chrome && this._touchCount === 0) {
-				enyo.job("resetGestureEvents", function() {
+				enyo.job("resetGestureEvents", () => {
 					gesture.events = oldevents;
 				}, 10);
 			}
 		},
-		makeEvent: function(inEvent) {
+		makeEvent(inEvent) {
 			var e = enyo.clone(inEvent.changedTouches[0]);
 			e.srcEvent = inEvent;
 			e.target = this.findTarget(e);
@@ -78,7 +78,7 @@ enyo.requiresWindow(function() {
 			//console.log("target for " + inEvent.type + " at " + e.pageX + ", " + e.pageY + " is " + (e.target ? e.target.id : "none"));
 			return e;
 		},
-		calcNodeOffset: function(inNode) {
+		calcNodeOffset(inNode) {
 			if (inNode.getBoundingClientRect) {
 				var o = inNode.getBoundingClientRect();
 				return {
@@ -89,12 +89,12 @@ enyo.requiresWindow(function() {
 				};
 			}
 		},
-		findTarget: function(e) {
+		findTarget(e) {
 			return document.elementFromPoint(e.clientX, e.clientY);
 		},
 		// NOTE: will find only 1 element under the touch and 
 		// will fail if an element is positioned outside the bounding box of its parent
-		findTargetTraverse: function(inNode, inX, inY) {
+		findTargetTraverse(inNode, inX, inY) {
 			var n = inNode || document.body;
 			var o = this.calcNodeOffset(n);
 			if (o && n != this.excludedTarget) {
@@ -114,17 +114,15 @@ enyo.requiresWindow(function() {
 				}
 			}
 		},
-		connect: function() {
-			enyo.forEach(['ontouchstart', 'ontouchmove', 'ontouchend', 'ongesturestart', 'ongesturechange', 'ongestureend'], function(e) {
+		connect() {
+			enyo.forEach(['ontouchstart', 'ontouchmove', 'ontouchend', 'ongesturestart', 'ongesturechange', 'ongestureend'], e => {
 				document[e] = enyo.dispatch;
 			});
 			// use proper target finding technique based on feature detection.
 			if (enyo.platform.androidChrome <= 18) {
 				// HACK: on Chrome for Android v18 on devices with higher density displays,
 				// document.elementFromPoint expects screen coordinates, not document ones
-				this.findTarget = function(e) {
-					return document.elementFromPoint(e.screenX, e.screenY);
-				};
+				this.findTarget = e => document.elementFromPoint(e.screenX, e.screenY);
 			} else if (!document.elementFromPoint) {
 				this.findTarget = function(e) {
 					return this.findTargetTraverse(null, e.clientX, e.clientY);

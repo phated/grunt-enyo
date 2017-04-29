@@ -35,17 +35,17 @@ enyo.kind({
 			]}
 		]}
 	],
-	create: function() {
-		this.inherited(arguments);
+	create(...args) {
+		this.inherited(args);
 	},
-	sampleChanged: function(inSender, inEvent) {
+	sampleChanged(inSender, inEvent) {
 		this.loadSample(inEvent.selected.content);
 		this.$.toolbar.resized();
 	},
-	loadSample: function(inSample) {
+	loadSample(inSample) {
 		this.$.codeEditor.setUrl("assets/" + inSample + ".js");
 	},
-	go: function() {
+	go() {
 		this.$.codePlayer.go(this.$.codeEditor.getValue());
 		if (enyo.Panels.isScreenNarrow()) {
 			this.next();

@@ -31,7 +31,7 @@ exports.notes = '';
 exports.warnOn = '*';
 
 // The actual init template.
-exports.template = function(grunt, init, done) {
+exports.template = (grunt, init, done) => {
   'use strict';
 
   grunt.helper('prompt', {type: 'enyo'}, [
@@ -52,14 +52,14 @@ exports.template = function(grunt, init, done) {
       default: '',
       warning: 'Space separated list of enyo libraries dependencies'
     }
-  ], function(err, props) {
+  ], (err, props) => {
     // Make an array out of the enyo_dependencies string
     var words = grunt.utils._.words;
     var clean = grunt.utils._.clean;
     var compact = grunt.utils._.compact;
     props.enyo_dependencies = compact(words(clean(props.enyo_dependencies))) || [];
     var component_deps = {};
-    props.enyo_dependencies.forEach(function(dependency){
+    props.enyo_dependencies.forEach(dependency => {
       component_deps[dependency] = "*";
     });
 

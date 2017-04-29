@@ -1,5 +1,5 @@
 //* @protected
-(function() {
+((() => {
 	if (window.navigator.msPointerEnabled) {
 		var msEvents = [
 			"MSPointerDown",
@@ -15,18 +15,18 @@
 			"MSGestureChange",
 			"MSGestureEnd"
 		];
-		enyo.forEach(msEvents, function(e) {
+		enyo.forEach(msEvents, e => {
 			enyo.dispatcher.listen(document, e);
 		});
 		// MSPointer events natively send mouse events as well
 		// MSGesture events need to be normalized to gesture events
-		enyo.dispatcher.features.push(function(e) {
+		enyo.dispatcher.features.push(e => {
 			if (handlers[e.type]) {
 				handlers[e.type](e);
 			}
 		});
 	}
-	var gestureNormalize = function(inType, inEvent) {
+	var gestureNormalize = (inType, inEvent) => {
 		var e = enyo.clone(inEvent);
 		return enyo.mixin(e, {
 			pageX: inEvent.translationX || 0,
@@ -40,14 +40,14 @@
 		});
 	};
 	var handlers = {
-		MSGestureStart: function(inEvent){
+		MSGestureStart(inEvent) {
 			enyo.dispatch(gestureNormalize("gesturestart", inEvent));
 		},
-		MSGestureChange: function(inEvent){
+		MSGestureChange(inEvent) {
 			enyo.dispatch(gestureNormalize("gesturechange", inEvent));
 		},
-		MSGestureEnd: function(inEvent){
+		MSGestureEnd(inEvent) {
 			enyo.dispatch(gestureNormalize("gestureend", inEvent));
 		}
 	};
-})();
+}))();

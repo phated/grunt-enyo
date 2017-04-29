@@ -37,7 +37,7 @@ enyo.kind({
 	//* published by _enyo.Ajax_.
 	published: enyo.AjaxProperties,
 	//* @protected
-	constructor: function(inParams) {
+	constructor(inParams) {
 		enyo.mixin(this, inParams);
 		this.inherited(arguments);
 	},
@@ -45,13 +45,13 @@ enyo.kind({
 	/**
 		Sends the ajax request with parameters _inParams_.
 	*/
-	go: function(inParams) {
+	go(inParams) {
 		this.startTimer();
 		this.request(inParams);
 		return this;
 	},
 	//* @protected
-	request: function(inParams) {
+	request(inParams) {
 		var parts = this.url.split("?");
 		var uri = parts.shift() || "";
 		var args = parts.join("?").split("&");
@@ -75,7 +75,7 @@ enyo.kind({
 		enyo.mixin(xhr_headers, this.headers);
 		//
 		this.xhr = enyo.xhr.request({
-			url: url,
+			url,
 			method: this.method,
 			callback: enyo.bind(this, "receive"),
 			body: this.postBody || body,
@@ -86,7 +86,7 @@ enyo.kind({
 			xhrFields: this.xhrFields
 		});
 	},
-	receive: function(inText, inXhr) {
+	receive(inText, inXhr) {
 		if (!this.destroyed) {
 			if (this.isFailure(inXhr)) {
 				this.fail(inXhr.status);
@@ -95,25 +95,25 @@ enyo.kind({
 			}
 		}
 	},
-	xhrToResponse: function(inXhr) {
+	xhrToResponse(inXhr) {
 		if (inXhr) {
 			return this[(this.handleAs || "text") + "Handler"](inXhr);
 		}
 	},
-	isFailure: function(inXhr) {
+	isFailure(inXhr) {
 		// Usually we will treat status code 0 and 2xx as success.  But in webos, if url is a local file,
 		// 200 is returned if the file exists, 0 otherwise.  So we workaround this by treating 0 differently if
 		// the app running inside webos and the url is not http.
 		//return ((!window.PalmSystem || this.isHttpUrl()) && !inStatus) || (inStatus >= 200 && inStatus < 300);
 		return (inXhr.status !== 0) && (inXhr.status < 200 || inXhr.status >= 300);
 	},
-	xmlHandler: function(inXhr) {
+	xmlHandler(inXhr) {
 		return inXhr.responseXML;
 	},
-	textHandler: function(inXhr) {
+	textHandler(inXhr) {
 		return inXhr.responseText;
 	},
-	jsonHandler: function(inXhr) {
+	jsonHandler(inXhr) {
 		var r = inXhr.responseText;
 		try {
 			return r && enyo.json.parse(r);
@@ -123,7 +123,7 @@ enyo.kind({
 		}
 	},
 	statics: {
-		objectToQuery: function(/*Object*/ map) {
+		objectToQuery(/*Object*/ map) {
 			var enc = encodeURIComponent;
 			var pairs = [];
 			var backstop = {};

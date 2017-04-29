@@ -1,7 +1,7 @@
 enyo.kind({
 	name: "AsyncTest",
 	kind: enyo.TestSuite,
-	testAsyncExists: function() {
+	testAsyncExists() {
 		new enyo.Async();
 		this.finish();
 	},
@@ -49,7 +49,7 @@ enyo.kind({
 			;
 	},
 	*/
-	testAsyncFail: function() {
+	testAsyncFail() {
 		var a = new enyo.Async();
 		a.response(this, function(inSender, inValue) {
 			this.finish("error response not passed to success handler");
@@ -59,9 +59,9 @@ enyo.kind({
 		});
 		a.fail("foo");
 	},
-	testAsyncInnerFail: function() {
+	testAsyncInnerFail() {
 		new enyo.Async()
-			.response(function(inSender, inValue) {
+			.response((inSender, inValue) => {
 				inSender.fail("always fail");
 			})
 			.error(this, function() {
@@ -70,12 +70,12 @@ enyo.kind({
 			.respond("foo")
 			;
 	},
-	testAsyncInnerFailRecover: function() {
+	testAsyncInnerFailRecover() {
 		new enyo.Async()
-			.response(function(inSender, inValue) {
+			.response((inSender, inValue) => {
 				inSender.fail("first response always fails");
 			})
-			.error(function(inSender) {
+			.error(inSender => {
 				inSender.recover();
 				return "recovery response";
 			})

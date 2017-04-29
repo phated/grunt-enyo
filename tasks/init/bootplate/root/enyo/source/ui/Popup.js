@@ -56,34 +56,34 @@ enyo.kind({
 	tools: [
 		{kind: "Signals", onKeydown: "keydown"}
 	],
-	create: function() {
-		this.inherited(arguments);
+	create(...args) {
+		this.inherited(args);
 		/*if (this.floating) {
 			this.setParent(enyo.floatingLayer);
 		}*/
 		this.canGenerate = !this.floating;
 	},
-	render: function() {
+	render(...args) {
 		if (this.floating) {
 			if (!enyo.floatingLayer.hasNode()) {
 				enyo.floatingLayer.render();
 			}
 			this.parentNode = enyo.floatingLayer.hasNode();
 		}
-		this.inherited(arguments);
+		this.inherited(args);
 	},
-	destroy: function() {
+	destroy(...args) {
 		if (this.showing) {
 			this.release();
 		}
-		this.inherited(arguments);
+		this.inherited(args);
 	},
 
-	reflow: function() {
+	reflow(...args) {
 		this.updatePosition();
-		this.inherited(arguments);
+		this.inherited(args);
 	},
-	calcViewportSize: function() {
+	calcViewportSize() {
 		if (window.innerWidth) {
 			return {
 				width: window.innerWidth,
@@ -97,7 +97,7 @@ enyo.kind({
 			};
 		}
 	},
-	updatePosition: function() {
+	updatePosition() {
 		if( this.centered ) {
 			var d = this.calcViewportSize();
 			var b = this.getBounds();
@@ -105,7 +105,7 @@ enyo.kind({
 			this.addStyles( "top: " + Math.max( ( ( d.height - b.height ) / 2 ), 0 ) + "px; left: " + Math.max( ( ( d.width - b.width ) / 2 ), 0 ) + "px;" );
 		}
 	},
-	showingChanged: function() {
+	showingChanged(...args) {
 		// auto render when shown.
 		if (this.floating && this.showing && !this.hasNode()) {
 			this.render();
@@ -114,7 +114,7 @@ enyo.kind({
 		if (this.centered) {
 			this.applyStyle("visibility", "hidden");
 		}
-		this.inherited(arguments);
+		this.inherited(args);
 		if (this.showing) {
 			this.resized();
 			if (this.captureEvents) {
@@ -134,13 +134,13 @@ enyo.kind({
 			this[this.showing ? "doShow" : "doHide"]();
 		}
 	},
-	capture: function() {
+	capture() {
 		enyo.dispatcher.capture(this, !this.modal);
 	},
-	release: function() {
+	release() {
 		enyo.dispatcher.release();
 	},
-	down: function(inSender, inEvent) {
+	down(inSender, inEvent) {
 		//record the down event to verify in tap
 		this.downEvent = inEvent;
 		
@@ -149,7 +149,7 @@ enyo.kind({
 			inEvent.preventDefault();
 		}
 	},
-	tap: function(inSender, inEvent) {
+	tap(inSender, inEvent) {
 		// dismiss on tap if property is set and click started & ended outside the popup
 		if (this.autoDismiss && (!inEvent.dispatchTarget.isDescendantOf(this)) && this.downEvent &&
 			(!this.downEvent.dispatchTarget.isDescendantOf(this))) {
@@ -159,26 +159,26 @@ enyo.kind({
 		}
 	},
 	// if a drag event occurs outside a popup, hide
-	dragstart: function(inSender, inEvent) {
+	dragstart(inSender, inEvent) {
 		var inScope = (inEvent.dispatchTarget === this || inEvent.dispatchTarget.isDescendantOf(this));
 		if (inSender.autoDismiss && !inScope) {
 			inSender.setShowing(false);
 		}
 		return true;
 	},
-	keydown: function(inSender, inEvent) {
+	keydown(inSender, inEvent) {
 		if (this.showing && this.autoDismiss && inEvent.keyCode == 27 /* escape */) {
 			this.hide();
 		}
 	},
 	// If something inside the popup blurred, keep track of it.
-	blur: function(inSender, inEvent) {
+	blur(inSender, inEvent) {
 		if (inEvent.dispatchTarget.isDescendantOf(this)) {
 			this.lastFocus = inEvent.originator;
 		}
 	},
 	// When something outside the popup focuses (e.g., due to tab key), focus our last focused control.
-	focus: function(inSender, inEvent) {
+	focus(inSender, inEvent) {
 		var dt = inEvent.dispatchTarget;
 		if (this.modal && !dt.isDescendantOf(this)) {
 			if (dt.hasNode()) {
@@ -190,11 +190,11 @@ enyo.kind({
 			}
 		}
 	},
-	requestShow: function(inSender, inEvent) {
+	requestShow(inSender, inEvent) {
 		this.show();
 		return true;
 	},
-	requestHide: function(inSender, inEvent) {
+	requestHide(inSender, inEvent) {
 		this.hide();
 		return true;
 	}

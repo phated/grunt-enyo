@@ -16,27 +16,27 @@ enyo.kind({
 	name: "enyo.Signals",
 	kind: enyo.Component,
 	//* @protected
-	create: function() {
-		this.inherited(arguments);
+	create(...args) {
+		this.inherited(args);
 		enyo.Signals.addListener(this);
 	},
-	destroy: function() {
+	destroy(...args) {
 		enyo.Signals.removeListener(this);
-		this.inherited(arguments);
+		this.inherited(args);
 	},
-	notify: function(inMsg, inPayload) {
+	notify(inMsg, inPayload) {
 		this.dispatchEvent(inMsg, inPayload);
 	},
 	statics: {
 		listeners: [],
-		addListener: function(inListener) {
+		addListener(inListener) {
 			this.listeners.push(inListener);
 		},
-		removeListener: function(inListener) {
+		removeListener(inListener) {
 			enyo.remove(inListener, this.listeners);
 		},
-		send: function(inMsg, inPayload) {
-			enyo.forEach(this.listeners, function(l) {
+		send(inMsg, inPayload) {
+			enyo.forEach(this.listeners, l => {
 				l.notify(inMsg, inPayload);
 			});
 		}

@@ -15,23 +15,23 @@
 enyo.kind({
 	name: "enyo.FloatingLayer",
 	//* @protected
-	create: function() {
-		this.inherited(arguments);
+	create(...args) {
+		this.inherited(args);
 		this.setParent(null);
 	},
-	render: function() {
+	render(...args) {
 		this.parentNode = document.body;
-		return this.inherited(arguments);
+		return this.inherited(args);
 	},
-	generateInnerHtml: function() {
+	generateInnerHtml() {
 		return "";
 	},
-	beforeChildRender: function() {
+	beforeChildRender() {
 		if (!this.hasNode()) {
 			this.render();
 		}
 	},
-	teardownChildren: function() {
+	teardownChildren() {
 	}
 });
 

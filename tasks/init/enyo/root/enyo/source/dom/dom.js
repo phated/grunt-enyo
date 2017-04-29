@@ -3,7 +3,7 @@
 /**
 	Allow bootstrapping in environments that do not have a window object right away.
 */
-enyo.requiresWindow = function(inFunction) {
+enyo.requiresWindow = inFunction => {
 	inFunction();
 };
 
@@ -15,7 +15,7 @@ enyo.dom = {
 			// find 'node' if it's a string id, or return it unchanged if it's already a node reference
 			var domNode = enyo.byId(node);
 	*/
-	byId: function(id, doc){
+	byId(id, doc) {
 		return (typeof id == "string") ? (doc || document).getElementById(id) : id; 
 	},
 	/**
@@ -28,22 +28,22 @@ enyo.dom = {
 
 			'&amp;lt;code&amp;gt;"This &amp;amp; That"&amp;lt;/code&amp;gt;'
 	*/
-	escape: function(inText) {
+	escape(inText) {
 		return inText !== null ? String(inText).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;') : '';
 	},
 	//* @protected
-	getComputedStyle: function(inNode) {
+	getComputedStyle(inNode) {
 		return window.getComputedStyle && inNode && window.getComputedStyle(inNode, null);
 	},
-	getComputedStyleValue: function(inNode, inProperty, inComputedStyle) {
+	getComputedStyleValue(inNode, inProperty, inComputedStyle) {
 		var s = inComputedStyle || this.getComputedStyle(inNode);
 		return s ? s.getPropertyValue(inProperty) : null;
 	},
-	getFirstElementByTagName: function(inTagName) {
+	getFirstElementByTagName(inTagName) {
 		var e = document.getElementsByTagName(inTagName);
 		return e && e[0];
 	},
-	applyBodyFit: function() {
+	applyBodyFit() {
 		var h = this.getFirstElementByTagName("html");
 		if (h) {
 			h.className += " enyo-document-fit";
@@ -54,7 +54,7 @@ enyo.dom = {
 		}
 		enyo.bodyIsFitting = true;
 	},
-	getWindowWidth: function() {
+	getWindowWidth() {
 		if (window.innerWidth) {
 			return window.innerWidth;
 		}

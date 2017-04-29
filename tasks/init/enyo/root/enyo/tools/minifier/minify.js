@@ -1,12 +1,10 @@
-var
-	fs = require("fs"),
-	path = require("path"),
-	walker = require("walker"),
-	jsp = require("uglify-js").parser,
-	pro = require("uglify-js").uglify
-	;
+var fs = require("fs");
+var path = require("path");
+var walker = require("walker");
+var jsp = require("uglify-js").parser;
+var pro = require("uglify-js").uglify;
 
-options = function(args) {
+options = args => {
 	var opts = {};
 	for (var i=2; i<args.length; i++) {
 		var arg = args[i];
@@ -34,21 +32,22 @@ function printUsage() {
 
 // make a relative path from source to target
 function makeRelPath(inSource, inTarget) {
-	// node 0.5 has this nice thing, 0.4 does not
-	if (path.relative) {
+    // node 0.5 has this nice thing, 0.4 does not
+    if (path.relative) {
 		return path.relative(inSource, inTarget);
 	}
-	var s,t;
-	s = pathSplit(path.resolve(inSource));
-	t = pathSplit(path.resolve(inTarget));
-	while (s.length && s[0] === t[0]){
+    var s;
+    var t;
+    s = pathSplit(path.resolve(inSource));
+    t = pathSplit(path.resolve(inTarget));
+    while (s.length && s[0] === t[0]){
 		s.shift();
 		t.shift();
 	}
-	for(var i = 0, l = s.length; i < l; i++) {
+    for(var i = 0, l = s.length; i < l; i++) {
 		t.unshift("..");
 	}
-	return path.join.apply(null, t);
+    return path.join.apply(null, t);
 }
 
 // properly split path based on platform
@@ -57,7 +56,7 @@ function pathSplit(inPath) {
 	return inPath.split(sep);
 }
 
-buildPathBlock = function(loader) {
+buildPathBlock = loader => {
 	var p$ = [];
 	for (var i=0, p; p=loader.packages[i]; i++) {
 		if (p.name.indexOf("-") == -1) {
@@ -68,14 +67,14 @@ buildPathBlock = function(loader) {
 	return !p ? "" : "\n// minifier: path aliases\n\nenyo.path.addPaths({" + p + "});\n";
 };
 
-concatCss = function(loader) {
+concatCss = loader => {
 	w("");
 	var blob = "";
 	for (var i=0, s; s=loader.sheets[i]; i++) {
 		w(s);
 		var code = fs.readFileSync(s, "utf8");
 		// fix url paths
-		code = code.replace(/url\([^)]*\)/g, function(inMatch) {
+		code = code.replace(/url\([^)]*\)/g, inMatch => {
 			// find the url path, ignore quotes in url string
 			var urlPath = inMatch.replace(/["']/g, "").slice(4, -1);
 			// skip data urls
@@ -96,7 +95,7 @@ concatCss = function(loader) {
 	return blob;
 };
 
-concatJs = function(loader) {
+concatJs = loader => {
 	w("");
 	var blob = "";
 	for (var i=0, m; m=loader.modules[i]; i++) {
@@ -115,19 +114,19 @@ concatJs = function(loader) {
 	return blob;
 };
 
-compress = function(inCode) {
+compress = inCode => {
 	var ast = jsp.parse(inCode); // parse code and get the initial AST
 	ast = pro.ast_mangle(ast); // get a new AST with mangled names
 	ast = pro.ast_squeeze(ast); // get an AST with compression optimizations
 	return pro.gen_code(ast, {indent_level:0, beautify: !opt.aggro, ascii_only:true}); // compressed code here
 };
 
-compressJsFile = function(inPath) {
+compressJsFile = inPath => {
 	var code = fs.readFileSync(inPath, "utf8");
 	return compress(code);
 };
 
-finish = function(loader) {
+finish = loader => {
 	//w(loader.packages);
 	//w('');
 	//

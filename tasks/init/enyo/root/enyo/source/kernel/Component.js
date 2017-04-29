@@ -52,16 +52,16 @@ enyo.kind({
 	},
 	defaultKind: "Component",
 	handlers: {},
-	toString: function() {
+	toString() {
 		return this.kindName;
 	},
-	constructor: function() {
+	constructor(...args) {
 		// initialize instance objects
 		this._componentNameMap = {};
 		this.$ = {};
-		this.inherited(arguments);
+		this.inherited(args);
 	},
-	constructed: function(inProps) {
+	constructed(inProps) {
 		// entire constructor chain has fired, now start creation chain
 		// process instance properties
 		this.importProps(inProps);
@@ -69,7 +69,7 @@ enyo.kind({
 		this.create();
 	},
 	//* @protected
-	importProps: function(inProps) {
+	importProps(inProps) {
 		if (inProps) {
 			for (var n in inProps) {
 				this[n] = inProps[n];
@@ -77,11 +77,11 @@ enyo.kind({
 		}
 		this.handlers = enyo.mixin(enyo.clone(this.kindHandlers), this.handlers);
 	},
-	create: function() {
+	create() {
 		this.ownerChanged();
 		this.initComponents();
 	},
-	initComponents: function() {
+	initComponents() {
 		// 'components' property in kind declarations is renamed to 'kindComponents'
 		// by the Component subclass mechanism, allowing us to distinguish them easily
 		// from this.components, without the code-writer having to worry about the
@@ -92,13 +92,13 @@ enyo.kind({
 		this.createChrome(this.kindComponents);
 		this.createClientComponents(this.components);
 	},
-	createChrome: function(inComponents) {
+	createChrome(inComponents) {
 		this.createComponents(inComponents, {isChrome: true});
 	},
-	createClientComponents: function(inComponents) {
+	createClientComponents(inComponents) {
 		this.createComponents(inComponents, {owner: this.getInstanceOwner()});
 	},
-	getInstanceOwner: function() {
+	getInstanceOwner() {
 		return (!this.owner || this.owner.notInstanceOwner) ? this : this.owner;
 	},
 	//* @public
@@ -108,7 +108,7 @@ enyo.kind({
 		Usually the Component will be suitable for garbage collection after 
 		being destroyed, unless user code keeps a reference to it.
 	*/
-	destroy: function() {
+	destroy() {
 		this.destroyComponents();
 		this.setOwner(null);
 		// JS objects are never truly destroyed (GC'd) until all references are gone,
@@ -119,8 +119,8 @@ enyo.kind({
 	/**
 		Destroys all owned components.
 	*/
-	destroyComponents: function() {
-		enyo.forEach(this.getComponents(), function(c) {
+	destroyComponents() {
+		enyo.forEach(this.getComponents(), c => {
 			// This local components list may be stale as components
 			// we owned when the loop started could have been destroyed 
 			// by containers. Avoid redestroying components by testing
@@ -130,11 +130,12 @@ enyo.kind({
 			}
 		});
 	},
-	makeId: function() {
-		var delim = "_", pre = this.owner && this.owner.getId();
-		return this.name ? (pre ? pre + delim : "") + this.name : "";
-	},
-	ownerChanged: function(inOldOwner) {
+	makeId() {
+        var delim = "_";
+        var pre = this.owner && this.owner.getId();
+        return this.name ? (pre ? pre + delim : "") + this.name : "";
+    },
+	ownerChanged(inOldOwner) {
 		if (inOldOwner) {
 			inOldOwner.removeComponent(this);
 		}
@@ -146,20 +147,23 @@ enyo.kind({
 		}
 		//this.id = this.makeId();
 	},
-	nameComponent: function(inComponent) {
-		var prefix = enyo.Component.prefixFromKindName(inComponent.kindName);
-		// get last memoized name index
-		var n, i = this._componentNameMap[prefix] || 0;
-		// find an available name
-		do {
+	nameComponent(inComponent) {
+        var prefix = enyo.Component.prefixFromKindName(inComponent.kindName);
+
+        // get last memoized name index
+        var n;
+
+        var i = this._componentNameMap[prefix] || 0;
+        // find an available name
+        do {
 			n = prefix + (++i > 1 ? String(i) : "");
 		} while (this.$[n]);
-		// memoize next likely-unique id tag for this prefix
-		this._componentNameMap[prefix] = Number(i);
-		// set and return
-		return inComponent.name = n;
-	},
-	addComponent: function(inComponent) {
+        // memoize next likely-unique id tag for this prefix
+        this._componentNameMap[prefix] = Number(i);
+        // set and return
+        return inComponent.name = n;
+    },
+	addComponent(inComponent) {
 		var n = inComponent.getName();
 		if (!n) {
 			n = this.nameComponent(inComponent);
@@ -180,7 +184,7 @@ enyo.kind({
 		}
 		this.$[n] = inComponent;
 	},
-	removeComponent: function(inComponent) {
+	removeComponent(inComponent) {
 		delete this.$[inComponent.getName()];
 	},
 	//* @public
@@ -188,7 +192,7 @@ enyo.kind({
 		Returns an Array of owned components. In other words, converts the _$_
 		hash into an array and returns the array.
 	*/
-	getComponents: function() {
+	getComponents() {
 		var results = [];
 		for (var n in this.$) { 
 			results.push(this.$[n]); 
@@ -196,14 +200,14 @@ enyo.kind({
 		return results;
 	},
 	//* @protected
-	adjustComponentProps: function(inProps) {
+	adjustComponentProps(inProps) {
 		if (this.defaultProps) {
 			enyo.mixin(inProps, this.defaultProps);
 		}
 		inProps.kind = inProps.kind || inProps.isa || this.defaultKind;
 		inProps.owner = inProps.owner || this;
 	},
-	_createComponent: function(inInfo, inMoreInfo) {
+	_createComponent(inInfo, inMoreInfo) {
 		// CAVEAT: inInfo and inMoreInfo are copied before mutation, but it's only a shallow copy
 		var props = enyo.mixin(enyo.clone(inMoreInfo), inInfo);
 		this.adjustComponentProps(props);
@@ -227,7 +231,7 @@ enyo.kind({
 			// (will be available as other.$.another).
 			this.createComponent({name: "another"}, {owner: other});
 	*/
-	createComponent: function(inInfo, inMoreInfo) {
+	createComponent(inInfo, inMoreInfo) {
 		// createComponent and createComponents both delegate to the protected method (_createComponent),
 		// allowing overrides to customize createComponent and createComponents separately.
 		return this._createComponent(inInfo, inMoreInfo);
@@ -246,7 +250,7 @@ enyo.kind({
 				{name: "zot"}
 			], {owner: this});
 	*/
-	createComponents: function(inInfos, inCommonInfo) {
+	createComponents(inInfos, inCommonInfo) {
 		if (inInfos) {
 			var cs = [];
 			for (var i=0, ci; (ci=inInfos[i]); i++) {
@@ -256,7 +260,7 @@ enyo.kind({
 		}
 	},
 	//* @protected
-	getBubbleTarget: function() {
+	getBubbleTarget() {
 		return this.owner;
 	},
 	//* @public
@@ -277,7 +281,7 @@ enyo.kind({
 		_inEvent_ will have at least one property, _originator_, which
 		references the component that triggered the event in the first place.
 	*/
-	bubble: function(inEventName, inEvent, inSender) {
+	bubble(inEventName, inEvent, inSender) {
 		var e = inEvent || {};
 		// FIXME: is this the right place?
 		if (!("originator" in e)) {
@@ -287,7 +291,7 @@ enyo.kind({
 		}
 		return this.dispatchBubble(inEventName, e, inSender);
 	},
-	dispatchBubble: function(inEventName, inEvent, inSender) {
+	dispatchBubble(inEventName, inEvent, inSender) {
 		// Try to dispatch from here, stop bubbling on truthy return value
 		if (this.dispatchEvent(inEventName, inEvent, inSender)) {
 			return true;
@@ -312,7 +316,7 @@ enyo.kind({
 		_inEvent_ will have at least one property, _originator_, which
 		references the component that triggered the event in the first place.
 	*/
-	bubbleUp: function(inEventName, inEvent, inSender) {
+	bubbleUp(inEventName, inEvent, inSender) {
 		// Bubble to next target
 		var next = this.getBubbleTarget();
 		if (next) {
@@ -333,7 +337,7 @@ enyo.kind({
 			// 'tap' dispatched to 'tapHandler' delegate in this.owner
 			ontap: "tapHandler",
 	*/
-	dispatchEvent: function(inEventName, inEvent, inSender) {
+	dispatchEvent(inEventName, inEvent, inSender) {
 		// bottleneck event decoration
 		this.decorateEvent(inEventName, inEvent, inSender);
 		//
@@ -353,18 +357,18 @@ enyo.kind({
 			return this.bubbleDelegation(this.owner, this[inEventName], inEventName, inEvent, this);
 		}
 	},
-	decorateEvent: function(inEventName, inEvent, inSender) {
+	decorateEvent(inEventName, inEvent, inSender) {
 		// an event may float by us as part of a dispatchEvent chain or delegateEvent
 		// both call this method so intermediaries can decorate inEvent
 	},
-	bubbleDelegation: function(inDelegate, inName, inEventName, inEvent, inSender) {
+	bubbleDelegation(inDelegate, inName, inEventName, inEvent, inSender) {
 		// next target in bubble sequence
 		var next = this.getBubbleTarget();
 		if (next) {
 			return next.delegateEvent(inDelegate, inName, inEventName, inEvent, inSender);
 		}
 	},
-	delegateEvent: function(inDelegate, inName, inEventName, inEvent, inSender) {
+	delegateEvent(inDelegate, inName, inEventName, inEvent, inSender) {
 		// override this method to play tricks with delegation
 		// bottleneck event decoration
 		this.decorateEvent(inEventName, inEvent, inSender);
@@ -381,7 +385,7 @@ enyo.kind({
 		arrive here. If you need to handle these differently, you may 
 		need to also override dispatchEvent.
 	*/
-	dispatch: function(inMethodName, inEvent, inSender) {
+	dispatch(inMethodName, inEvent, inSender) {
 		var fn = inMethodName && this[inMethodName];
 		if (fn) {
 			return fn.call(this, inSender || this, inEvent);
@@ -390,7 +394,7 @@ enyo.kind({
 	/**
 		Sends a message to myself and my descendants.
 	*/
-	waterfall: function(inMessageName, inMessage, inSender) {
+	waterfall(inMessageName, inMessage, inSender) {
 		//this.log(inMessageName, (inSender || this).name, "=>", this.name);
 		if (this.dispatchEvent(inMessageName, inMessage, inSender)) {
 			return true;
@@ -400,7 +404,7 @@ enyo.kind({
 	/**
 		Sends a message to my descendants.
 	*/
-	waterfallDown: function(inMessageName, inMessage, inSender) {
+	waterfallDown(inMessageName, inMessage, inSender) {
 		for (var n in this.$) {
 			this.$[n].waterfall(inMessageName, inMessage, inSender);
 		}
@@ -411,7 +415,7 @@ enyo.kind({
 
 enyo.defaultCtor = enyo.Component;
 
-enyo.create = enyo.Component.create = function(inConfig) {
+enyo.create = enyo.Component.create = inConfig => {
 	if (!inConfig.kind && ("kind" in inConfig)) {
 		throw "enyo.create: Attempt to create a null kind. Check dependencies.";
 	}
@@ -465,9 +469,10 @@ enyo.Component.publishEvents = function(ctor, props) {
 	}
 };
 
-enyo.Component.addEvent = function(inName, inValue, inProto) {
-	var v, fn;
-	if (!enyo.isString(inValue)) {
+enyo.Component.addEvent = (inName, inValue, inProto) => {
+    var v;
+    var fn;
+    if (!enyo.isString(inValue)) {
 		v = inValue.value;
 		fn = inValue.caller;
 	} else {
@@ -478,8 +483,8 @@ enyo.Component.addEvent = function(inName, inValue, inProto) {
 		v = inValue;
 		fn = "do" + enyo.cap(inName.slice(2));
 	}
-	inProto[inName] = v;
-	if (!inProto[fn]) {
+    inProto[inName] = v;
+    if (!inProto[fn]) {
 		inProto[fn] = function(inEvent) {
 			// bubble this event
 			return this.bubble(inName, inEvent);
@@ -490,7 +495,7 @@ enyo.Component.addEvent = function(inName, inValue, inProto) {
 	}
 };
 
-enyo.Component.prefixFromKindName = function(inKindName) {
+enyo.Component.prefixFromKindName = inKindName => {
 	var prefix = enyo.Component._kindPrefixi[inKindName];
 	if (!prefix) {
 		// memoize naming information for this kind

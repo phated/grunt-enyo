@@ -19,7 +19,7 @@ enyo.kind({
 List of PhoneGap events detailed on the [PhoneGap Docs](http://docs.phonegap.com/en/1.6.0/phonegap_events_events.md.html#Events)
 */
 //* @protected
-(function(){
+((() => {
 	if (window.cordova || window.PhoneGap) {
 		var pge = [
 			"deviceready",
@@ -43,4 +43,4 @@ List of PhoneGap events detailed on the [PhoneGap Docs](http://docs.phonegap.com
 			document.addEventListener(e, enyo.bind(enyo.Signals, "send", "on" + e), false);
 		}
 	}
-})();
+}))();

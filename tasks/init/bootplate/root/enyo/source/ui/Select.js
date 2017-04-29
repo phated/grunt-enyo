@@ -35,35 +35,35 @@ enyo.kind({
 	},
 	tag: "select",
 	defaultKind: "enyo.Option",
-	rendered: function() {
-		this.inherited(arguments);
+	rendered(...args) {
+		this.inherited(args);
 		this.selectedChanged();
 	},
-	getSelected: function() {
+	getSelected() {
 		return Number(this.getNodeProperty("selectedIndex", this.selected));
 	},
-	setSelected: function(inIndex) {
+	setSelected(inIndex) {
 		// default property mechanism can't track changed correctly for virtual properties
 		this.setPropertyValue("selected", Number(inIndex), "selectedChanged");
 	},
-	selectedChanged: function() {
+	selectedChanged() {
 		this.setNodeProperty("selectedIndex", this.selected);
 	},
-	change: function() {
+	change() {
 		this.selected = this.getSelected();
 	},
-	render: function() {
+	render(...args) {
 		// work around IE bug with innerHTML setting of <select>, rerender parent instead
 		// http://support.microsoft.com/default.aspx?scid=kb;en-us;276228
 		if (enyo.platform.ie) {
 			this.parent.render();
 		} else {
-			this.inherited(arguments);
+			this.inherited(args);
 		}
 	},
 	//* @public
 	//* Returns the value of the selected option.
-	getValue: function() {
+	getValue() {
 		if (this.hasNode()) {
 			return this.node.value;
 		}
@@ -81,11 +81,11 @@ enyo.kind({
 	},
 	//* @protected
 	tag: "option",
-	create: function() {
-		this.inherited(arguments);
+	create(...args) {
+		this.inherited(args);
 		this.valueChanged();
 	},
-	valueChanged: function() {
+	valueChanged() {
 		this.setAttribute("value", this.value);
 	}
 });
@@ -102,11 +102,11 @@ enyo.kind({
 	//* @protected
 	tag: "optgroup",
 	defaultKind: "enyo.Option",
-	create: function() {
-		this.inherited(arguments);
+	create(...args) {
+		this.inherited(args);
 		this.labelChanged();
 	},
-	labelChanged: function() {
+	labelChanged() {
 		this.setAttribute("label", this.label);
 	}
 });

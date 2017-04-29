@@ -28,7 +28,7 @@ enyo.platform = {
 };
 
 //* @protected
-(function() {
+((() => {
 	var ua = navigator.userAgent;
 	var ep = enyo.platform;
 	var platforms = [
@@ -61,4 +61,4 @@ enyo.platform = {
 	}
 	// these platforms only allow one argument for console.log
 	enyo.dumbConsole = Boolean(ep.android || ep.ios || ep.webos);
-})();
+}))();

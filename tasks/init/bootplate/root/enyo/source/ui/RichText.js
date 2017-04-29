@@ -35,7 +35,7 @@ enyo.kind({
 			{os: "ios", version: 5}
 		],
 		//* Returns true if the platform has contenteditable attribute.
-		hasContentEditable: function() {
+		hasContentEditable() {
 			for (var i=0, t, m; t=enyo.RichText.osInfo[i]; i++) {
 				if (enyo.platform[t.os] < t.version) {
 					return false;
@@ -53,20 +53,20 @@ enyo.kind({
 		onblur: "blurHandler"
 	},
 	// create RichText as a div if platform has contenteditable attribute, otherwise create it as a textarea
-	create: function() {
+	create(...args) {
 		this.setTag(enyo.RichText.hasContentEditable()?"div":"textarea");
-		this.inherited(arguments);
+		this.inherited(args);
 	},
 	// simulate onchange event that inputs expose
-	focusHandler: function() {
+	focusHandler() {
 		this._value = this.getValue();
 	},
-	blurHandler: function() {
+	blurHandler() {
 		if (this._value !== this.getValue()) {
 			this.bubble("onchange");
 		}
 	},
-	valueChanged: function() {
+	valueChanged() {
 		if (this.hasFocus()) {
 			this.selectAll();
 			this.insertAtCursor(this.value);
@@ -76,13 +76,13 @@ enyo.kind({
 	},
 	//* @public
 	//* Gets value of the RichText.
-	getValue: function() {
+	getValue() {
 		if (this.hasNode()) {
 			return this.node.innerHTML;
 		}
 	},
 	//* Returns true if the RichText is focused.
-	hasFocus: function() {
+	hasFocus() {
 		if (this.hasNode()) {
 			return document.activeElement === this.node;
 		}
@@ -90,46 +90,46 @@ enyo.kind({
 	/**
 		Returns the selection object.
 	*/
-	getSelection: function() {
+	getSelection() {
 		if (this.hasFocus()) {
 			return window.getSelection();
 		}
 	},
 	//* Removes the selection object.
-	removeSelection: function(inStart) {
+	removeSelection(inStart) {
 		var s = this.getSelection();
 		if (s) {
 			s[inStart ? "collapseToStart" : "collapseToEnd"]();
 		}
 	},
 	//* Modifies the selection object.
-	modifySelection: function(inType, inDirection, inAmount) {
+	modifySelection(inType, inDirection, inAmount) {
 		var s = this.getSelection();
 		if (s) {
 			s.modify(inType || "move", inDirection, inAmount);
 		}
 	},
 	//* Moves the cursor according to the Editing API.
-	moveCursor: function(inDirection, inAmount) {
+	moveCursor(inDirection, inAmount) {
 		this.modifySelection("move", inDirection, inAmount);
 	},
 	//* Moves the cursor to end of text field.
-	moveCursorToEnd: function() {
+	moveCursorToEnd() {
 		this.moveCursor("forward", "documentboundary");
 	},
 	//* Moves the cursor to start of text field.
-	moveCursorToStart: function() {
+	moveCursorToStart() {
 		this.moveCursor("backward", "documentboundary");
 	},
 	//* Selects all content in text field.
-	selectAll: function() {
+	selectAll() {
 		if (this.hasFocus()) {
 			document.execCommand("selectAll");
 		}
 	},
 	//* Inserts HTML at the cursor position.  HTML is escaped unless the
 	//* _allowHTML_ property is true.
-	insertAtCursor: function(inValue) {
+	insertAtCursor(inValue) {
 		if (this.hasFocus()) {
 			var v = this.allowHtml ? inValue : enyo.Control.escapeHtml(inValue).replace(/\n/g, "<br/>");
 			document.execCommand("insertHTML", false, v);

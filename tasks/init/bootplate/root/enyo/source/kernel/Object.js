@@ -17,7 +17,7 @@ enyo.kind({
 	//* @protected
 	// has no base kind
 	kind: null,
-	constructor: function() {
+	constructor() {
 		enyo._objectCount++;
 	},
 	/**
@@ -26,7 +26,7 @@ enyo.kind({
 		All property setting should bottleneck here so that objects can
 		observe changes wlog.
 	*/
-	setPropertyValue: function(n, v, cf) {
+	setPropertyValue(n, v, cf) {
 		if (this[cf]) {
 			var old = this[n];
 			this[n] = v;
@@ -35,19 +35,19 @@ enyo.kind({
 			this[n] = v;
 		}
 	},
-	_setProperty: function(n, v, cf) {
+	_setProperty(n, v, cf) {
 		this.setPropertyValue(n, v, (this.getProperty(n) !== v) && cf);
 	},
 	//* @public
 	//* Destroys object with passed-in name.
-	destroyObject: function(inName) {
+	destroyObject(inName) {
 		if (this[inName] && this[inName].destroy) {
 			this[inName].destroy();
 		}
 		this[inName] = null;
 	},
 	//* Gets value of property with passed-in name.
-	getProperty: function(n) {
+	getProperty(n) {
 		var getter = "get" + enyo.cap(n);
 		if (this[getter]) {
 			return this[getter]();
@@ -55,7 +55,7 @@ enyo.kind({
 		return this[n];
 	},
 	//* Sets value of property named 'n' to 'v'.
-	setProperty: function(n, v) {
+	setProperty(n, v) {
 		var setter = "set" + enyo.cap(n);
 		if (this[setter]) {
 			this[setter](v);
@@ -77,21 +77,21 @@ enyo.kind({
 				}
 			});
 	*/
-	log: function() {
-		var acc = arguments.callee.caller;
+	log(...args) {
+		var acc = args.callee.caller;
 		var nom = ((acc ? acc.nom : "") || "(instance method)") + ":";
-		enyo.logging.log("log", [nom].concat(enyo.cloneArray(arguments)));
+		enyo.logging.log("log", [nom].concat(enyo.cloneArray(args)));
 	},
 	//* Same as _log_, except uses the console's warn method (if it exists).
-	warn: function() {
-		this._log("warn", arguments);
+	warn(...args) {
+		this._log("warn", args);
 	},
 	//* Same as _log_, except uses the console's error method (if it exists).
-	error: function() {
-		this._log("error", arguments);
+	error(...args) {
+		this._log("error", args);
 	},
 	//* @protected
-	_log: function(inMethod, inArgs) {
+	_log(inMethod, inArgs) {
 		if (enyo.logging.shouldLog(inMethod)) {
 			try {
 				throw new Error();
@@ -111,7 +111,7 @@ enyo.Object.subclass = function(ctor, props) {
 	this.publish(ctor, props);
 };
 
-enyo.Object.publish = function(ctor, props) {
+enyo.Object.publish = (ctor, props) => {
 	var pp = props.published;
 	if (pp) {
 		var cp = ctor.prototype;
@@ -121,7 +121,7 @@ enyo.Object.publish = function(ctor, props) {
 	}
 };
 
-enyo.Object.addGetterSetter = function(inName, inValue, inProto) {
+enyo.Object.addGetterSetter = (inName, inValue, inProto) => {
 	var priv_n = inName;
 	inProto[priv_n] = inValue;
 	//

@@ -2,7 +2,7 @@ enyo.kind({
 	name: "AjaxTest",
 	kind: enyo.TestSuite,
 	timeout: 10000,
-	_testAjax: function(inProps, inParams, inAssertFn) {
+	_testAjax(inProps, inParams, inAssertFn) {
 		return new enyo.Ajax(inProps)
 			.response(this, function(inSender, inValue) {
 				this.finish(inAssertFn.call(null, inValue) ? "" : "bad response: " + inValue);
@@ -13,79 +13,55 @@ enyo.kind({
 			})
 			.go(inParams);
 	},
-	_testResponse: function(inProps, inAssertFn) {
+	_testResponse(inProps, inAssertFn) {
 		this._testAjax(enyo.mixin({url: "php/test1.php?format=" + inProps.handleAs}, inProps), null, inAssertFn);
 	},
-	testJsonResponse: function() {
-		this._testResponse({handleAs: "json"}, function(inValue) {
-			return inValue.response == "hello";
-		});
+	testJsonResponse() {
+		this._testResponse({handleAs: "json"}, inValue => inValue.response == "hello");
 	},
-	testTextResponse: function() {
-		this._testResponse({handleAs: "text"}, function(inValue) {
-			return inValue == "hello";
-		});
+	testTextResponse() {
+		this._testResponse({handleAs: "text"}, inValue => inValue == "hello");
 	},
-	testXmlResponse: function() {
-		this._testResponse({handleAs: "xml"}, function(inValue) {
+	testXmlResponse() {
+		this._testResponse({handleAs: "xml"}, inValue => {
 			var r = inValue.getElementsByTagName("response")[0].childNodes[0].nodeValue;
 			return r == "hello";
 		});
 	},
-	testSyncTextResponse: function() {
-		this._testResponse({handleAs: "text", sync: true}, function(inValue) {
-			return inValue == "hello";
-		});
+	testSyncTextResponse() {
+		this._testResponse({handleAs: "text", sync: true}, inValue => inValue == "hello");
 	},
-	testPostRequest: function() {
-		this._testAjax({url: "php/test2.php", method: "POST"}, {query: "enyo"}, function(inValue) {
-			return inValue.response == "enyo";
-		});
+	testPostRequest() {
+		this._testAjax({url: "php/test2.php", method: "POST"}, {query: "enyo"}, inValue => inValue.response == "enyo");
 	},
-	testPutRequest: function() {
-		this._testAjax({url: "php/test2.php", method: "PUT"}, null, function(inValue) {
-			return inValue.status == "put";
-		});
+	testPutRequest() {
+		this._testAjax({url: "php/test2.php", method: "PUT"}, null, inValue => inValue.status == "put");
 	},
-	testDeleteRequest: function() {
-		this._testAjax({url: "php/test2.php", method: "DELETE"}, null, function(inValue) {
-			return inValue.status == "delete";
-		});
+	testDeleteRequest() {
+		this._testAjax({url: "php/test2.php", method: "DELETE"}, null, inValue => inValue.status == "delete");
 	},
-	testHeader: function() {
-		this._testAjax({url: "php/test2.php", method: "POST", headers: {"X-Requested-With": "XMLHttpRequest"}}, {query: "enyo"}, function(inValue) {
-			return inValue.isAjax;
-		});
+	testHeader() {
+		this._testAjax({url: "php/test2.php", method: "POST", headers: {"X-Requested-With": "XMLHttpRequest"}}, {query: "enyo"}, inValue => inValue.isAjax);
 	},
-	testPostBody: function() {
-		this._testAjax({url: "php/test2.php", method: "POST", postBody: "This is a test."}, null, function(inValue) {
-			return inValue.response == "This is a test.";
-		});
+	testPostBody() {
+		this._testAjax({url: "php/test2.php", method: "POST", postBody: "This is a test."}, null, inValue => inValue.response == "This is a test.");
 	},
-	testContentType: function() {
+	testContentType() {
 		var contentType = "text/plain";
-		this._testAjax({url: "php/test2.php", method: "PUT", contentType: contentType}, null, function(inValue) {
-			return inValue.ctype == contentType;
-		});
+		this._testAjax({url: "php/test2.php", method: "PUT", contentType}, null, inValue => inValue.ctype == contentType);
 	},
-	testXhrStatus: function() {
-		var ajax = this._testAjax({url: "php/test2.php"}, null, function(inValue) {
-			return ajax.xhr.status == 200;
-		});
+	testXhrStatus() {
+		var ajax = this._testAjax({url: "php/test2.php"}, null, inValue => ajax.xhr.status == 200);
 	},
-	testXhrFields: function() {
-		var ajax = this._testAjax({url: "php/test2.php", xhrFields: {withCredentials: true}}, null, function(inValue) {
-			return ajax.xhr.withCredentials;
-		});
+	testXhrFields() {
+		var ajax = this._testAjax({url: "php/test2.php", xhrFields: {withCredentials: true}}, null, inValue => ajax.xhr.withCredentials);
 	},
 	// test CORS (Cross-Origin Resource Sharing) by testing against youtube api
-	testCORS: function() {
-		this._testAjax({url: "http://query.yahooapis.com/v1/public/yql/jonathan/weather/"}, {q:'select * from weather.forecast where location=94025', format: "json"}, function(inValue) {
-			return inValue && inValue.query && inValue.query.results && inValue.query.count > 0;
-		});
+	testCORS() {
+		this._testAjax({url: "http://query.yahooapis.com/v1/public/yql/jonathan/weather/"}, {q:'select * from weather.forecast where location=94025', format: "json"}, inValue => inValue && inValue.query && inValue.query.results && inValue.query.count > 0);
 	},
 	// test CORS failure
-	testCORSFailure: function() {
+	testCORSFailure() {
 		new enyo.Ajax({url: "https://dev.virtualearth.net/REST/v1/Locations/47.64054,-122.12934"})
 			.response(this, function(inSender, inValue) {
 				this.finish("CORS failure flagged as success");
@@ -96,7 +72,7 @@ enyo.kind({
 			.go();
 	},
 	// server is set to respond after 3 seconds, so make sure timeout fires first
-	testAjaxTimeout: function() {
+	testAjaxTimeout() {
 		new enyo.Ajax({url: "php/test3.php", timeout: 500})
 			.response(this, function(inSender, inValue) {
 				this.finish("did not timeout");

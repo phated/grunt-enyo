@@ -10,7 +10,7 @@ enyo.kind({
 		]},
 		{kind: "onyx.TextArea", fit:true, classes:"ajax-sample-source"}
 	],
-	fetch: function() {    
+	fetch() {    
 		var ajax = new enyo.Ajax({
 			url: "http://query.yahooapis.com/v1/public/yql?format=json"
 		});
@@ -21,7 +21,7 @@ enyo.kind({
 		// attach responders to the transaction object
 		ajax.response(this, "processResponse");
 	},
-	processResponse: function(inSender, inResponse) {
+	processResponse(inSender, inResponse) {
 		// do something with it
 		this.$.textArea.setValue(JSON.stringify(inResponse, null, 2));
 	}

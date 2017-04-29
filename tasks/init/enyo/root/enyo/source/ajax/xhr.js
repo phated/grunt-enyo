@@ -12,7 +12,7 @@ enyo.xhr = {
 		- _password_: The optional password to use for authentication purposes.
 		- _xhrFields_: Optional object containing name/value pairs to mix directly into the generated xhr object.
 	*/
-	request: function(inParams) {
+	request(inParams) {
 		var xhr = this.getXMLHttpRequest();
 		//
 		var method = inParams.method || "GET";
@@ -40,14 +40,14 @@ enyo.xhr = {
 		return xhr;
 	},
 	//* @protected
-	makeReadyStateHandler: function(inXhr, inCallback) {
-		inXhr.onreadystatechange = function() {
+	makeReadyStateHandler(inXhr, inCallback) {
+		inXhr.onreadystatechange = () => {
 			if (inXhr.readyState == 4) {
-				inCallback && inCallback.apply(null, [inXhr.responseText, inXhr]);
+				inCallback && inCallback(...[inXhr.responseText, inXhr]);
 			}
 		};
 	},
-	getXMLHttpRequest: function() {
+	getXMLHttpRequest() {
 		try {
 			return new XMLHttpRequest();
 		} catch (e) {}

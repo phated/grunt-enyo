@@ -8,8 +8,8 @@ enyo.kind({
 	name: "enyo.BaseLayout",
 	kind: enyo.Layout,
 	layoutClass: "enyo-positioned",
-	reflow: function() {
-		enyo.forEach(this.container.children, function(c) {
+	reflow() {
+		enyo.forEach(this.container.children, c => {
 			if (c.fit !== null) {
 				c.addRemoveClass("enyo-fit", c.fit);
 			}

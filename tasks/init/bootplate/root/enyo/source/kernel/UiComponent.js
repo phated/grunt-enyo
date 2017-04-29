@@ -34,22 +34,22 @@ enyo.kind({
 	statics: {
 		_resizeFlags: {showingOnly: true} // don't waterfall these events into hidden controls
 	},
-	create: function() {
+	create(...args) {
 		this.controls = [];
 		this.children = [];
 		this.containerChanged();
-		this.inherited(arguments);
+		this.inherited(args);
 		this.layoutKindChanged();
 	},
-	destroy: function() {
+	destroy(...args) {
 		// Destroys all non-chrome controls (regardless of owner).
 		this.destroyClientControls();
 		// Removes us from our container.
 		this.setContainer(null);
 		// Destroys chrome controls owned by this.
-		this.inherited(arguments);
+		this.inherited(args);
 	},
-	importProps: function(inProps) {
+	importProps(inProps) {
 		this.inherited(arguments);
 		if (!this.owner) {
 			//this.log("registering ownerless control [" + this.kindName + "] with enyo.master");
@@ -63,21 +63,21 @@ enyo.kind({
 	//
 	// We could call _discoverControlParent_ in _addComponent_, but it would
 	// cause a lot of useless checking.
-	createComponents: function() {
-		var results = this.inherited(arguments);
+	createComponents(...args) {
+		var results = this.inherited(args);
 		this.discoverControlParent();
 		return results;
 	},
-	discoverControlParent: function() {
+	discoverControlParent() {
 		this.controlParent = this.$[this.controlParentName] || this.controlParent;
 	},
-	adjustComponentProps: function(inProps) {
+	adjustComponentProps(inProps) {
 		// Components we create have us as a container by default.
 		inProps.container = inProps.container || this;
 		this.inherited(arguments);
 	},
 	// containment
-	containerChanged: function(inOldContainer) {
+	containerChanged(inOldContainer) {
 		if (inOldContainer) {
 			inOldContainer.removeControl(this);
 		}
@@ -86,14 +86,14 @@ enyo.kind({
 		}
 	},
 	// parentage
-	parentChanged: function(inOldParent) {
+	parentChanged(inOldParent) {
 		if (inOldParent && inOldParent != this.parent) {
 			inOldParent.removeChild(this);
 		}
 	},
 	//* @public
 	// Note: Oddly, a Control is considered a descendant of itself.
-	isDescendantOf: function(inAncestor) {
+	isDescendantOf(inAncestor) {
 		var p = this;
 		while (p && p!=inAncestor) {
 			p = p.parent;
@@ -103,13 +103,13 @@ enyo.kind({
 	/**
 		Returns all controls.
 	*/
-	getControls: function() {
+	getControls() {
 		return this.controls;
 	},
 	/**
 		Returns all non-chrome controls.
 	*/
-	getClientControls: function() {
+	getClientControls() {
 		var results = [];
 		for (var i=0, cs=this.controls, c; (c=cs[i]); i++) {
 			if (!c.isChrome) {
@@ -122,14 +122,14 @@ enyo.kind({
 		Destroys "client controls", the same set of controls returned by
 		_getClientControls_.
 	*/
-	destroyClientControls: function() {
+	destroyClientControls() {
 		var c$ = this.getClientControls();
 		for (var i=0, c; (c=c$[i]); i++) {
 			c.destroy();
 		}
 	},
 	//* @protected
-	addControl: function(inControl, inBefore) {
+	addControl(inControl, inBefore) {
 		// Called to add an already created control to the object's control list. It is
 		// not used to create controls and should likely not be called directly.
 		// It can be overridden to detect when controls are added.
@@ -137,30 +137,30 @@ enyo.kind({
 		// When we add a Control, we also establish a parent.
 		this.addChild(inControl, inBefore);
 	},
-    removeControl: function(inControl) {
+    removeControl(inControl) {
 		// Called to remove a control from the object's control list. As with addControl it
 		// can be overridden to detect when controls are removed.
 		// When we remove a Control, we also remove it from its parent.
 		inControl.setParent(null);
 		return enyo.remove(inControl, this.controls);
 	},
-	indexOfControl: function(inControl) {
+	indexOfControl(inControl) {
 		return enyo.indexOf(inControl, this.controls);
 	},
-	indexOfClientControl: function(inControl) {
+	indexOfClientControl(inControl) {
 		return enyo.indexOf(inControl, this.getClientControls());
 	},
-	indexInContainer: function() {
+	indexInContainer() {
 		return this.container.indexOfControl(this);
 	},
-	clientIndexInContainer: function() {
+	clientIndexInContainer() {
 		return this.container.indexOfClientControl(this);
 	},
-	controlAtIndex: function(inIndex) {
+	controlAtIndex(inIndex) {
 		return this.controls[inIndex];
 	},
 	// children
-	addChild: function(inChild, inBefore) {
+	addChild(inChild, inBefore) {
 		// if inBefore is undefined, add to the end of the child list.
 		// If it's null, add to front of list, otherwise add before the
 		// specified control.
@@ -190,13 +190,13 @@ enyo.kind({
 			}
 		}
 	},
-	removeChild: function(inChild) {
+	removeChild(inChild) {
 		return enyo.remove(inChild, this.children);
 	},
-	indexOfChild: function(inChild) {
+	indexOfChild(inChild) {
 		return enyo.indexOf(inChild, this.children);
 	},
-	layoutKindChanged: function() {
+	layoutKindChanged() {
 		if (this.layout) {
 			this.layout.destroy();
 		}
@@ -205,14 +205,14 @@ enyo.kind({
 			this.render();
 		}
 	},
-	flow: function() {
+	flow() {
 		if (this.layout) {
 			this.layout.flow();
 		}
 	},
 	// CAVEAT: currently we use the entry point for both
 	// post-render layout work *and* post-resize layout work.
-	reflow: function() {
+	reflow() {
 		if (this.layout) {
 			this.layout.reflow();
 		}
@@ -222,12 +222,12 @@ enyo.kind({
 		To respond to a resize, override _resizeHandler_ instead.
 	*/
 	// syntactic sugar for 'waterfall("onresize")'
-	resized: function() {
+	resized() {
 		this.waterfall("onresize", enyo.UiComponent._resizeFlags);
 		this.waterfall("onpostresize", enyo.UiComponent._resizeFlags);
 	},
 	//* @protected
-	resizeHandler: function() {
+	resizeHandler() {
 		// FIXME: once we are in the business of reflowing layouts on resize, then we have an 
 		// inside/outside problem: some scenarios will need to reflow before child
 		// controls reflow, and some will need to reflow after. Even more complex scenarios
@@ -238,7 +238,7 @@ enyo.kind({
 	/**
 		Sends a message to all my descendents.
 	*/
-	waterfallDown: function(inMessage, inPayload, inSender) {
+	waterfallDown(inMessage, inPayload, inSender) {
 		// Note: Controls will generally be both in a $ hash and a child list somewhere.
 		// Attempt to avoid duplicated messages by sending only to components that are not
 		// UiComponent, as those components are guaranteed not to be in a child list.
@@ -262,12 +262,12 @@ enyo.kind({
 			}
 		}
 	},
-	getBubbleTarget: function() {
+	getBubbleTarget() {
 		return this.parent;
 	}
 });
 
-enyo.createFromKind = function(inKind, inParam) {
+enyo.createFromKind = (inKind, inParam) => {
 	var ctor = inKind && enyo.constructorForKind(inKind);
 	if (ctor) {
 		return new ctor(inParam);
@@ -285,11 +285,11 @@ enyo.master = new enyo.Component({
 	name: "master",
 	notInstanceOwner: true,
 	eventFlags: {showingOnly: true}, // don't waterfall these events into hidden controls
-	getId: function() {
+	getId() {
 		return '';
 	},
 	isDescendantOf: enyo.nop,
-	bubble: function(inEventName, inEvent, inSender) {
+	bubble(inEventName, inEvent, inSender) {
 		//console.log("master event: " + inEventName);
 		if (inEventName == "onresize") {
 			// Resize is special; waterfall this message.

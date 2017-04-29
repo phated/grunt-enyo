@@ -1,15 +1,15 @@
 //* @protected
-enyo.requiresWindow(function() {
+enyo.requiresWindow(() => {
 	// add touch-specific gesture feature
 	var gesture = enyo.gesture;
 	//
-	gesture.events.touchstart = function(e) {
+	gesture.events.touchstart = e => {
 		gesture.events = touchGesture;
 		gesture.events.touchstart(e);
 	};
 	//
 	var touchGesture = {
-		touchstart: function(inEvent) {
+		touchstart(inEvent) {
 			this.excludedTarget = null;
 			var e = this.makeEvent(inEvent);
 			gesture.down(e);
@@ -18,7 +18,7 @@ enyo.requiresWindow(function() {
 			this.overEvent = e;
 			gesture.over(e);
 		},
-		touchmove: function(inEvent) {
+		touchmove(inEvent) {
 			// NOTE: allow user to supply a node to exclude from event 
 			// target finding via the drag event.
 			var de = gesture.drag.dragEvent;
@@ -40,7 +40,7 @@ enyo.requiresWindow(function() {
 			}
 			this.overEvent = e;
 		},
-		touchend: function(inEvent) {
+		touchend(inEvent) {
 			gesture.up(this.makeEvent(inEvent));
 			// NOTE: in touch land, there is no distinction between
 			// a pointer enter/leave and a drag over/out.
@@ -50,7 +50,7 @@ enyo.requiresWindow(function() {
 			// this ordering is ad hoc.
 			gesture.out(this.overEvent);
 		},
-		makeEvent: function(inEvent) {
+		makeEvent(inEvent) {
 			var e = enyo.clone(inEvent.changedTouches[0]);
 			e.srcEvent = inEvent;
 			e.target = this.findTarget(e.clientX, e.clientY);
@@ -59,7 +59,7 @@ enyo.requiresWindow(function() {
 			//console.log("target for " + inEvent.type + " at " + e.pageX + ", " + e.pageY + " is " + (e.target ? e.target.id : "none"));
 			return e;
 		},
-		calcNodeOffset: function(inNode) {
+		calcNodeOffset(inNode) {
 			if (inNode.getBoundingClientRect) {
 				var o = inNode.getBoundingClientRect();
 				return {
@@ -70,12 +70,12 @@ enyo.requiresWindow(function() {
 				};
 			}
 		},
-		findTarget: function(inX, inY) {
+		findTarget(inX, inY) {
 			return document.elementFromPoint(inX, inY);
 		},
 		// NOTE: will find only 1 element under the touch and 
 		// will fail if an element is positioned outside the bounding box of its parent
-		findTargetTraverse: function(inNode, inX, inY) {
+		findTargetTraverse(inNode, inX, inY) {
 			var n = inNode || document.body;
 			var o = this.calcNodeOffset(n);
 			if (o && n != this.excludedTarget) {
@@ -95,8 +95,8 @@ enyo.requiresWindow(function() {
 				}
 			}
 		},
-		connect: function() {
-			enyo.forEach(['ontouchstart', 'ontouchmove', 'ontouchend', 'ongesturestart', 'ongesturechange', 'ongestureend'], function(e) {
+		connect() {
+			enyo.forEach(['ontouchstart', 'ontouchmove', 'ontouchend', 'ongesturestart', 'ongesturechange', 'ongestureend'], e => {
 				document[e] = enyo.dispatch;
 			});
 			// use proper target finding technique based on feature detection.

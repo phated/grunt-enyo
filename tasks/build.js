@@ -1,9 +1,9 @@
-module.exports = function(grunt) {
+module.exports = grunt => {
   'use strict';
 
   var path = require('path');
 
-  grunt.registerTask('build', 'Build your Enyo project - The Awesome Way', function(){
+  grunt.registerTask('build', 'Build your Enyo project - The Awesome Way', () => {
     var minifyModule = path.normalize(process.cwd() + '/enyo/tools/minifier/minify.js');
 
     process.argv.pop();

@@ -14,8 +14,8 @@ enyo.kind({
 			{name: "enyoPlatformJSON", content: "", style: "padding: 8px;"}
 		]}
 	],
-	create: function() {
-		this.inherited(arguments);
+	create(...args) {
+		this.inherited(args);
 		this.$.uaString.setContent(navigator.userAgent);
 		this.$.enyoPlatformJSON.setContent(JSON.stringify(enyo.platform));
 	}

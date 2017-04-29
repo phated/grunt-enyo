@@ -66,28 +66,28 @@ enyo.kind({
 		onChange: ""
 	},
 	//* @protected
-	create: function() {
+	create(...args) {
 		this.clear();
-		this.inherited(arguments);
+		this.inherited(args);
 	},
-	multiChanged: function() {
+	multiChanged() {
 		if (!this.multi) {
 			this.clear();
 		}
 		this.doChange();
 	},
-	highlander: function(inKey) {
+	highlander(inKey) {
 		if (!this.multi) {
 			this.deselect(this.lastSelected);
 		}
 	},
 	//* @public
 	//* Removes all selections.
-	clear: function() {
+	clear() {
 		this.selected = {};
 	},
 	//* Returns true if the _inKey_ row is selected.
-	isSelected: function(inKey) {
+	isSelected(inKey) {
 		return this.selected[inKey];
 	},
 	/**
@@ -97,7 +97,7 @@ enyo.kind({
 		that key that will be sent with the	_onSelect_ or _onDeselect_ events.
 		If not used, the data will be set to 'true'.
 	*/
-	setByKey: function(inKey, inSelected, inData) {
+	setByKey(inKey, inSelected, inData) {
 		if (inSelected) {
 			this.selected[inKey] = (inData || true);
 			this.lastSelected = inKey;
@@ -110,7 +110,7 @@ enyo.kind({
 		this.doChange();
 	},
 	//* Deselects a row.
-	deselect: function(inKey) {
+	deselect(inKey) {
 		if (this.isSelected(inKey)) {
 			this.setByKey(inKey, false);
 		}
@@ -123,7 +123,7 @@ enyo.kind({
 		that key that will be sent with the	_onSelect_ or _onDeselect_ events.
 		If not used, the data will be set to 'true'.
 	*/
-	select: function(inKey, inData) {
+	select(inKey, inData) {
 		if (this.multi) {
 			this.setByKey(inKey, !this.isSelected(inKey), inData);
 		} else if (!this.isSelected(inKey)) {
@@ -139,7 +139,7 @@ enyo.kind({
 		that key that will be sent with the	_onSelect_ or _onDeselect_ events.
 		If not used, the data will be set to 'true'.
 	*/
-	toggle: function(inKey, inData) {
+	toggle(inKey, inData) {
 		if (!this.multi && this.lastSelected != inKey) {
 			this.deselect(this.lastSelected);
 		}
@@ -149,7 +149,7 @@ enyo.kind({
 		Returns the selection as a hash in which each selected item has a value;
 		unselected items are undefined.
 	*/
-	getSelected: function() {
+	getSelected() {
 		return this.selected;
 	},
 	/**
@@ -157,7 +157,7 @@ enyo.kind({
 		selected, it will be unselected.  Any rows above this row will
 		have their keys value reduced by one.
 	*/
-	remove: function(inKey) {
+	remove(inKey) {
 		var newSelected = {};
 		for (var row in this.selected) {
 			if (row < inKey) {

@@ -1,88 +1,66 @@
 enyo.kind({
 	name: "WebServiceTest",
 	kind: enyo.TestSuite,
-	_testWebService: function(inProps, inParams, inAssertFn) {
+	_testWebService(inProps, inParams, inAssertFn) {
 		var ws = this.createComponent({kind: enyo.WebService, onResponse: "_response", onError: "_error", assertFn: inAssertFn}, inProps);
 		return ws.send(inParams);
 	},
-	_response: function(inSender, inValue) {
+	_response(inSender, inValue) {
 		this.finish(inSender.assertFn(inValue.data) ? "" : "bad response: " + inValue.data);
 	},
-	_error: function(inSender, inValue) {
+	_error(inSender, inValue) {
 		this.finish("bad status: " + inValue.data);
 	},
-	_testResponse: function(inProps, inAssertFn) {
+	_testResponse(inProps, inAssertFn) {
 		this._testWebService(enyo.mixin({url: "php/test1.php?format=" + (inProps.format || inProps.handleAs)}, inProps), null, inAssertFn);
 	},
-	testJsonResponse: function() {
+	testJsonResponse() {
 		this._testResponse({handleAs: "json"}, 
-			function(inValue) {
-				return inValue.response == "hello";
-			}
+			inValue => inValue.response == "hello"
 		);
 	},
-	testTextResponse: function() {
-		this._testResponse({handleAs: "text"}, function(inValue) {
-			return inValue == "hello";
-		});
+	testTextResponse() {
+		this._testResponse({handleAs: "text"}, inValue => inValue == "hello");
 	},
-	testXmlResponse: function() {
-		this._testResponse({handleAs: "xml"}, function(inValue) {
+	testXmlResponse() {
+		this._testResponse({handleAs: "xml"}, inValue => {
 			var r = inValue.getElementsByTagName("response")[0].childNodes[0].nodeValue;
 			return r == "hello";
 		});
 	},
-	testPostRequest: function() {
-		this._testWebService({url: "php/test2.php", method: "POST"}, {query: "enyo"}, function(inValue) {
-			return inValue.response == "enyo";
-		});
+	testPostRequest() {
+		this._testWebService({url: "php/test2.php", method: "POST"}, {query: "enyo"}, inValue => inValue.response == "enyo");
 	},
-	testPutRequest: function() {
-		this._testWebService({url: "php/test2.php", method: "PUT"}, null, function(inValue) {
-			return inValue.status == "put";
-		});
+	testPutRequest() {
+		this._testWebService({url: "php/test2.php", method: "PUT"}, null, inValue => inValue.status == "put");
 	},
-	testDeleteRequest: function() {
-		this._testWebService({url: "php/test2.php", method: "DELETE"}, null, function(inValue) {
-			return inValue.status == "delete";
-		});
+	testDeleteRequest() {
+		this._testWebService({url: "php/test2.php", method: "DELETE"}, null, inValue => inValue.status == "delete");
 	},
-	testHeader: function() {
-		this._testWebService({url: "php/test2.php", method: "POST", headers: {"X-Requested-With": "XMLHttpRequest"}}, {query: "enyo"}, function(inValue) {
-			return inValue.isAjax;
-		});
+	testHeader() {
+		this._testWebService({url: "php/test2.php", method: "POST", headers: {"X-Requested-With": "XMLHttpRequest"}}, {query: "enyo"}, inValue => inValue.isAjax);
 	},
-	testPostBody: function() {
-		this._testWebService({url: "php/test2.php", method: "POST", postBody: "This is a test."}, null, function(inValue) {
-			return inValue.response == "This is a test.";
-		});
+	testPostBody() {
+		this._testWebService({url: "php/test2.php", method: "POST", postBody: "This is a test."}, null, inValue => inValue.response == "This is a test.");
 	},
-	testContentType: function() {
+	testContentType() {
 		var contentType = "text/plain"
-		this._testWebService({url: "php/test2.php", method: "PUT", contentType: contentType}, null, function(inValue) {
-			return inValue.ctype == contentType;
-		});
+		this._testWebService({url: "php/test2.php", method: "PUT", contentType}, null, inValue => inValue.ctype == contentType);
 	},
-	testXhrStatus: function() {
-		var ajax = this._testWebService({url: "php/test2.php"}, null, function(inValue) {
-			return ajax.xhr.status == 200;
-		});
+	testXhrStatus() {
+		var ajax = this._testWebService({url: "php/test2.php"}, null, inValue => ajax.xhr.status == 200);
 	},
-	testXhrFields: function() {
-		var ajax = this._testWebService({url: "php/test2.php", xhrFields: {withCredentials: true}}, null, function(inValue) {
-			return ajax.xhr.withCredentials;
-		});
+	testXhrFields() {
+		var ajax = this._testWebService({url: "php/test2.php", xhrFields: {withCredentials: true}}, null, inValue => ajax.xhr.withCredentials);
 	},
 	// test CORS (Cross-Origin Resource Sharing) by testing against youtube api
-	testCORS: function() {
-		this._testWebService({url: "http://query.yahooapis.com/v1/public/yql/jonathan/weather/"}, {q: 'select * from weather.forecast where location=94025', format: "json"}, function(inValue) {console.log(inValue)
+	testCORS() {
+		this._testWebService({url: "http://query.yahooapis.com/v1/public/yql/jonathan/weather/"}, {q: 'select * from weather.forecast where location=94025', format: "json"}, inValue => {console.log(inValue)
 			return inValue && inValue.query && inValue.query.results && inValue.query.count > 0;
 		});
 	},
-	testJsonp: function() {
-		this._testResponse({jsonp: true, format: "jsonp"}, function(inValue) {
-			return inValue.response == "hello";
-		});
+	testJsonp() {
+		this._testResponse({jsonp: true, format: "jsonp"}, inValue => inValue.response == "hello");
 	}/*,
 	testCharset: function() {
 		this._testResponse({charset: "utf8"}, function(inValue) {
